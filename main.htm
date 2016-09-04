@@ -1,0 +1,69 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+	<title>Academia Management Game</title>
+</head>
+
+<body>
+
+  <canvas id="gameArea" width="1280px" height="720px" style="border: 1px solid #000000;">
+	</canvas>
+
+	<script>
+    var TILE_SIZE = 32;
+
+	  var canvas = document.getElementById("gameArea");
+		var ctx = canvas.getContext("2d");
+
+    //Setup initial camera parameters
+    var cameraScreenPosition = [640 - 0.5*TILE_SIZE, 360 - 0.5*TILE_SIZE];
+    var cameraMapPosition = [2,2];
+
+    //Parameters for test map
+    var mapLayout = [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,0],[1,0,0,0,1],[1,1,1,1,1]];
+    var mapWidth = mapLayout.length;
+    var mapHeight = mapLayout[0].length;
+
+    var x, y, keyPress;
+
+    //Setup the Event Listener for keyboard input
+    window.addEventListener('keydown', function (e) {
+          keyPress = e.keyCode;
+    })
+    window.addEventListener('keyup', function (e) {
+          keyPress = false;
+    })
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, 1280, 720);
+
+      controller();
+
+      for (i = 0; i < mapWidth; i++) {
+        x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
+        for (j = 0; j < mapHeight; j++) {
+          y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
+          if (mapLayout[i][j] == 1) {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+          }
+        }
+      }
+    }
+
+    function controller() {
+      if (keyPress && keyPress == 37 && cameraMapPosition[0] > 0) {cameraMapPosition[0] -= 1;}
+      if (keyPress && keyPress == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= 1;}
+      if (keyPress && keyPress == 39 && cameraMapPosition[0] < mapWidth) {cameraMapPosition[0] += 1;}
+      if (keyPress && keyPress == 40 && cameraMapPosition[1] < mapHeight) {cameraMapPosition[1] += 1;}
+    }
+
+    setInterval(gameLoop,40);
+  </script>
+
+</body>
+
+</html>
