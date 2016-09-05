@@ -7,30 +7,36 @@
 	<title>Academia Management Game</title>
 </head>
 
-<body>
+<body style = "margin: 0px; padding: 0px;">
 
-  <canvas id="gameArea" width="1280px" height="720px" style="border: 1px solid #000000;">
+  <canvas id = "gameArea" style = "margin: 0px; padding: 0px; border: 1px solid #000000">
 	</canvas>
 
-  <img id="tileset" width="0" height="0" src="assets/tileset.png">
+  <img id="tileset" width = "0" height = "0" src = "assets/tileset.png">
 
 	<script>
     var TILE_SIZE = 32;
+    var CAMERA_SPEED = 0.25;
+    var SUPPORTED_RESOUTIONS = [[1920,1080],[1280,720]];
 
 	  var canvas = document.getElementById("gameArea");
 		var ctx = canvas.getContext("2d");
     var tileSet = document.getElementById("tileset");
+    var x, y, keyPress;
+
+    var i = 0;
+    while (window.innerHeight < SUPPORTED_RESOUTIONS[i][1]) {i++;}
+    canvas.width = SUPPORTED_RESOUTIONS[i][0];
+    canvas.height = SUPPORTED_RESOUTIONS[i][1];
 
     //Setup initial camera parameters
-    var cameraScreenPosition = [640 - 0.5*TILE_SIZE, 360 - 0.5*TILE_SIZE];
-    var cameraMapPosition = [2,2];
+    var cameraScreenPosition = [0.5 * (canvas.width - TILE_SIZE), 0.5 * (canvas.height - TILE_SIZE)];
+    var cameraMapPosition = [2.0, 2.0];
 
     //Parameters for test map
-    var mapLayout = [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,0],[1,0,0,0,1],[1,1,1,1,1]];
+    var mapLayout = [[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,17,16,16,16,16,16,16,19,30,0,0],[0,0,15,30,0,0,0,0,0,15,30,0,0],[0,0,15,30,0,0,0,0,0,14,30,0,0],[0,0,15,30,0,0,0,0,0,0,0,0,0],[0,0,15,30,0,0,0,0,0,12,30,0,0],[0,0,15,30,0,0,0,0,0,15,30,0,0],[0,0,18,16,16,16,16,16,16,20,30,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0]];
     var mapWidth = mapLayout.length;
     var mapHeight = mapLayout[0].length;
-
-    var x, y, keyPress;
 
     //Setup the Event Listener for keyboard input
     window.addEventListener('keydown', function (e) {
@@ -41,7 +47,7 @@
     })
 
     function gameLoop() {
-      ctx.clearRect(0, 0, 1280, 720);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       controller();
 
@@ -49,24 +55,20 @@
         x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
         for (j = 0; j < mapHeight; j++) {
           y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
-          if (mapLayout[i][j] == 1) {
-            ctx.drawImage(tileSet, 0, 0, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
-          }
-          if (mapLayout[i][j] == 0) {
-            ctx.drawImage(tileSet, TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
-          }
+          ctx.drawImage(tileSet, (mapLayout[i][j]%10)*TILE_SIZE, Math.floor(mapLayout[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
         }
       }
+      requestAnimationFrame(gameLoop);
     }
 
     function controller() {
-      if (keyPress && keyPress == 37 && cameraMapPosition[0] > 0) {cameraMapPosition[0] -= 1;}
-      if (keyPress && keyPress == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= 1;}
-      if (keyPress && keyPress == 39 && cameraMapPosition[0] < mapWidth) {cameraMapPosition[0] += 1;}
-      if (keyPress && keyPress == 40 && cameraMapPosition[1] < mapHeight) {cameraMapPosition[1] += 1;}
+      if (keyPress && keyPress == 37 && cameraMapPosition[0] > 0) {cameraMapPosition[0] -= CAMERA_SPEED;}
+      if (keyPress && keyPress == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= CAMERA_SPEED;}
+      if (keyPress && keyPress == 39 && cameraMapPosition[0] < mapWidth) {cameraMapPosition[0] += CAMERA_SPEED;}
+      if (keyPress && keyPress == 40 && cameraMapPosition[1] < mapHeight) {cameraMapPosition[1] += CAMERA_SPEED;}
     }
 
-    setInterval(gameLoop,40);
+    requestAnimationFrame(gameLoop);
   </script>
 
 </body>
