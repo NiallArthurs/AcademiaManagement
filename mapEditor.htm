@@ -12,7 +12,9 @@
   <canvas id = "gameArea" style = "margin: 0px; padding: 0px; border: 1px solid #000000">
 	</canvas>
 
-  <img id="tileset" width = "0" height = "0" src = "assets/tileset.png">
+  <img id = "tileset" width = "0" height = "0" src = "assets/tileset.png">
+
+  <div id = "map" style = "white-space: pre-wrap;"></div>
 
 	<script>
     var TILE_SIZE = 32;
@@ -22,32 +24,46 @@
 	  var canvas = document.getElementById("gameArea");
 		var ctx = canvas.getContext("2d");
     var tileSet = document.getElementById("tileset");
+    var mapText = document.getElementById("map");
     var x, y, keyPress;
 
     var i = 0;
     while (window.innerHeight < SUPPORTED_RESOUTIONS[i][1]) {i++;}
     canvas.width = SUPPORTED_RESOUTIONS[i][0];
     canvas.height = SUPPORTED_RESOUTIONS[i][1];
+    mapText.width = canvas.width;
 
     //Setup initial camera parameters
     var cameraScreenPosition = [0.5 * (canvas.width - TILE_SIZE), 0.5 * (canvas.height - TILE_SIZE)];
     var cameraMapPosition = [2.0, 2.0];
 
     //Parameters for test map
-    var mapLayout = [[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,17,16,16,16,16,16,16,19,30,0,0],[0,0,15,30,0,0,0,0,0,15,30,0,0],[0,0,15,30,0,0,0,0,0,14,30,0,0],[0,0,15,30,0,0,0,0,0,0,0,0,0],[0,0,15,30,0,0,0,0,0,12,30,0,0],[0,0,15,30,0,0,0,0,0,15,30,0,0],[0,0,18,16,16,16,16,16,16,20,30,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0]];
+    var mapLayout = [[0,0,15,30,0,0,0,0,0,0,0,0,0],[0,0,15,30,0,0,0,0,0,0,0,0,0],[0,0,21,16,16,16,16,16,16,19,30,0,0],[0,0,15,30,0,0,0,0,0,15,30,0,0],[0,0,15,30,0,0,0,0,0,14,30,0,0],[0,0,15,30,0,0,0,0,0,0,0,0,0],[0,0,15,30,0,0,0,0,0,12,30,0,0],[0,0,15,30,0,0,0,0,0,15,30,0,0],[0,0,21,16,16,16,16,16,16,20,30,0,0],[0,0,15,30,0,0,0,0,0,0,0,0,0],[0,0,15,30,0,0,0,0,0,0,0,0,0]];
     var mapWidth = mapLayout.length;
     var mapHeight = mapLayout[0].length;
 
     //Setup the Event Listener for keyboard input
     window.addEventListener('keydown', function (e) {
-          keyPress = e.keyCode;
+      keyPress = e.keyCode;
     })
     window.addEventListener('keyup', function (e) {
-          keyPress = false;
+      keyPress = false;
+    })
+    canvas.addEventListener('mousedown', function(e) {
+      if (e.which == 3) {
+        var tileX = Math.floor(cameraMapPosition[0] + (e.pageX - cameraScreenPosition[0]) / TILE_SIZE);
+        var tileY = Math.floor(cameraMapPosition[1] + (e.pageY - cameraScreenPosition[1]) / TILE_SIZE);
+        var tileID = prompt("Enter new tile ID for (" + tileX + ", " + tileY + "):", mapLayout[tileX][tileY]);
+        mapLayout[tileX][tileY] = tileID;
+        mapText.innerHTML = produceMapString();
+      }
     })
 
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#54AB47";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       controller();
 
@@ -66,6 +82,23 @@
       if (keyPress && keyPress == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= CAMERA_SPEED;}
       if (keyPress && keyPress == 39 && cameraMapPosition[0] < mapWidth) {cameraMapPosition[0] += CAMERA_SPEED;}
       if (keyPress && keyPress == 40 && cameraMapPosition[1] < mapHeight) {cameraMapPosition[1] += CAMERA_SPEED;}
+    }
+
+    function produceMapString() {
+      var mapString = "[";
+      for (i = 0; i < mapWidth - 1; i++) {
+        mapString += "[";
+        for (j = 0; j < mapHeight - 1; j++) {
+          mapString += mapLayout[i][j] + ",";
+        }
+        mapString += mapLayout[i][mapHeight - 1] + "],";
+      }
+      mapString += "[";
+      for (j = 0; j < mapHeight - 1; j++) {
+        mapString += mapLayout[mapWidth - 1][j] + ",";
+      }
+      mapString += mapLayout[mapWidth - 1][mapHeight - 1] + "]]";
+      return mapString;
     }
 
     requestAnimationFrame(gameLoop);
