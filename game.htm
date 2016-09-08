@@ -25,7 +25,7 @@ var it = 1;
 canvas.width = SUPPORTED_RESOLUTIONS[it][0];
 canvas.height = SUPPORTED_RESOLUTIONS[it][1];
 var cameraScreenPosition = [0.5 * (canvas.width - TILE_SIZE), 0.5 * (canvas.height - TILE_SIZE)];
-var cameraMapPosition = [3.0, 3.0];
+var cameraMapPosition = [2.0, 2.0];
 
 // Return random int in range [min, max]
 function getRandomInt(min, max) {
@@ -191,7 +191,6 @@ var World = (function () {
         var x = cameraScreenPosition[0] + TILE_SIZE*(this.entities[i].x - cameraMapPosition[0]);
         var y = cameraScreenPosition[1] + TILE_SIZE*(this.entities[i].y - cameraMapPosition[1]);
         //this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-        //this.entities[i].sprite
         this.ctx.drawImage(this.entities[i].sprite.spritesheet, this.entities[i].sprite.getX(), this.entities[i].sprite.getY(), this.entities[i].sprite.spriteWidth, this.entities[i].sprite.spriteHeight, x, y - (this.entities[i].sprite.spriteHeight-TILE_SIZE), this.entities[i].sprite.spriteWidth, this.entities[i].sprite.spriteHeight);
 
       }
@@ -216,8 +215,9 @@ var Character = (function () {
     this.theory = 0;
     this.computational = 0;
     this.sprite = new Sprite(char, 32, 32*1.5,32*4,32*1.5*4,  animations, "walkdown", speeds);
-    this.x = getRandomInt(0,this.map.width-1);; // Current x tile
-    this.y = getRandomInt(0,this.map.height-1);; // Current y tile
+    var rpos = this.randomPosition();
+    this.x = rpos[0]  // Current y tile
+    this.y = rpos[1]; // Current y tile
     this.Tx = 0; // target x tile (for blocking)
     this.Ty = 0; // target y tile (for blocking)
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
@@ -315,7 +315,7 @@ var Character = (function () {
       }
 
     },
-    randomMove: function() {
+    randomPosition: function() {
       // Move to random position - testing
       tx = 0;
       ty = 0;
@@ -324,7 +324,11 @@ var Character = (function () {
         ty = getRandomInt(0,this.map.height-1);
       } while (this.map.collision(tx, ty));
 
-      this.move(tx, ty);
+      return [tx, ty];
+    },
+    randomMove: function() {
+      var pos = this.randomPosition();
+      this.move(pos[0], pos[1]);
     },
     move: function(xDest, yDest) {
       this.path = this.map.generatePath(this.x, this.y, xDest, yDest);
