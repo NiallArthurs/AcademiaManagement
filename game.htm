@@ -154,37 +154,52 @@ var Character = (function () {
       self.dt = data;
     });
 
-    this.speed = 1/32; // Movememnt speed
+    this.speed = 2; // Movememnt speed - pixels/second
   };
 
   Character.prototype = {
     update: function () {
-      //alert(this.speed*this.dt);
-
       // If the path isn't empty have the character follow it.
       if (this.path.length != 0)
       {
         if (this.x == this.path[0][0] && this.y == this.path[0][1]) {
           this.path.shift();
         }
-
-        //alert("x: "+ this.x +  " y: "+ this.y +" path.y: " +this.path[0][1]+" path.x: "+ this.path[0][0] );
         if (this.path.length != 0) {
           // Move the character position along the path
           if (this.x - this.path[0][0] > 0) {
-            this.x -= (this.speed);
+            if (this.x - (this.speed*this.dt) < this.path[0][0]) {
+              this.x = this.path[0][0];
+            }
+            else {
+              this.x -= (this.speed*this.dt);
+            }
             this.direction = 2;
           }
           else if (this.x - this.path[0][0] < 0) {
-            this.x += (this.speed);
+            if (this.x + (this.speed*this.dt) > this.path[0][0]) {
+              this.x = this.path[0][0];
+            }
+            else {
+              this.x += (this.speed*this.dt);
+            }
             this.direction = 3;
           }
           else if (this.y - this.path[0][1] > 0) {
-            this.y -= (this.speed);
+            if (this.y - (this.speed*this.dt) < this.path[0][1]) {
+              this.y = this.path[0][1];
+            } else {
+              this.y -= (this.speed*this.dt);
+            }
             this.direction = 0;
           }
           else if (this.y - this.path[0][1] < 0) {
-            this.y += (this.speed);
+            if (this.y + (this.speed*this.dt) > this.path[0][1]) {
+              this.y = this.path[0][1];
+            }
+            else {
+              this.y += (this.speed*this.dt);
+            }
             this.direction = 1;
           }
         }
@@ -195,7 +210,6 @@ var Character = (function () {
         do{
           tx = getRandomInt(0,this.map.width-1);
           ty = getRandomInt(0,this.map.height-1);
-          //alert("x="+tx+" y="+ty);
         } while (this.map.collision(tx, ty));
 
         this.move(tx, ty);
@@ -204,8 +218,6 @@ var Character = (function () {
     },
     move: function(xDest, yDest) {
       this.path = this.map.generatePath(this.x, this.y, xDest, yDest);
-      this.Tx = this.path[0][0];
-      this.Ty = this.path[0][1];
     },
   }
 
