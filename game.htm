@@ -1,0 +1,249 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+</head>
+
+<body>
+
+<img id = "tileset" width = "0" height = "0" src = "assets/tileset.png">
+<canvas id="gameArea"> </canvas>
+<script src="extern/amplify.core.min.js"></script>
+<script src="extern/pathfinding-browser.min.js"></script>
+<script src="maps.js"></script>
+<script>
+//Setup initial camera parameters
+var TILE_SIZE = 32;
+// Determine required screen size
+var SUPPORTED_RESOLUTIONS = [[1920,1080],[1280,720]];
+var canvas = document.getElementById("gameArea");
+var it = 0;
+//while (window.innerHeight < SUPPORTED_RESOLUTIONS[it][1]) {it++;
+//}
+
+canvas.width = SUPPORTED_RESOLUTIONS[it][0];
+canvas.height = SUPPORTED_RESOLUTIONS[it][1];
+var cameraScreenPosition = [0.5 * (canvas.width - TILE_SIZE), 0.5 * (canvas.height - TILE_SIZE)];
+var cameraMapPosition = [3.0, 3.0];
+
+// Return random in in range [min, max]
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Maps class
+var Map2D = (function () {
+
+  var Map2D = function(_layout, _name, _tileset) {
+    this.occupied = [];
+    this.layout = _layout; // Not final solution for map storage!
+    this.name = _name;
+    this.width = this.layout.length;
+    this.height = this.layout[0].length;
+    this.tileset = _tileset;
+    this.gridOrig = new PF.Grid(this.width, this.height);
+    // Create the grid for collisons for use by the path finder
+    for (var i=0; i < this.width; i++) {
+      for (var j=0; j < this.height; j++) {
+        if (this.layout[i][j] == 0)
+        {
+          this.gridOrig.setWalkableAt(i, j, true);
+        }
+      }
+    }
+    this.finder = new PF.AStarFinder();
+  };
+
+  Map2D.prototype = {
+    collision: function (x, y) {
+      if (this.layout[x][y] != 0) {
+        return true;
+      }
+
+      return false;
+    },
+    generatePath: function(x0, y0, x, y) {
+      var grid = this.gridOrig.clone();
+      return this.finder.findPath(x0, y0, x, y, grid);
+    },
+    loadTileset: function(){
+      // Preload tileset
+    }
+  }
+
+  return Map2D;
+})();
+
+// World class
+var World = (function () {
+
+  var World = function(_canvas) {
+    this.map = 0;
+    this.maps = [new Map2D(mapA, "test", tileset)];
+    this.entities = [];
+    for (var i=0; i < 10; i++)
+    {
+      this.entities.push(new Character(this.maps[this.map]));
+    }
+    this.ctx = _canvas.getContext("2d");
+    this.width = _canvas.width;
+    this.height = _canvas.height;
+    this.bgcolor = "#54AB47";
+  };
+
+  World.prototype = {
+    update: function () {
+      for (var i=0; i < this.entities.length;  i++)
+      {
+        this.entities[i].update();
+      }
+    },
+    draw: function (dt) {
+      // Clear canvas
+      this.ctx.clearRect(0, 0, this.width, this.height);
+
+      // Draw backgroud
+      this.ctx.fillStyle = this.bgcolor;
+      this.ctx.fillRect(0, 0, this.width, this.height);
+
+      // Draw map
+      for (i = 0; i < this.maps[this.map].width; i++) {
+        var x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
+        for (j = 0; j < this.maps[this.map].height; j++) {
+          var y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
+          this.ctx.drawImage(this.maps[this.map].tileset, (this.maps[this.map].layout[i][j]%10)*TILE_SIZE, Math.floor(this.maps[this.map].layout[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+        }
+      }
+
+      // Draw entities
+      for (i=0; i < this.entities.length; i++) {
+        var x = cameraScreenPosition[0] + TILE_SIZE*(this.entities[i].x - cameraMapPosition[0]);
+        var y = cameraScreenPosition[1] + TILE_SIZE*(this.entities[i].y - cameraMapPosition[1]);
+        this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+      }
+      this.ctx.fillStyle = "black";
+      this.ctx.font = "25px Arial";
+      this.ctx.fillText("dt: "+dt,10,20);
+    }
+  }
+
+  return World;
+})();
+
+// Character class
+var Character = (function () {
+
+  var Character = function(_map) {
+    this.map = _map;
+    this.charname = "";
+    this.level = 0;
+    this.efficiency = 0;
+    this.experiments = 0;
+    this.theory = 0;
+    this.computational = 0;
+    this.x = getRandomInt(0,this.map.width-1);; // Current x tile
+    this.y = getRandomInt(0,this.map.height-1);; // Current y tile
+    this.Tx = 0; // target x tile (for blocking)
+    this.Ty = 0; // target y tile (for blocking)
+    this.direction = 0; // 0 = up, 1 = down, 2 = left, 3 = right
+    this.path = [];
+    this.dt = 0;
+    var self = this;
+    // subscribe to dt
+    amplify.subscribe( "dt", function (data) {
+      self.dt = data;
+    });
+
+    this.speed = 2; // Movememnt speed - pixels/second
+  };
+
+  Character.prototype = {
+    update: function () {
+      // If the path isn't empty have the character follow it.
+      if (this.path.length != 0)
+      {
+        if (this.x == this.path[0][0] && this.y == this.path[0][1]) {
+          this.path.shift();
+        }
+        if (this.path.length != 0) {
+          // Move the character position along the path
+          if (this.x - this.path[0][0] > 0) {
+            if (this.x - (this.speed*this.dt) < this.path[0][0]) {
+              this.x = this.path[0][0];
+            }
+            else {
+              this.x -= (this.speed*this.dt);
+            }
+            this.direction = 2;
+          }
+          else if (this.x - this.path[0][0] < 0) {
+            if (this.x + (this.speed*this.dt) > this.path[0][0]) {
+              this.x = this.path[0][0];
+            }
+            else {
+              this.x += (this.speed*this.dt);
+            }
+            this.direction = 3;
+          }
+          else if (this.y - this.path[0][1] > 0) {
+            if (this.y - (this.speed*this.dt) < this.path[0][1]) {
+              this.y = this.path[0][1];
+            } else {
+              this.y -= (this.speed*this.dt);
+            }
+            this.direction = 0;
+          }
+          else if (this.y - this.path[0][1] < 0) {
+            if (this.y + (this.speed*this.dt) > this.path[0][1]) {
+              this.y = this.path[0][1];
+            }
+            else {
+              this.y += (this.speed*this.dt);
+            }
+            this.direction = 1;
+          }
+        }
+      } else {
+        // Move to random position - testing
+        tx = 0;
+        ty = 0;
+        do{
+          tx = getRandomInt(0,this.map.width-1);
+          ty = getRandomInt(0,this.map.height-1);
+        } while (this.map.collision(tx, ty));
+
+        this.move(tx, ty);
+      }
+
+    },
+    move: function(xDest, yDest) {
+      this.path = this.map.generatePath(this.x, this.y, xDest, yDest);
+    },
+  }
+
+  return Character;
+})();
+
+var world = new World(canvas);
+
+var lastTime;
+
+function gameLoop() {
+  var now = Date.now();
+  var dt = (now - lastTime) / 1000.0; // Time since last
+  amplify.publish( "dt", dt);
+
+  world.update();
+  world.draw(dt);
+
+  lastTime = now;
+  requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
+
+
+</script>
+
+</body>
+</html>
