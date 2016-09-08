@@ -223,7 +223,7 @@ var Character = (function () {
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.dt = 0;
-    this.speed = 1/2; // Movement speed - pixels/second
+    this.speed = 1; // Movement speed - pixels/second
     var self = this;
     // subscribe to dt
     amplify.subscribe( "dt", function (data) {
