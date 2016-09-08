@@ -7,6 +7,7 @@
 <body>
 
 <img id = "tileset" width = "0" height = "0" src = "assets/tileset.png">
+<img id = "char" width = "0" height = "0" src = "assets/character.png">
 <canvas id="gameArea"> </canvas>
 <script src="extern/amplify.core.min.js"></script>
 <script src="extern/pathfinding-browser.min.js"></script>
@@ -17,7 +18,7 @@ var TILE_SIZE = 32;
 // Determine required screen size
 var SUPPORTED_RESOLUTIONS = [[1920,1080],[1280,720]];
 var canvas = document.getElementById("gameArea");
-var it = 0;
+var it = 1;
 //while (window.innerHeight < SUPPORTED_RESOLUTIONS[it][1]) {it++;
 //}
 
@@ -26,10 +27,74 @@ canvas.height = SUPPORTED_RESOLUTIONS[it][1];
 var cameraScreenPosition = [0.5 * (canvas.width - TILE_SIZE), 0.5 * (canvas.height - TILE_SIZE)];
 var cameraMapPosition = [3.0, 3.0];
 
-// Return random in in range [min, max]
+// Return random int in range [min, max]
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+
+// Example sprite animations
+var  animations = {
+       down: [0],
+       left: [5],
+       right: [8],
+       up: [12],
+       walkdown: [0, 1, 2 , 3],
+       walkleft: [4, 5, 6, 7],
+       walkright: [8, 9, 10, 11],
+       walkup: [12, 13, 14, 15]
+};
+
+// speeds are in terms of seconds/frame
+var speeds = {down:0, left:0, right:0, up:0, walkdown:0.2, walkleft:0.2, walkright:0.2, walkup: 0.2};
+
+// Sprite class
+var Sprite = (function () {
+
+  var Sprite = function(_spritesheet, _swidth, _sheight, _width, _height, _animations, _state, _speed) {
+    this.spritesheet = _spritesheet;
+    // Should get the below two from the image!
+    this.width = _width;
+    this.height = _height;
+    this.spriteWidth = _swidth;
+    this.spriteHeight = _sheight;
+    this.speed = _speed;
+    this.animations = _animations;
+    this.dt = 0;
+    this.time = 0;
+    this.state = _state;
+    this.frame = 0; //move along the animation
+    var self = this;
+    amplify.subscribe( "dt", function (data) {
+      self.time += data;
+      if (self.time >= self.speed[self.state])
+      {
+          self.frame = (self.frame + 1) % self.animations[self.state].length;
+          self.time = 0;
+      }
+    });
+  };
+
+  Sprite.prototype = {
+    setState: function(state) {
+      if (state != this.state)
+      {
+        this.state = state;
+        this.frame = 0;
+        self.time = 0;
+      }
+    },
+    getX: function() {
+      return this.animations[this.state][this.frame]*this.spriteWidth % this.width;
+    },
+    getY: function() {
+      return this.spriteHeight*Math.floor(this.animations[this.state][this.frame]/(this.width/this.spriteWidth));
+    }
+  }
+
+  return Sprite;
+})();
+
 
 // Maps class
 var Map2D = (function () {
@@ -48,6 +113,9 @@ var Map2D = (function () {
         if (this.layout[i][j] == 0)
         {
           this.gridOrig.setWalkableAt(i, j, true);
+        }
+        else {
+          this.gridOrig.setWalkableAt(i, j, false);
         }
       }
     }
@@ -100,7 +168,7 @@ var World = (function () {
     },
     draw: function (dt) {
       // Clear canvas
-      this.ctx.clearRect(0, 0, this.width, this.height);
+      //this.ctx.clearRect(0, 0, this.width, this.height);
 
       // Draw backgroud
       this.ctx.fillStyle = this.bgcolor;
@@ -119,11 +187,14 @@ var World = (function () {
       for (i=0; i < this.entities.length; i++) {
         var x = cameraScreenPosition[0] + TILE_SIZE*(this.entities[i].x - cameraMapPosition[0]);
         var y = cameraScreenPosition[1] + TILE_SIZE*(this.entities[i].y - cameraMapPosition[1]);
-        this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        //this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        //this.entities[i].sprite
+        this.ctx.drawImage(this.entities[i].sprite.spritesheet, this.entities[i].sprite.getX(), this.entities[i].sprite.getY(), this.entities[i].sprite.spriteWidth, this.entities[i].sprite.spriteHeight, x, y - (this.entities[i].sprite.spriteHeight-TILE_SIZE), this.entities[i].sprite.spriteWidth, this.entities[i].sprite.spriteHeight);
+
       }
       this.ctx.fillStyle = "black";
       this.ctx.font = "25px Arial";
-      this.ctx.fillText("dt: "+dt,10,20);
+      this.ctx.fillText("FPS: "+Math.floor(1/dt),10,20);
     }
   }
 
@@ -141,20 +212,20 @@ var Character = (function () {
     this.experiments = 0;
     this.theory = 0;
     this.computational = 0;
+    this.sprite = new Sprite(char, 32, 32*1.5,32*4,32*1.5*4,  animations, "walkdown", speeds);
     this.x = getRandomInt(0,this.map.width-1);; // Current x tile
     this.y = getRandomInt(0,this.map.height-1);; // Current y tile
     this.Tx = 0; // target x tile (for blocking)
     this.Ty = 0; // target y tile (for blocking)
-    this.direction = 0; // 0 = up, 1 = down, 2 = left, 3 = right
+    this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.dt = 0;
+    this.speed = 1; // Movement speed - pixels/second
     var self = this;
     // subscribe to dt
     amplify.subscribe( "dt", function (data) {
       self.dt = data;
     });
-
-    this.speed = 2; // Movememnt speed - pixels/second
   };
 
   Character.prototype = {
@@ -174,6 +245,7 @@ var Character = (function () {
             else {
               this.x -= (this.speed*this.dt);
             }
+            this.sprite.setState("walkleft");
             this.direction = 2;
           }
           else if (this.x - this.path[0][0] < 0) {
@@ -183,6 +255,7 @@ var Character = (function () {
             else {
               this.x += (this.speed*this.dt);
             }
+            this.sprite.setState("walkright");
             this.direction = 3;
           }
           else if (this.y - this.path[0][1] > 0) {
@@ -191,6 +264,7 @@ var Character = (function () {
             } else {
               this.y -= (this.speed*this.dt);
             }
+            this.sprite.setState("walkup");
             this.direction = 0;
           }
           else if (this.y - this.path[0][1] < 0) {
@@ -200,10 +274,25 @@ var Character = (function () {
             else {
               this.y += (this.speed*this.dt);
             }
+            this.sprite.setState("walkdown");
             this.direction = 1;
           }
         }
       } else {
+
+        if (this.direction == 1) {
+          this.sprite.setState("down");
+        }
+        else if (this.direction == 0) {
+          this.sprite.setState("up");
+        }
+        else if (this.direction == 3) {
+          this.sprite.setState("right");
+        }
+        else if (this.direction == 4) {
+          this.sprite.setState("left");
+        }
+
         // Move to random position - testing
         tx = 0;
         ty = 0;
@@ -231,8 +320,10 @@ var lastTime;
 function gameLoop() {
   var now = Date.now();
   var dt = (now - lastTime) / 1000.0; // Time since last
-  amplify.publish( "dt", dt);
-
+  if (!isNaN(dt))
+  {
+    amplify.publish( "dt", dt);
+  }
   world.update();
   world.draw(dt);
 
