@@ -36,7 +36,7 @@ function getRandomInt(min, max) {
 // Example sprite animations
 var  animations = {
        down: [0],
-       left: [5],
+       left: [4],
        right: [8],
        up: [12],
        walkdown: [0, 1, 2 , 3],
@@ -66,16 +66,19 @@ var Sprite = (function () {
     this.frame = 0; //move along the animation
     var self = this;
     amplify.subscribe( "dt", function (data) {
-      self.time += data;
-      if (self.time >= self.speed[self.state])
-      {
-          self.frame = (self.frame + 1) % self.animations[self.state].length;
-          self.time = 0;
-      }
+      self.tick(data);
     });
   };
 
   Sprite.prototype = {
+    tick: function(dt) {
+      this.time += dt;
+      if (this.time >= this.speed[this.state])
+      {
+          this.frame = (this.frame + 1) % this.animations[this.state].length;
+          this.time = 0;
+      }
+    },
     setState: function(state) {
       if (state != this.state)
       {
@@ -149,7 +152,7 @@ var World = (function () {
     this.map = 0;
     this.maps = [new Map2D(mapA, "test", tileset)];
     this.entities = [];
-    for (var i=0; i < 10; i++)
+    for (var i=0; i < 5; i++)
     {
       this.entities.push(new Character(this.maps[this.map]));
     }
@@ -220,15 +223,32 @@ var Character = (function () {
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.dt = 0;
-    this.speed = 1; // Movement speed - pixels/second
+    this.speed = 1/2; // Movement speed - pixels/second
     var self = this;
     // subscribe to dt
     amplify.subscribe( "dt", function (data) {
       self.dt = data;
     });
+
+    amplify.subscribe( "mousedown", function(ev) {
+      self.input(ev);
+    });
   };
 
   Character.prototype = {
+    input: function (data) {
+      var x = data["ev"].pageX - data["offsetLeft"];
+      var y = data["ev"].pageY - data["offsetTop"];
+
+      var xPos = cameraScreenPosition[0] + TILE_SIZE*(this.x - cameraMapPosition[0]);
+      var yPos = cameraScreenPosition[1] + TILE_SIZE*(this.y - cameraMapPosition[1])-(this.sprite.spriteHeight-TILE_SIZE);
+
+      if (x >= xPos && x <= (xPos+this.sprite.spriteWidth) && y >= yPos  && y <= (yPos+this.sprite.spriteHeight))
+      {
+        // Testing
+        this.randomMove();
+      }
+    },
     update: function () {
       // If the path isn't empty have the character follow it.
       if (this.path.length != 0)
@@ -236,6 +256,7 @@ var Character = (function () {
         if (this.x == this.path[0][0] && this.y == this.path[0][1]) {
           this.path.shift();
         }
+
         if (this.path.length != 0) {
           // Move the character position along the path
           if (this.x - this.path[0][0] > 0) {
@@ -279,7 +300,6 @@ var Character = (function () {
           }
         }
       } else {
-
         if (this.direction == 1) {
           this.sprite.setState("down");
         }
@@ -289,21 +309,22 @@ var Character = (function () {
         else if (this.direction == 3) {
           this.sprite.setState("right");
         }
-        else if (this.direction == 4) {
+        else if (this.direction == 2) {
           this.sprite.setState("left");
         }
-
-        // Move to random position - testing
-        tx = 0;
-        ty = 0;
-        do{
-          tx = getRandomInt(0,this.map.width-1);
-          ty = getRandomInt(0,this.map.height-1);
-        } while (this.map.collision(tx, ty));
-
-        this.move(tx, ty);
       }
 
+    },
+    randomMove: function() {
+      // Move to random position - testing
+      tx = 0;
+      ty = 0;
+      do{
+        tx = getRandomInt(0,this.map.width-1);
+        ty = getRandomInt(0,this.map.height-1);
+      } while (this.map.collision(tx, ty));
+
+      this.move(tx, ty);
     },
     move: function(xDest, yDest) {
       this.path = this.map.generatePath(this.x, this.y, xDest, yDest);
@@ -314,8 +335,11 @@ var Character = (function () {
 })();
 
 var world = new World(canvas);
-
 var lastTime;
+
+canvas.addEventListener("mousedown", function(e){
+  amplify.publish( "mousedown", {ev:e, offsetLeft: canvas.offsetLeft, offsetTop: canvas.offsetTop});
+}, false);
 
 function gameLoop() {
   var now = Date.now();
@@ -324,6 +348,7 @@ function gameLoop() {
   {
     amplify.publish( "dt", dt);
   }
+
   world.update();
   world.draw(dt);
 
