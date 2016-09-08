@@ -12,6 +12,7 @@
   <canvas id = "gameArea" style = "border: 1px solid #000000;"></canvas>
 
   <img id = "tileset" width = "0" height = "0" src = "assets/tileset.png">
+  <img id = "mapTools" width = "0" height = "0" src = "assets/mapEditor.png">
 
   <div id = "controls" style = "width: 1270px; padding: 5px; border: 1px solid #000000;">
     <button type = "button" onclick = "genBlankMap()">Generate Blank Map</button>
@@ -28,8 +29,11 @@
 	  var canvas = document.getElementById("gameArea");
 		var ctx = canvas.getContext("2d");
     var tileSet = document.getElementById("tileset");
+    var mapTools = document.getElementById("mapTools");
     var mapText = document.getElementById("map");
     var x, y, keyPress;
+
+    var editorMode = 0;
 
     var i = 0;
     while (window.innerHeight < SUPPORTED_RESOUTIONS[i][1]) {i++;}
@@ -45,7 +49,7 @@
     var mapLayout = [[1,1,17,16,16,16,24,16,16,16,16,16,19],[1,1,15,30,0,0,14,30,0,0,0,0,15],[17,16,20,30,0,0,0,0,0,0,0,0,15],[15,30,0,0,0,0,12,30,0,0,0,0,15],[40,50,0,0,0,0,18,16,19,30,0,0,15],[15,30,0,0,0,0,0,0,15,30,0,0,15],[40,50,0,0,0,0,0,0,15,30,0,0,15],[15,30,0,0,0,0,0,0,15,30,0,0,15],[18,16,19,30,0,0,0,0,15,30,0,0,15],[1,1,15,30,0,0,0,0,15,30,0,0,15],[1,1,18,16,16,16,16,16,22,16,16,16,20]];
     var mapWidth = mapLayout.length;
     var mapHeight = mapLayout[0].length;
-    var collisionMap = zero2D(mapWidth, mapHeight);
+    var collisionMap = [[1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,0,0,1,1,0,0,0,0,1],[1,1,1,1,0,0,0,0,0,0,0,0,1],[1,1,0,0,0,0,1,1,0,0,0,0,1],[1,1,0,0,0,0,1,1,1,1,0,0,1],[1,1,0,0,0,0,0,0,1,1,0,0,1],[1,1,0,0,0,0,0,0,1,1,0,0,1],[1,1,0,0,0,0,0,0,1,1,0,0,1],[1,1,1,1,0,0,0,0,1,1,0,0,1],[1,1,1,1,0,0,0,0,1,1,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1]];
 
     //Setup the Event Listener for keyboard input
     window.addEventListener('keydown', function (e) {
@@ -54,19 +58,31 @@
     window.addEventListener('keyup', function (e) {
       keyPress = false;
     })
-    canvas.addEventListener('mousedown', function(e) {
-      if (e.which == 3) {
+    canvas.addEventListener('click', function(e) {
+      if (e.which == 2 && editorMode == 0) {
         var tileX = Math.floor(cameraMapPosition[0] + (e.pageX - cameraScreenPosition[0]) / TILE_SIZE);
         var tileY = Math.floor(cameraMapPosition[1] + (e.pageY - cameraScreenPosition[1]) / TILE_SIZE);
         var tileID = prompt("Enter new tile ID for (" + tileX + ", " + tileY + "):", mapLayout[tileX][tileY]);
         mapLayout[tileX][tileY] = tileID;
         mapText.innerHTML = "<textarea rows='10' cols='180'>" + produceMapString() + "</textarea>";
       }
+      if (e.which == 1 && editorMode == 1) {
+        var tileX = Math.floor(cameraMapPosition[0] + (e.pageX - cameraScreenPosition[0]) / TILE_SIZE);
+        var tileY = Math.floor(cameraMapPosition[1] + (e.pageY - cameraScreenPosition[1]) / TILE_SIZE);
+        collisionMap[tileX][tileY] = 1;
+        mapText.innerHTML = "<textarea rows='10' cols='180'>" + produceMapString() + "</textarea>";
+      }
+      if (e.which == 2 && editorMode == 1) {
+        var tileX = Math.floor(cameraMapPosition[0] + (e.pageX - cameraScreenPosition[0]) / TILE_SIZE);
+        var tileY = Math.floor(cameraMapPosition[1] + (e.pageY - cameraScreenPosition[1]) / TILE_SIZE);
+        collisionMap[tileX][tileY] = 0;
+        mapText.innerHTML = "<textarea rows='10' cols='180'>" + produceMapString() + "</textarea>";
+      }
     })
 
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = "20px Arial";
 
+    function gameLoop() {
       ctx.fillStyle = "#54AB47";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -79,6 +95,25 @@
           ctx.drawImage(tileSet, (mapLayout[i][j]%10)*TILE_SIZE, Math.floor(mapLayout[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
         }
       }
+
+      if (editorMode == 1) {
+        for (i = 0; i < mapWidth; i++) {
+          x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
+          for (j = 0; j < mapHeight; j++) {
+            y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
+            ctx.drawImage(mapTools, (collisionMap[i][j]%10)*TILE_SIZE, Math.floor(collisionMap[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+          }
+        }
+      }
+
+      ctx.fillStyle = "#000000";
+      if (editorMode == 0) {
+        ctx.fillText("Mapping Mode",10,20);
+      }
+      if (editorMode == 1) {
+        ctx.fillText("Collision Mode",10,20);
+      }
+
       requestAnimationFrame(gameLoop);
     }
 
@@ -87,10 +122,12 @@
       if (keyPress && keyPress == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= CAMERA_SPEED;}
       if (keyPress && keyPress == 39 && cameraMapPosition[0] < mapWidth) {cameraMapPosition[0] += CAMERA_SPEED;}
       if (keyPress && keyPress == 40 && cameraMapPosition[1] < mapHeight) {cameraMapPosition[1] += CAMERA_SPEED;}
+      if (keyPress && keyPress == 67 && editorMode == 0) {editorMode = 1;}
+      if (keyPress && keyPress == 77 && editorMode == 1) {editorMode = 0;}
     }
 
     function produceMapString() {
-      var mapString = "[";
+      var mapString = "mapLayout = [";
       for (i = 0; i < mapWidth - 1; i++) {
         mapString += "[";
         for (j = 0; j < mapHeight - 1; j++) {
@@ -102,7 +139,20 @@
       for (j = 0; j < mapHeight - 1; j++) {
         mapString += mapLayout[mapWidth - 1][j] + ",";
       }
-      mapString += mapLayout[mapWidth - 1][mapHeight - 1] + "]]";
+      mapString += mapLayout[mapWidth - 1][mapHeight - 1] + "]];\n";
+      mapString += "collisionMap = [";
+      for (i = 0; i < mapWidth - 1; i++) {
+        mapString += "[";
+        for (j = 0; j < mapHeight - 1; j++) {
+          mapString += collisionMap[i][j] + ",";
+        }
+        mapString += collisionMap[i][mapHeight - 1] + "],";
+      }
+      mapString += "[";
+      for (j = 0; j < mapHeight - 1; j++) {
+        mapString += collisionMap[mapWidth - 1][j] + ",";
+      }
+      mapString += collisionMap[mapWidth - 1][mapHeight - 1] + "]];";
       return mapString;
     }
 
