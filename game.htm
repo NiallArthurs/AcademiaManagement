@@ -186,8 +186,18 @@ var World = (function () {
         }
       }
 
+      // Sort entities by y position
+      var drawOrder = [];
+      for (i=0; i < this.entities.length; i++)
+        drawOrder.push([i, this.entities[i].y]);
+
+      drawOrder.sort(function(a, b){
+        return a[1]-b[1];
+      })
+
       // Draw entities
-      for (i=0; i < this.entities.length; i++) {
+      for (j=0; j < this.entities.length; j++) {
+        var i = drawOrder[j][0];
         var x = cameraScreenPosition[0] + TILE_SIZE*(this.entities[i].x - cameraMapPosition[0]);
         var y = cameraScreenPosition[1] + TILE_SIZE*(this.entities[i].y - cameraMapPosition[1]);
         //this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
@@ -347,7 +357,7 @@ canvas.addEventListener("mousedown", function(e){
 
 function gameLoop() {
   var now = Date.now();
-  var dt = (now - lastTime) / 1000.0; // Time since last
+  var dt = (now - lastTime) / 1000.0; // Time in seconds since last
   if (!isNaN(dt))
   {
     amplify.publish( "dt", dt);
