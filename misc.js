@@ -5,3 +5,8 @@ function zero2D(rows, cols) {
   while (rows--) array.push(row.slice());
   return array;
 }
+
+// Return random int in range [min, max]
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
