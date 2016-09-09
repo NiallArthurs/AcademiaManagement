@@ -1,0 +1,37 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+	<title>Map Editor</title>
+  <link rel = "stylesheet" type = "text/css" href = "mapEditor.css">
+</head>
+
+<body>
+
+  <img id = "tileset" src = "../assets/tileset.png">
+  <img id = "mapTools" src = "../assets/mapEditor.png">
+
+  <canvas id = "gameArea"></canvas>
+
+  <div id = "controls">
+    <button type = "button" onclick = "genBlankMap()">Generate Blank Map</button>
+    <button type = "button" onclick = "refreshTileSet()">Refresh Tileset</button>
+    <button type = "button" onclick = "editorMode = 0;">Mapping Mode</button>
+    <button type = "button" onclick = "editorMode = 1;">Collision Mode</button>
+  </div>
+
+  <div id = "toolPane">
+    <div id = "map">
+      <h3>Map Output</h3>
+      <textarea readonly rows='10' cols='85'></textarea>
+    </div>
+  </div>
+
+  <script src = "../misc.js"></script>
+	<script src = "mapEditor.js"></script>
+
+</body>
+
+</html>

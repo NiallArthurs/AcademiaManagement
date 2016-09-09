@@ -1,0 +1,46 @@
+body {
+  margin: 0px;
+  padding: 0px;
+}
+h3 {
+  text-decoration: underline;
+  font-family: "courier new";
+  font-variant: small-caps;
+  font-size: 18pt;
+  text-align: left;
+  margin: 5px;
+  margin-left: 10px;
+}
+img {
+  width: 0px;
+  height: 0px;
+}
+#controls {
+  position: absolute;
+  top: 721px;
+  left: 0px;
+  width: 1270px;
+  padding: 5px;
+  border: 1px solid #000000;
+}
+#gameArea {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  border: 1px solid #000000;
+}
+#map {
+  position: absolute;
+  bottom: 0px;
+  width: 637px;
+  text-align: center;
+}
+#toolPane {
+  position: absolute;
+  top: 0px;
+  left: 1281px;
+  width: 637px;
+  height: 752px;
+  text-align: center;
+  border: 1px solid #000000;
+}
