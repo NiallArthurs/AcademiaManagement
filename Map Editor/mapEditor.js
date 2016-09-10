@@ -10,6 +10,7 @@ var mapText = document.getElementById("map");
 var x, y, keyPress;
 
 var editorMode = 0;
+var brushID = 0;
 
 var i = 0;
 while (window.innerHeight < SUPPORTED_RESOUTIONS[i][1]) {i++;}
@@ -36,23 +37,28 @@ window.addEventListener('keydown', function (e) {
 window.addEventListener('keyup', function (e) {
   keyPress = false;
 })
-canvas.addEventListener('click', function(e) {
+window.addEventListener('click', function(e) {
+  var tileX = Math.floor(cameraMapPosition[0] + (e.pageX - cameraScreenPosition[0]) / TILE_SIZE);
+  var tileY = Math.floor(cameraMapPosition[1] + (e.pageY - cameraScreenPosition[1]) / TILE_SIZE);
+  if (e.which == 1 && editorMode == 0) {
+    if (1440 < e.pageX && e.pageX < 1760 && 100 < e.pageY && e.pageY < 420) {
+      brushID = Math.floor((e.pageX - 1440)/TILE_SIZE) + Math.floor((e.pageY - 100)/TILE_SIZE)*10;
+    }
+    else {
+      mapLayout[tileX][tileY] = brushID;
+      mapText.innerHTML = "<h3>Map Output</h3><textarea readonly rows='10' cols='85'>" + produceMapString() + "</textarea>";
+    }
+  }
   if (e.which == 2 && editorMode == 0) {
-    var tileX = Math.floor(cameraMapPosition[0] + (e.pageX - cameraScreenPosition[0]) / TILE_SIZE);
-    var tileY = Math.floor(cameraMapPosition[1] + (e.pageY - cameraScreenPosition[1]) / TILE_SIZE);
     var tileID = prompt("Enter new tile ID for (" + tileX + ", " + tileY + "):", mapLayout[tileX][tileY]);
     mapLayout[tileX][tileY] = tileID;
     mapText.innerHTML = "<h3>Map Output</h3><textarea readonly rows='10' cols='85'>" + produceMapString() + "</textarea>";
   }
   if (e.which == 1 && editorMode == 1) {
-    var tileX = Math.floor(cameraMapPosition[0] + (e.pageX - cameraScreenPosition[0]) / TILE_SIZE);
-    var tileY = Math.floor(cameraMapPosition[1] + (e.pageY - cameraScreenPosition[1]) / TILE_SIZE);
     collisionMap[tileX][tileY] = 1;
     mapText.innerHTML = "<h3>Map Output</h3><textarea readonly rows='10' cols='85'>" + produceMapString() + "</textarea>";
   }
   if (e.which == 2 && editorMode == 1) {
-    var tileX = Math.floor(cameraMapPosition[0] + (e.pageX - cameraScreenPosition[0]) / TILE_SIZE);
-    var tileY = Math.floor(cameraMapPosition[1] + (e.pageY - cameraScreenPosition[1]) / TILE_SIZE);
     collisionMap[tileX][tileY] = 0;
     mapText.innerHTML = "<h3>Map Output</h3><textarea readonly rows='10' cols='85'>" + produceMapString() + "</textarea>";
   }

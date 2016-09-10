@@ -15,6 +15,11 @@ img {
   width: 0px;
   height: 0px;
 }
+#brushSelector {
+  width: auto;
+  height: auto;
+  border: 1px solid #000000;
+}
 #controls {
   position: absolute;
   top: 721px;
@@ -34,6 +39,12 @@ img {
   bottom: 0px;
   width: 637px;
   text-align: center;
+}
+#toolSelector {
+  position: absolute;
+  top: 98px;
+  left: 0px;
+  width: 637px;
 }
 #toolPane {
   position: absolute;
