@@ -7,7 +7,7 @@
 <body>
 
 <img id = "tileset" width = "0" height = "0" src = "assets/tileset.png">
-<img id = "char" width = "0" height = "0" src = "assets/character.png">
+<img id = "char" width = "0" height = "0" src = "assets/char3.png">
 <canvas id="gameArea"> </canvas>
 <script src="extern/amplify.core.min.js"></script>
 <script src="extern/pathfinding-browser.min.js"></script>
@@ -45,7 +45,7 @@ var cameraScreenPosition = [0.5 * (canvas.width - TILE_SIZE), 0.5 * (canvas.heig
 var cameraMapPosition = [2.0, 2.0];
 
 // Example sprite animations - character
-var  animations = {
+/**var  animations = {
        down: {frames: [0], speed: 0},
        left: {frames: [4], speed: 0},
        right: {frames: [8], speed: 0},
@@ -54,6 +54,17 @@ var  animations = {
        walkleft: {frames: [4, 5, 6, 7], speed: 0.2},
        walkright: {frames: [8, 9, 10, 11], speed: 0.2},
        walkup: {frames: [12, 13, 14, 15], speed: 0.2}
+};**/
+
+var  animations = {
+       down: {frames: [3], speed: 0},
+       left: {frames: [6], speed: 0},
+       right: {frames: [9], speed: 0},
+       up: {frames: [0], speed: 0},
+       walkdown: {frames: [3, 4, 3, 5], speed: 0.2},
+       walkleft: {frames: [6, 7, 6, 8], speed: 0.2},
+       walkright: {frames: [9, 10, 9, 11], speed: 0.2},
+       walkup: {frames: [0, 1, 0, 2], speed: 0.2}
 };
 
 // World class
@@ -74,6 +85,9 @@ var World = (function () {
   };
 
   World.prototype = {
+    cameraPosition: function (cameraMPos, cameraSPos) {
+      amplify.publish( "camera-pos", cameraMPos, cameraSPos);
+    },
     update: function () {
       for (var i=0; i < this.entities.length;  i++)
       {
@@ -108,9 +122,7 @@ var World = (function () {
       // Draw entities
       for (j=0; j < this.entities.length; j++) {
         var i = drawOrder[j][0];
-        var x = cameraScreenPosition[0] + TILE_SIZE*(this.entities[i].x - cameraMapPosition[0]);
-        var y = cameraScreenPosition[1] + TILE_SIZE*(this.entities[i].y - cameraMapPosition[1]);
-        this.ctx.drawImage(this.entities[i].sprite.spritesheet, this.entities[i].sprite.getX(), this.entities[i].sprite.getY(), this.entities[i].sprite.spriteWidth, this.entities[i].sprite.spriteHeight, x, y - (this.entities[i].sprite.spriteHeight-TILE_SIZE), this.entities[i].sprite.spriteWidth, this.entities[i].sprite.spriteHeight);
+        this.ctx.drawImage(this.entities[i].sprite.spritesheet, this.entities[i].sprite.getSX(), this.entities[i].sprite.getSY(), this.entities[i].sprite.spriteWidth, this.entities[i].sprite.spriteHeight, this.entities[i].sprite.getX(), this.entities[i].sprite.getY(), this.entities[i].sprite.spriteWidth, this.entities[i].sprite.spriteHeight);
 
       }
       this.ctx.fillStyle = "black";
@@ -124,6 +136,8 @@ var World = (function () {
 
 var world = new World(canvas);
 var lastTime;
+
+world.cameraPosition(cameraMapPosition, cameraScreenPosition);
 
 canvas.addEventListener("mousedown", function(e){
   amplify.publish( "mousedown", {ev:e, offsetLeft: canvas.offsetLeft, offsetTop: canvas.offsetTop});
