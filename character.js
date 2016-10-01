@@ -1,9 +1,9 @@
 // Character class
 var Character = (function () {
 
-  var Character = function(_map) {
+  var Character = function(_map, _name) {
     this.map = _map;
-    this.charname = "";
+    this.charname = _name;
     this.level = 0;
     this.efficiency = 0;
     this.experiments = 0;
@@ -26,6 +26,7 @@ var Character = (function () {
 
   Character.prototype = {
     input: function (data) {
+      amplify.publish( "notify-text", this.sprite.getX(), this.sprite.getY()-this.sprite.spriteHeight/2, this.charname+" x:"+this.sprite.x+" y:"+this.sprite.y);
       // Testing
       if (this.path.length == 0)
       this.randomMove();

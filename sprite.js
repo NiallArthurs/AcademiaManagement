@@ -18,19 +18,34 @@ var Sprite = (function () {
     this.cameraMapPosition = 0;
     this.cameraScreenPosition = 0;
     this.inputCallback = _inputCallback;
+    this.pause = false;
     var self = this;
+
+    amplify.subscribe("pause", function (val) {
+      self.pauseSprite(val);
+    });
+
     amplify.subscribe( "dt", function (data) {
       self.tick(data);
     });
+
     amplify.subscribe( "camera-pos", function (mPos, sPos) {
       self.cameraPosition(mPos, sPos);
     });
+
     amplify.subscribe( "mousedown", function(ev) {
       self.input(ev);
     });
   };
 
   Sprite.prototype = {
+    pauseSprite: function (val) {
+      if (val == true) {
+        this.pause = true;
+      } else if (val == false) {
+        this.pause = false
+      }
+    },
     input: function (data) {
       // Sprite should handle mouse events.
       if (typeof this.inputCallback  === "function") {
@@ -48,6 +63,9 @@ var Sprite = (function () {
       this.cameraScreenPosition = sPos;
     },
     tick: function(dt) {
+      if (this.pause)
+        return;
+
       this.time += dt;
       if (this.time >= this.animations[this.state]["speed"])
       {
@@ -74,6 +92,9 @@ var Sprite = (function () {
     },
     getSY: function() {
       return this.spriteHeight*Math.floor(this.animations[this.state]["frames"][this.frame]/(this.width/this.spriteWidth));
+    },
+    draw: function(ctx) {
+      ctx.drawImage(this.spritesheet, this.getSX(), this.getSY(), this.spriteWidth, this.spriteHeight, this.getX(), this.getY(), this.spriteWidth, this.spriteHeight);
     }
   }
 
