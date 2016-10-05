@@ -6,6 +6,7 @@ var canvas = document.getElementById("gameArea");
 var ctx = canvas.getContext("2d");
 var tileSet = document.getElementById("tileset");
 var mapTools = document.getElementById("mapTools");
+var objectTiles = document.getElementById("objectMap");
 var mapText = document.getElementById("map");
 var x, y, keyPress;
 
@@ -26,6 +27,7 @@ var cameraMapPosition = [2.0, 2.0];
 var mapLayout = [[1,1,17,16,16,16,24,16,16,16,16,16,19],[1,1,15,30,0,0,14,33,0,0,0,0,15],[17,16,20,33,0,0,0,0,0,0,0,0,15],[15,30,0,0,0,0,12,32,0,0,0,0,15],[40,50,0,0,0,0,18,16,19,32,0,0,15],[15,30,0,0,0,0,0,0,15,30,0,0,15],[40,50,0,0,0,0,0,0,15,30,0,0,15],[15,30,0,0,0,0,0,0,15,30,0,0,15],[18,16,19,32,0,0,0,0,15,30,0,0,15],[1,1,15,30,0,0,0,0,15,30,0,0,15],[1,1,18,16,16,16,16,16,22,16,16,16,20]];
 var mapWidth = mapLayout.length;
 var mapHeight = mapLayout[0].length;
+var objectMap = [[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,10,20,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,30,40,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,11,21,0,0,0,0,0,0,0,0],[0,0,0,12,22,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0]];
 var collisionMap = [[1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,0,0,1,1,0,0,0,0,1],[1,1,1,1,0,0,0,0,0,0,0,0,1],[1,1,0,0,0,0,1,1,0,0,0,0,1],[1,1,0,0,0,0,1,1,1,1,0,0,1],[1,1,0,0,0,0,0,0,1,1,0,0,1],[1,1,0,0,0,0,0,0,1,1,0,0,1],[1,1,0,0,0,0,0,0,1,1,0,0,1],[1,1,1,1,0,0,0,0,1,1,0,0,1],[1,1,1,1,0,0,0,0,1,1,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1]];
 
 mapText.innerHTML = "<h3>Map Output</h3><textarea readonly rows='10' cols='85'>" + produceMapString() + "</textarea>";
@@ -80,6 +82,14 @@ function gameLoop() {
     }
   }
 
+  for (i = 0; i < mapWidth; i++) {
+    x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
+    for (j = 0; j < mapHeight; j++) {
+      y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
+      ctx.drawImage(objectTiles, (objectMap[i][j]%10)*TILE_SIZE, Math.floor(objectMap[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+    }
+  }
+
   if (editorMode == 1) {
     for (i = 0; i < mapWidth; i++) {
       x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
@@ -93,6 +103,7 @@ function gameLoop() {
   ctx.fillStyle = "#000000";
   if (editorMode == 0) {
     ctx.fillText("Mapping Mode",10,20);
+    ctx.fillText("Brush ID:" + brushID,1140,20);
   }
   if (editorMode == 1) {
     ctx.fillText("Collision Mode",10,20);
