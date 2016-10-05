@@ -16,6 +16,7 @@
   <script src="sprite.js"></script>
   <script src="map.js"></script>
   <script src="character.js"></script>
+  <script src="mouse.js"></script>
   <script src="notify.js"></script>
   <script>
 
@@ -149,13 +150,16 @@ var World = (function () {
       // Draw entities
       for (j=0; j < this.entities.length; j++) {
         var i = drawOrder[j][0];
-        this.entities[i].sprite.draw(this.ctx);
+        this.entities[i].draw(this.ctx);
       }
 
       // Draw FPS
       this.ctx.fillStyle = "black";
       this.ctx.font = "25px Arial";
-      this.ctx.fillText("FPS: "+Math.floor(1/dt),10,20);
+      if (this.pause)
+        this.ctx.fillText("FPS: "+Math.floor(1/dt) + " (Paused)",10,20);
+      else
+        this.ctx.fillText("FPS: "+Math.floor(1/dt),10,20);
 
       // Draw any ui elements
       for (k=0; k < this.ui.length;k++)

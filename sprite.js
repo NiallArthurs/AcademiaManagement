@@ -20,19 +20,15 @@ var Sprite = (function () {
     this.inputCallback = _inputCallback;
     this.pause = false;
     var self = this;
-
     amplify.subscribe("pause", function (val) {
       self.pauseSprite(val);
     });
-
     amplify.subscribe( "dt", function (data) {
       self.tick(data);
     });
-
     amplify.subscribe( "camera-pos", function (mPos, sPos) {
       self.cameraPosition(mPos, sPos);
     });
-
     amplify.subscribe( "mousedown", function(ev) {
       self.input(ev);
     });

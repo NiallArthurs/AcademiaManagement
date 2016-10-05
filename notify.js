@@ -2,81 +2,78 @@
 // Text Notification
 var Notify = (function () {
 
-  var Notify = function(_x, _y, _text, _callback) {
+  var Notify = function(_x, _y, _text) {
+    // Call MouseEvent constructor
+    MouseEvent.call(this, _x, _y, 0, 0);
     this.text = _text;
     this.dt = 0;
-    this.width = 0;
-    this.height = 0;
     this.visible = 1;
     this.hide = 0;
     this.textWidth = 0;
     this.textHeight = 0;
-    this.xPos = _x;
-    this.yPos = _y;
     this.offset = 5;
     this.alpha = 0;
-    this.inputCallback = _callback;
+    this.speed = 4;
+    this.drawStartup = 1;
     var self = this;
 
     amplify.subscribe( "dt", function (data) {
       self.tick(data);
     });
-
-    amplify.subscribe( "mousedown", function(ev) {
-      self.input(ev);
-    });
   };
 
-  Notify.prototype = {
-    input: function (data) {
+  Notify.prototype = Object.create(MouseEvent.prototype)
+  Notify.prototype.constructor = Notify;
 
-      var x = data["ev"].pageX - data["offsetLeft"];
-      var y = data["ev"].pageY - data["offsetTop"];
+  Notify.prototype.tick = function(dt) {
 
-      if (x >= this.xPos-this.offset && x <= (this.xPos+this.width+2*this.offset) && y >= this.yPos-this.offset  && y <= (this.yPos+this.height+2*this.offset))
-      {
-        if (typeof this.inputCallback  === "function")
-          this.inputCallback();
-        else
-          this.hide = 1;
-      }
-    },
-    tick: function(dt) {
       this.dt = dt;
       // Notifications fade in and out
       if ((this.alpha < 1.0) && (this.hide == 0))
-        this.alpha = this.alpha + this.dt*5;
+        this.alpha = this.alpha + this.dt*this.speed;
 
       if (this.hide == 1)
-          this.alpha = this.alpha - this.dt*5;
+          this.alpha = this.alpha - this.dt*this.speed;
 
       if (this.alpha < 0)
       {
         this.alpha = 0;
         this.visible = 0;
       }
-    },
-    draw: function(ctx) {
+  };
+
+  Notify.prototype.inputMouseDownCallback = function() {
+      this.hide = 1;
+  };
+
+  Notify.prototype.draw = function(ctx) {
 
       ctx.font = "20px Arial";
-      ctx.fillStyle = "#ffffff";
       ctx.strokeStyle = "green";
-      this.textWidth = ctx.measureText(this.text).width;
+
+      // Assign the width and height for the notification (once when we are given the canvas context)
+      if (this.drawStartup)
+      {
+        this.textWidth = ctx.measureText(this.text).width;
+	this.width = this.textWidth + 2*this.offset;
+	this.height = 20 + 2* this.offset;
+	this.xPos = this.xPos-this.textWidth/2-this.offset+16;
+	this.yPos = this.yPos-this.offset;
+	this.drawStartup = 0;
+      }
+
       ctx.globalAlpha = this.alpha;
-      this.width = this.textWidth;
-      this.height = 20;
       // Box centered above tile
-      ctx.fillRect(this.xPos-this.textWidth/2-this.offset+16, this.yPos-this.offset, this.width+2*this.offset, this.height+2*this.offset);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(this.xPos, this.yPos, this.width, this.height);
       ctx.fillStyle = "rgba(0, 0, 0, " + this.alpha + ")";
       ctx.textBaseline = "middle";
-      ctx.fillText(this.text, this.xPos-this.textWidth/2+16, this.yPos+this.height/2);
-      ctx.strokeRect(this.xPos-this.textWidth/2-this.offset+16, this.yPos-this.offset, this.width+2*this.offset, this.height+2*this.offset);
+      ctx.fillText(this.text, this.xPos+this.offset, this.yPos+this.height/2);
+      ctx.strokeRect(this.xPos, this.yPos, this.width, this.height);
 
       // Reset alpha
       ctx.globalAlpha=1.0;
-
-    }
-  }
+    };
 
   return Notify;
 })();

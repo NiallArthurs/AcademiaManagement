@@ -8,19 +8,23 @@ var Character = (function () {
     this.efficiency = 0;
     this.experiments = 0;
     this.theory = 0;
-    this.computational = 0;
+    this.computation = 0;
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.dt = 0;
     this.speed = 1; // Movement speed - pixels/second
+    this.state = ['work', 'sleep', 'rest'];
+    // Randomly assign state for now
+    this.activeState = getRandomInt(0,2);
     var self = this;
     this.sprite = new Sprite(char, 32, 42,32*3,42*4,  animations, "walkdown", function() {self.input()});
     var rpos = this.randomPosition();
     this.sprite.x = rpos[0]  // Current y tile
     this.sprite.y = rpos[1]; // Current y tile
+    this.sleepOffset = [0, getRandomInt(-5, 5), getRandomInt(10, 20)];
     // subscribe to dt
-    amplify.subscribe( "dt", function (data) {
-      self.dt = data;
+    amplify.subscribe( "dt", function (dt) {
+      self.dt = dt;
     });
   };
 
@@ -95,6 +99,29 @@ var Character = (function () {
           this.sprite.setState("left");
         }
       }
+
+      if (this.state[this.activeState] === 'sleep')
+        this.sleepOffset[0] += this.sleepOffset[2]*this.dt;
+    },
+    draw: function(ctx) {
+
+      this.sprite.draw(ctx);
+
+      // Draw state based animations
+      if (this.state[this.activeState] === 'sleep')
+        this.drawSleep(ctx);
+    },
+    drawSleep: function(ctx) {
+      // Tiny "z" animation to signify sleeo
+      ctx.font = this.sleepOffset[2]+"px Arial";
+      ctx.fillStyle = "rgba(0, 0, 0, " + (1-(this.sleepOffset[0]/(this.sleepOffset[2]+this.sleepOffset[1]))) + ")";
+
+      var zWidth = ctx.measureText("z").width;
+
+      if (this.sleepOffset[0] < (this.sleepOffset[2]+this.sleepOffset[1]))
+        ctx.fillText("z", this.sprite.getX()-zWidth/2+this.sleepOffset[1]+this.sprite.spriteWidth/2, this.sprite.getY()-this.sleepOffset[0]);
+      else
+        this.sleepOffset = [0, getRandomInt(-5, 5), getRandomInt(10, 20)];
 
     },
     randomPosition: function() {
