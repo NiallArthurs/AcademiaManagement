@@ -30,10 +30,13 @@ var Character = (function () {
 
   Character.prototype = {
     input: function (data) {
-      amplify.publish( "notify-text", this.sprite.getX(), this.sprite.getY()-this.sprite.spriteHeight/2, this.charname+" x:"+this.sprite.x+" y:"+this.sprite.y);
-      // Testing
-      if (this.path.length == 0)
-      this.randomMove();
+      var self = this;
+      var menu = [["Text Notification", function() {amplify.publish("popup-text", self.sprite.getX(), self.sprite.getY(), "My name is "+self.charname);}],
+              ["Move", function() { if (self.path.length == 0) self.randomMove();}],
+              ["Work", function () {if (self.state[self.activeState] != "work") self.activeState = 0;}],
+              ["Sleep", function () {if (self.state[self.activeState] != "sleep") self.activeState = 1;}]];
+
+      amplify.publish("popup-menu", this.sprite.getX(), this.sprite.getY(), menu);
     },
     update: function () {
       // If the path isn't empty have the character follow it.

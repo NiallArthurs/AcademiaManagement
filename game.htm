@@ -18,6 +18,7 @@
   <script src="character.js"></script>
   <script src="mouse.js"></script>
   <script src="notify.js"></script>
+  <script src="menu.js"></script>
   <script>
 
   var tmpMap = [[1,1,17,16,16,16,24,16,16,16,16,16,19],
@@ -78,14 +79,21 @@ var World = (function () {
 
     var self = this;
 
-    amplify.subscribe("notify-text", function (x, y, text, fun) {
+    amplify.subscribe("popup-text", function (x, y, text, fun) {
       self.createNotify(x, y, text, fun);
+    });
+
+    amplify.subscribe("popup-menu", function (x, y, menu) {
+      self.createMenu(x, y, menu);
     });
   };
 
   World.prototype = {
     createNotify: function (x, y, text, fun) {
       this.ui.push(new Notify(x, y, text, fun));
+    },
+    createMenu: function (x, y, menu) {
+      this.ui.push(new Menu(x, y, menu));
     },
     cameraPosition: function (cameraMPos, cameraSPos) {
       amplify.publish( "camera-pos", cameraMPos, cameraSPos);
@@ -177,6 +185,10 @@ world.cameraPosition(cameraMapPosition, cameraScreenPosition);
 
 canvas.addEventListener("mousedown", function(e){
   amplify.publish( "mousedown", {ev:e, offsetLeft: canvas.offsetLeft, offsetTop: canvas.offsetTop});
+}, false);
+
+canvas.addEventListener("mousemove", function(e){
+  amplify.publish( "mousemove", {ev:e, offsetLeft: canvas.offsetLeft, offsetTop: canvas.offsetTop});
 }, false);
 
 function gameLoop() {

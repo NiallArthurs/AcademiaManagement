@@ -43,6 +43,9 @@ var Sprite = (function () {
       }
     },
     input: function (data) {
+      if (this.pause)
+        return;
+        
       // Sprite should handle mouse events.
       if (typeof this.inputCallback  === "function") {
           var x = data["ev"].pageX - data["offsetLeft"];

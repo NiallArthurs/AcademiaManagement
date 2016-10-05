@@ -4,10 +4,10 @@ var Notify = (function () {
 
   var Notify = function(_x, _y, _text) {
     // Call MouseEvent constructor
-    MouseEvent.call(this, _x, _y, 0, 0);
+    MouseEvent.call(this, _x, _y, 0, 0, false);
     this.text = _text;
     this.dt = 0;
-    this.visible = 1;
+    this.visible = true;
     this.hide = 0;
     this.textWidth = 0;
     this.textHeight = 0;
@@ -33,17 +33,20 @@ var Notify = (function () {
         this.alpha = this.alpha + this.dt*this.speed;
 
       if (this.hide == 1)
+      {
           this.alpha = this.alpha - this.dt*this.speed;
+      }
 
       if (this.alpha < 0)
       {
         this.alpha = 0;
-        this.visible = 0;
+        this.visible = false;
       }
   };
 
   Notify.prototype.inputMouseDownCallback = function() {
       this.hide = 1;
+      this.cleanup();
   };
 
   Notify.prototype.draw = function(ctx) {
@@ -55,11 +58,11 @@ var Notify = (function () {
       if (this.drawStartup)
       {
         this.textWidth = ctx.measureText(this.text).width;
-	this.width = this.textWidth + 2*this.offset;
-	this.height = 20 + 2* this.offset;
-	this.xPos = this.xPos-this.textWidth/2-this.offset+16;
-	this.yPos = this.yPos-this.offset;
-	this.drawStartup = 0;
+	      this.width = this.textWidth + 2*this.offset;
+        this.height = 20 + 2* this.offset;
+      	this.xPos = this.xPos-this.textWidth/2-this.offset+16;
+	      this.yPos = this.yPos-this.offset;
+	      this.drawStartup = 0;
       }
 
       ctx.globalAlpha = this.alpha;
