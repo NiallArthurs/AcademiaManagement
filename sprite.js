@@ -45,7 +45,7 @@ var Sprite = (function () {
     input: function (data) {
       if (this.pause)
         return;
-        
+
       // Sprite should handle mouse events.
       if (typeof this.inputCallback  === "function") {
           var x = data["ev"].pageX - data["offsetLeft"];
@@ -56,10 +56,6 @@ var Sprite = (function () {
           if (x >= xPos && x <= (xPos+this.spriteWidth) && y >= yPos  && y <= (yPos+this.spriteHeight))
             this.inputCallback(x, y);
         }
-    },
-    cameraPosition: function(mPos, sPos) {
-      this.cameraMapPosition = mPos;
-      this.cameraScreenPosition = sPos;
     },
     tick: function(dt) {
       if (this.pause)

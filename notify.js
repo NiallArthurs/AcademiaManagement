@@ -17,9 +17,11 @@ var Notify = (function () {
     this.drawStartup = 1;
     var self = this;
 
-    amplify.subscribe( "dt", function (data) {
+    this.dtFn = function (data) {
       self.tick(data);
-    });
+    };
+
+    amplify.subscribe( "dt", this.dtFn);
   };
 
   Notify.prototype = Object.create(MouseEvent.prototype)
@@ -41,6 +43,7 @@ var Notify = (function () {
       {
         this.alpha = 0;
         this.visible = false;
+        amplify.unsubscribe( "dt", this.dtFn);
       }
   };
 

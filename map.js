@@ -37,8 +37,17 @@ var Map2D = (function () {
       var grid = this.gridOrig.clone();
       return this.finder.findPath(x0, y0, x, y, grid);
     },
+    draw: function(ctx) {
+      // Draw map
+      for (i = 0; i < this.width; i++) {
+        var x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
+        for (j = 0; j < this.height; j++) {
+          var y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
+          ctx.drawImage(this.tileset, (this.layout[i][j]%10)*TILE_SIZE, Math.floor(this.layout[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+        }
+      }
+    }
   }
 
   return Map2D;
 })();
-
