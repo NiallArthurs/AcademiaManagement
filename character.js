@@ -132,7 +132,7 @@ var Character = (function () {
 
           // Move the notification
           if (this.researchPoints.length != 0)
-            this.float.position += this.float.height*this.dt*(1/5);
+            this.float.position += this.float.height*this.dt*(1/3);
 
           // Randomly walk aroud when working
           if (this.path.length === 0)
