@@ -19,7 +19,7 @@ var GameState = {
     return this.fundingTotal;
   },
   update: function() {
-	this.cleanGrants;
+	this.cleanGrants();
 	this.determineTotalFunding();
   }, 
   // If grant duration has elapsed delete it
@@ -37,19 +37,19 @@ var GameState = {
     this.grants.push(tmp);
   },
   // Add research point
-  addResearchPoint: function (type) {
+  addResearchPoint: function (type, number) {
     // 0 - experiment, 1 - computation, 2 - theory
     if (type === 0)
     {
-      this.experimentPoints++;
+      this.experimentPoints+=number;
     }
     else if (type === 1)
     {
-      this.computationPoints++;
+      this.computationPoints+=number;
     }
     else if (type === 2)
     {
-      this.theoryPoints++;
+      this.theoryPoints+=number;
     }
   },
   // Add publication

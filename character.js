@@ -4,11 +4,10 @@ var Character = (function () {
   var Character = function(_map, _name) {
     this.map = _map;
     this.charname = _name;
-    this.level = 0;
-    this.efficiency = 0;
-    this.experiments = 0;
-    this.theory = 0;
-    this.computation = 0;
+    this.level = 1;
+    this.experiments = getRandomInt(1, 40)/(10*60);
+    this.theory = getRandomInt(1, 40)/(10*60);
+    this.computation = getRandomInt(1, 40)/(10*60);
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.dt = 0;
@@ -21,7 +20,16 @@ var Character = (function () {
     var rpos = this.randomPosition();
     this.sprite.x = rpos[0]  // Current y tile
     this.sprite.y = rpos[1]; // Current y tile
-    this.sleepOffset = [0, getRandomInt(-5, 5), getRandomInt(10, 20)];
+    this.points = [0.0, 0.0, 0.0];
+
+    // Parameters for notifications which float up from the character
+    this.float = {position: 0,
+		  offset: getRandomInt(-5, 5), 
+		  height: getRandomInt(10, 20), 
+		  reset: function() {this.position=0; this.offset=getRandomInt(-5,5); this.height=getRandomInt(10, 20);}}
+
+    this.researchPoints = [];
+
     // subscribe to dt
     amplify.subscribe( "dt", function (dt) {
       self.dt = dt;
@@ -31,7 +39,7 @@ var Character = (function () {
   Character.prototype = {
     input: function (data) {
       var self = this;
-      var menu = [["Text Notification", function() {amplify.publish("popup-text", self.sprite.getX(), self.sprite.getY(), "My name is "+self.charname);}],
+      var menu = [["Text Notification", function() {amplify.publish("popup-text", self.sprite.getX(), self.sprite.getY(), "My name is "+self.charname+", E: "+self.points[0]+ ", C: "+self.points[1]+", T: "+self.points[2]);}],
               ["Move", function() { if (self.path.length == 0) self.randomMove();}],
               ["Work", function () {if (self.state[self.activeState] != "work") self.activeState = 0;}],
               ["Sleep", function () {if (self.state[self.activeState] != "sleep") self.activeState = 1;}]];
@@ -104,27 +112,78 @@ var Character = (function () {
       }
 
       if (this.state[this.activeState] === 'sleep')
-        this.sleepOffset[0] += this.sleepOffset[2]*this.dt;
+      {
+        this.float.position += this.float.height*this.dt;
+      }
+      else if (this.state[this.activeState] === 'work') {
+
+        this.points[0] += this.dt*this.level*this.experiments;
+        this.points[1] += this.dt*this.level*this.computation;
+        this.points[2] += this.dt*this.level*this.theory;
+
+        for (var i=0; i < 3; i++)
+        {
+          if (this.points[i] >= 1.0)
+          {
+            GameState.addResearchPoint(i, Math.floor(this.points[i]));
+	    this.researchPoints.push([i,Math.floor(this.points[i])]);
+            this.points[i] = 0.0;
+          }
+        }
+        this.float.position += this.float.height*this.dt*(1/5);
+
+	if (this.path.length === 0)
+	    this.randomMove();
+      }
     },
     draw: function(ctx) {
 
       this.sprite.draw(ctx);
 
       // Draw state based animations
-      if (this.state[this.activeState] === 'sleep')
+      if (this.state[this.activeState] === 'sleep' & this.path.length === 0)
         this.drawSleep(ctx);
+      else if (this.state[this.activeState] === 'work')
+        this.drawWork(ctx);
+    },
+    drawWork: function(ctx) {
+      // Show generated research points
+      if (this.researchPoints.length != 0)
+      {
+      	ctx.font = "bold 20px Arial";
+	var string;
+	if (this.researchPoints[0][0]===0) {
+	  string = this.researchPoints[0][1] === 1 ? "E" : this.researchPoints[0][1]+"xE";
+      	  ctx.fillStyle = "rgba(255, 0, 0, " + (1-(this.float.position/(this.float.height))) + ")";	
+	} else if (this.researchPoints[0][0]===1) {
+	  string = this.researchPoints[0][1] === 1 ? "C" : this.researchPoints[0][1]+"xC";
+      	  ctx.fillStyle = "rgba(0, 255, 0, " + (1-(this.float.position/(this.float.height))) + ")";	
+	} else if (this.researchPoints[0][0]===2) {
+	  string = this.researchPoints[0][1] === 1 ? "T" : this.researchPoints[0][1]+"xT";
+      	  ctx.fillStyle = "rgba(0, 0, 255, " + (1-(this.float.position/(this.float.height))) + ")";	
+	}
+
+        var sWidth = ctx.measureText(string).width;
+      	if (this.float.position < (this.float.height))
+          ctx.fillText(string, this.sprite.getX()-sWidth/2+this.sprite.spriteWidth/2, this.sprite.getY()-this.float.position);
+        else
+	{
+	  this.researchPoints.shift();
+          this.float.reset();
+	  this.float.height = 20;
+	}
+      }
     },
     drawSleep: function(ctx) {
-      // Tiny "z" animation to signify sleeo
-      ctx.font = this.sleepOffset[2]+"px Arial";
-      ctx.fillStyle = "rgba(0, 0, 0, " + (1-(this.sleepOffset[0]/(this.sleepOffset[2]+this.sleepOffset[1]))) + ")";
-
+      // Use a combination of the float parameters to get a random sleep patern
+      ctx.font = this.float.height+"px Arial";
+      ctx.fillStyle = "rgba(0, 0, 0, " + (1-(this.float.position/(this.float.height+this.float.offset))) + ")";
       var zWidth = ctx.measureText("z").width;
 
-      if (this.sleepOffset[0] < (this.sleepOffset[2]+this.sleepOffset[1]))
-        ctx.fillText("z", this.sprite.getX()-zWidth/2+this.sleepOffset[1]+this.sprite.spriteWidth/2, this.sprite.getY()-this.sleepOffset[0]);
+      if (this.float.position < (this.float.height+this.float.offset))
+        ctx.fillText("z", this.sprite.getX()-zWidth/2+this.float.offset+this.sprite.spriteWidth/2, this.sprite.getY()-this.float.position);
       else
-        this.sleepOffset = [0, getRandomInt(-5, 5), getRandomInt(10, 20)];
+        this.float.reset();
 
     },
     randomPosition: function() {

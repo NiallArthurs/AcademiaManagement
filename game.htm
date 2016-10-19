@@ -42,10 +42,9 @@
   var SUPPORTED_RESOLUTIONS = [[1920,1080],[1280,720],[800,600]];
   var canvas = document.getElementById("gameArea");
   var it = 1;
-  while (window.innerHeight < SUPPORTED_RESOLUTIONS[it][1]){it++;}
+  //while (window.innerHeight < SUPPORTED_RESOLUTIONS[it][1]){it++;}
   canvas.width = SUPPORTED_RESOLUTIONS[it][0];
   canvas.height = SUPPORTED_RESOLUTIONS[it][1];
-
   var cameraScreenPosition = [0.5 * (canvas.width - TILE_SIZE), 0.5 * (canvas.height - TILE_SIZE)];
   var cameraMapPosition = [2.0, 2.0];
 
@@ -72,6 +71,8 @@
       this.pause = false;
       this.entities = [];
       this.ui = [];
+      this.keyDown = false;
+      this.key = 0;
       for (var i=0; i < 5; i++)
       {
         this.entities.push(new Character(this.maps[this.map],names[i]));
@@ -80,11 +81,25 @@
       this.width = _canvas.width;
       this.height = _canvas.height;
       this.bgcolor = "#54AB47";
-
+      this.dt = 0;
+      this.cameraSpeed = 6;
       var self = this;
+
+      window.addEventListener('keydown', function (e) {
+        self.key = e.keyCode;
+        self.keyDown = true;
+      })
+
+      window.addEventListener('keyup', function (e) {
+        self.keyDown = false;
+      })
 
       amplify.subscribe("popup-text", function (x, y, text, fun) {
         self.createNotify(x, y, text, fun);
+      });
+
+      amplify.subscribe("dt", function (dt) {
+        self.dt = dt;
       });
 
       amplify.subscribe("popup-menu", function (x, y, menu) {
@@ -133,6 +148,12 @@
           }
         }
       },
+      keyInput: function() {
+        if (this.keyDown && this.key == 37 && cameraMapPosition[0] > 0) {cameraMapPosition[0] -= this.dt*this.cameraSpeed;}
+        else if (this.keyDown && this.key == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= this.dt*this.cameraSpeed;}
+        else if (this.keyDown && this.key == 39 && cameraMapPosition[0] < this.maps[this.map].width) {cameraMapPosition[0] += this.dt*this.cameraSpeed;}
+        else if (this.keyDown && this.key == 40 && cameraMapPosition[1] < this.maps[this.map].height) {cameraMapPosition[1] += this.dt*this.cameraSpeed;}
+      },
       draw: function (dt) {
         // Draw backgroud
         this.ctx.fillStyle = this.bgcolor;
@@ -161,10 +182,11 @@
         this.ctx.font = "25px Arial";
         var time = Time.getCurrent();
         var timeString = "Y: "+time[0]+" M: "+time[1]+ " D: "+time[2];
+        var RPstring = ", RP E: "+GameState.experimentPoints+ " T: "+ GameState.theoryPoints + " C: "+ GameState.computationPoints;
         if (this.pause)
           this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt) + " (Paused)",10,20);
         else
-          this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt),10,20);
+          this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt)+ RPstring,10,20);
 
         // Draw any ui elements
         for (k=0; k < this.ui.length;k++)
@@ -199,6 +221,7 @@
       amplify.publish( "dt", dt);
     }
 
+    world.keyInput();
     world.draw(dt);
 
     lastTime = now;
