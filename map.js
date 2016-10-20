@@ -23,6 +23,12 @@ var Map2D = (function () {
       }
     }
     this.finder = new PF.AStarFinder();
+
+    // Render map to offscreen canvas
+    this.offscreenRender = document.createElement('canvas');
+    this.offscreenRender.width = TILE_SIZE*this.width;
+    this.offscreenRender.height = TILE_SIZE*this.height;
+    this.renderOffscreenMap();
   };
 
   Map2D.prototype = {
@@ -33,19 +39,24 @@ var Map2D = (function () {
 
       return false;
     },
+    renderOffscreenMap: function() {
+      var ctx = this.offscreenRender.getContext('2d');
+      for (i = 0; i < this.width; i++) {
+        for (j = 0; j < this.height; j++) {
+          ctx.drawImage(this.tileset, (this.layout[i][j]%10)*TILE_SIZE,
+            Math.floor(this.layout[i][j]/10.0)*TILE_SIZE, TILE_SIZE,
+            TILE_SIZE, TILE_SIZE*i, TILE_SIZE*j, TILE_SIZE, TILE_SIZE);
+        }
+      }
+    },
     generatePath: function(x0, y0, x, y) {
       var grid = this.gridOrig.clone();
       return this.finder.findPath(x0, y0, x, y, grid);
     },
     draw: function(ctx) {
-      // Draw map
-      for (i = 0; i < this.width; i++) {
-        var x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
-        for (j = 0; j < this.height; j++) {
-          var y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
-          ctx.drawImage(this.tileset, (this.layout[i][j]%10)*TILE_SIZE, Math.floor(this.layout[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
-        }
-      }
+      ctx.drawImage(this.offscreenRender, cameraScreenPosition[0]-TILE_SIZE*cameraMapPosition[0],
+        cameraScreenPosition[1]-TILE_SIZE*cameraMapPosition[1],this.offscreenRender.width,
+        this.offscreenRender.height);
     }
   }
 
