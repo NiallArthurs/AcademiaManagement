@@ -19,9 +19,9 @@ var GameState = {
     return this.fundingTotal;
   },
   update: function() {
-	this.cleanGrants();
-	this.determineTotalFunding();
-  }, 
+	   this.cleanGrants();
+	   this.determineTotalFunding();
+  },
   // If grant duration has elapsed delete it
   cleanGrants: function() {
     var i = this.grants.length;
@@ -41,15 +41,15 @@ var GameState = {
     // 0 - experiment, 1 - computation, 2 - theory
     if (type === 0)
     {
-      this.experimentPoints+=number;
+      this.experimentPoints += number;
     }
     else if (type === 1)
     {
-      this.computationPoints+=number;
+      this.computationPoints += number;
     }
     else if (type === 2)
     {
-      this.theoryPoints+=number;
+      this.theoryPoints += number;
     }
   },
   // Add publication

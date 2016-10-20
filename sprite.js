@@ -15,8 +15,6 @@ var Sprite = (function () {
     this.time = 0;
     this.state = _state;
     this.frame = 0; //move along the animation
-    this.cameraMapPosition = 0;
-    this.cameraScreenPosition = 0;
     this.inputCallback = _inputCallback;
     this.pause = false;
     var self = this;
@@ -25,9 +23,6 @@ var Sprite = (function () {
     });
     amplify.subscribe( "dt", function (data) {
       self.tick(data);
-    });
-    amplify.subscribe( "camera-pos", function (mPos, sPos) {
-      self.cameraPosition(mPos, sPos);
     });
     amplify.subscribe( "mousedown", function(ev) {
       self.input(ev);

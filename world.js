@@ -78,9 +78,9 @@ var World = (function () {
 
       // Pause when ui elements active
       if (this.ui.length > 0)
-      this.pauseGame(true);
+        this.pauseGame(true);
       else
-      this.pauseGame(false);
+        this.pauseGame(false);
 
       if (!this.pause)
       {
@@ -98,7 +98,7 @@ var World = (function () {
       else if (this.keyDown && this.key == 32) {this.centerCamera();}
     },
     draw: function (dt) {
-      // Draw backgroud
+      // Draw background
       this.ctx.fillStyle = this.bgcolor;
       this.ctx.fillRect(0, 0, this.width, this.height);
 
@@ -127,13 +127,13 @@ var World = (function () {
       var timeString = "Y: "+time[0]+" M: "+time[1]+ " D: "+time[2];
       var RPstring = ", RP E: "+GameState.experimentPoints+ " T: "+ GameState.theoryPoints + " C: "+ GameState.computationPoints;
       if (this.pause)
-      this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt) + " (Paused)",10,30);
+        this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt) + " (Paused)",10,30);
       else
-      this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt)+ RPstring,10,30);
+        this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt)+ RPstring,10,30);
 
       // Draw any ui elements
       for (k=0; k < this.ui.length;k++)
-      this.ui[k].draw(this.ctx);
+        this.ui[k].draw(this.ctx);
     }
   }
 

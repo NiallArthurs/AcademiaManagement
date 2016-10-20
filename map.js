@@ -13,8 +13,7 @@ var Map2D = (function () {
     // Create the grid for collisons for use by the path finder
     for (var i=0; i < this.width; i++) {
       for (var j=0; j < this.height; j++) {
-        if (this.layout[i][j] == 0)
-        {
+        if (this.layout[i][j] == 0) {
           this.gridOrig.setWalkableAt(i, j, true);
         }
         else {
