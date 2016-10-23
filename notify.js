@@ -15,11 +15,7 @@ var Notify = (function () {
     this.alpha = 0;
     this.speed = 4;
     this.drawStartup = 1;
-    var self = this;
-
-    this.dtFn = function (data) {
-      self.tick(data);
-    };
+    this.dtFn = this.tick.bind(this);
 
     amplify.subscribe( "dt", this.dtFn);
   };
@@ -31,10 +27,10 @@ var Notify = (function () {
 
       this.dt = dt;
       // Notifications fade in and out
-      if ((this.alpha < 1.0) && (this.hide == 0))
+      if ((this.alpha < 1.0) && (this.hide === 0))
         this.alpha = this.alpha + this.dt*this.speed;
 
-      if (this.hide == 1)
+      if (this.hide === 1)
       {
           this.alpha = this.alpha - this.dt*this.speed;
       }

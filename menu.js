@@ -59,25 +59,20 @@ var Menu = (function () {
     this.xPos = _x;
     this.yPos = _y;
     this.cleanupTest = false;
-    var self = this;
-
-    this.dtFn = function (data) {
-      self.tick(data);
-    };
-
+    this.dtFn = this.tick.bind(this);
     amplify.subscribe( "dt", this.dtFn);
   };
 
   Menu.prototype.tick = function(dt) {
     this.dt = dt;
     // Menu fade in and out
-    if ((this.alpha < 1.0) && (this.hide == 0))
+    if ((this.alpha < 1.0) && (this.hide === 0))
       this.alpha = this.alpha + this.dt*this.speed;
 
-    if (this.hide == 1)
+    if (this.hide === 1)
       this.alpha = this.alpha - this.dt*this.speed;
 
-    if (this.hide == 1 && !this.cleanupTest)
+    if (this.hide === 1 && !this.cleanupTest)
     {
       for (var i=0; i < this.menu.length; i++) {
         this.menu[i].cleanup();

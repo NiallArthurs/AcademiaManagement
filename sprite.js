@@ -17,27 +17,23 @@ var Sprite = (function () {
     this.frame = 0; //move along the animation
     this.inputCallback = _inputCallback;
     this.pause = false;
-    var self = this;
-    amplify.subscribe("pause", function (val) {
-      self.pauseSprite(val);
-    });
-    amplify.subscribe( "dt", function (data) {
-      self.tick(data);
-    });
-    amplify.subscribe( "mousedown", function(ev) {
-      self.input(ev);
-    });
+    this.pauseFn = this.pauseSprite.bind(this);
+    this.dtFn = this.tick.bind(this);
+    this.mousedownFn = this.inputMouseDown.bind(this);
+    amplify.subscribe("pause", this.pauseFn);
+    amplify.subscribe( "dt", this.dtFn);
+    amplify.subscribe( "mousedown", this.mousedownFn);
   };
 
   Sprite.prototype = {
     pauseSprite: function (val) {
-      if (val == true) {
+      if (val) {
         this.pause = true;
-      } else if (val == false) {
+      } else if (!val) {
         this.pause = false
       }
     },
-    input: function (data) {
+    inputMouseDown: function (data) {
       if (this.pause)
         return;
 
@@ -85,6 +81,11 @@ var Sprite = (function () {
     },
     draw: function(ctx) {
       ctx.drawImage(this.spritesheet, this.getSX(), this.getSY(), this.spriteWidth, this.spriteHeight, this.getX(), this.getY(), this.spriteWidth, this.spriteHeight);
+    },
+    cleanup: function() {
+      amplify.unsubscribe("pause", this.pauseFn);
+      amplify.unsubscribe("dt", this.dtFn);
+      amplify.unsubscribe("mousedown", this.mousedownFn);
     }
   }
 

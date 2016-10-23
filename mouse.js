@@ -10,15 +10,8 @@ var MouseEvent = (function () {
     this.mouseY = 0;
     this.hoverActive = _hover;
     this.hover = 0;
-    var self = this;
-
-    this.hoverFn = function(ev) {
-      self.inputMouseMove(ev);
-    };
-
-    this.mousedownFn = function(ev) {
-      self.inputMouseDown(ev);
-    };
+    this.hoverFn = this.inputMouseMove.bind(this);
+    this.mousedownFn = this.inputMouseDown.bind(this);
 
     if (this.hoverActive) {
       amplify.subscribe( "mousemove", this.hoverFn);
@@ -55,6 +48,7 @@ var MouseEvent = (function () {
       }
     },
     cleanup: function() {
+      // cleanup subscriptions
       if (this.hoverActive) {
         amplify.unsubscribe( "mousemove", this.hoverFn);
       }

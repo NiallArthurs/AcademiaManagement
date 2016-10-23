@@ -13,10 +13,10 @@ var x, y, keyPress;
 var editorMode = 0;
 var brushID = 0;
 
-var i = 0;
-while (window.innerHeight < SUPPORTED_RESOUTIONS[i][1]) {i++;}
-canvas.width = SUPPORTED_RESOUTIONS[i][0];
-canvas.height = SUPPORTED_RESOUTIONS[i][1];
+var k = 0;
+while (window.innerHeight < SUPPORTED_RESOUTIONS[k][1]) {k++;}
+canvas.width = SUPPORTED_RESOUTIONS[k][0];
+canvas.height = SUPPORTED_RESOUTIONS[k][1];
 mapText.width = canvas.width;
 
 //Setup initial camera parameters
@@ -74,26 +74,26 @@ function gameLoop() {
 
   controller();
 
-  for (i = 0; i < mapWidth; i++) {
+  for (var i = 0; i < mapWidth; i++) {
     x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
-    for (j = 0; j < mapHeight; j++) {
+    for (var j = 0; j < mapHeight; j++) {
       y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
       ctx.drawImage(tileSet, (mapLayout[i][j]%10)*TILE_SIZE, Math.floor(mapLayout[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
     }
   }
 
-  for (i = 0; i < mapWidth; i++) {
+  for (var i = 0; i < mapWidth; i++) {
     x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
-    for (j = 0; j < mapHeight; j++) {
+    for (var j = 0; j < mapHeight; j++) {
       y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
       ctx.drawImage(objectTiles, (objectMap[i][j]%10)*TILE_SIZE, Math.floor(objectMap[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
     }
   }
 
   if (editorMode == 1) {
-    for (i = 0; i < mapWidth; i++) {
+    for (var i = 0; i < mapWidth; i++) {
       x = cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0]);
-      for (j = 0; j < mapHeight; j++) {
+      for (var j = 0; j < mapHeight; j++) {
         y = cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1]);
         ctx.drawImage(mapTools, (collisionMap[i][j]%10)*TILE_SIZE, Math.floor(collisionMap[i][j]/10.0)*TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
       }
@@ -123,28 +123,28 @@ function controller() {
 
 function produceMapString() {
   var mapString = "mapLayout = [";
-  for (i = 0; i < mapWidth - 1; i++) {
+  for (var i = 0; i < mapWidth - 1; i++) {
     mapString += "[";
-    for (j = 0; j < mapHeight - 1; j++) {
+    for (var j = 0; j < mapHeight - 1; j++) {
       mapString += mapLayout[i][j] + ",";
     }
     mapString += mapLayout[i][mapHeight - 1] + "],";
   }
   mapString += "[";
-  for (j = 0; j < mapHeight - 1; j++) {
+  for (var j = 0; j < mapHeight - 1; j++) {
     mapString += mapLayout[mapWidth - 1][j] + ",";
   }
   mapString += mapLayout[mapWidth - 1][mapHeight - 1] + "]];\n";
   mapString += "collisionMap = [";
-  for (i = 0; i < mapWidth - 1; i++) {
+  for (var i = 0; i < mapWidth - 1; i++) {
     mapString += "[";
-    for (j = 0; j < mapHeight - 1; j++) {
+    for (var j = 0; j < mapHeight - 1; j++) {
       mapString += collisionMap[i][j] + ",";
     }
     mapString += collisionMap[i][mapHeight - 1] + "],";
   }
   mapString += "[";
-  for (j = 0; j < mapHeight - 1; j++) {
+  for (var j = 0; j < mapHeight - 1; j++) {
     mapString += collisionMap[mapWidth - 1][j] + ",";
   }
   mapString += collisionMap[mapWidth - 1][mapHeight - 1] + "]];";
@@ -158,6 +158,7 @@ function genBlankMap() {
   mapWidth = mapLayout.length;
   mapHeight = mapLayout[0].length;
   collisionMap = zero2D(newMapX, newMapY);
+  objectMap = zero2D(newMapX, newMapY)
 }
 
 function refreshTileSet() {

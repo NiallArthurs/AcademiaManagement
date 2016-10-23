@@ -15,29 +15,28 @@ var Character = (function () {
     this.state = ['work', 'sleep', 'rest'];
     // Randomly assign state for now
     this.activeState = getRandomInt(0,2);
-    var self = this;
-    this.sprite = new Sprite(char, 32, 42,32*3,42*4,  animations, "walkdown", function() {self.input()});
-    var rpos = this.randomPosition();
-    this.sprite.x = rpos[0]  // Current y tile
-    this.sprite.y = rpos[1]; // Current y tile
+    this.sprite = new Sprite(char, 32, 42,32*3,42*4,  animations, "walkdown", this.inputMouseDown.bind(this));
+    this.sprite.x = this.map.startPosition[0];  // Current x tile
+    this.sprite.y = this.map.startPosition[1]; // Current y tile
     this.points = [0.0, 0.0, 0.0];
-
+    this.randomMove();
     // Parameters for notifications which float up from the character
     this.float = {position: 0,
       offset: getRandomInt(-5, 5),
       height: getRandomInt(10, 20),
       reset: function() {this.position=0; this.offset=getRandomInt(-5,5); this.height=getRandomInt(10, 20);}}
 
-      this.researchPoints = [];
-
-      // subscribe to dt
-      amplify.subscribe( "dt", function (dt) {
-        self.dt = dt;
-      });
+    this.researchPoints = [];
+    // subscribe to dt
+    this.dtFn = this.tick.bind(this);
+    amplify.subscribe( "dt", this.dtFn);
     };
 
     Character.prototype = {
-      input: function (data) {
+      tick: function(dt) {
+        this.dt = dt;
+      },
+      inputMouseDown: function (data) {
         var self = this;
         var menu = [["Text Notification", function() {amplify.publish("popup-text", self.sprite.getX(), self.sprite.getY(), "My name is "+self.charname+", E: "+self.points[0]+ ", C: "+self.points[1]+", T: "+self.points[2]);}],
         ["Move", function() { if (self.path.length == 0) self.randomMove();}],
@@ -125,13 +124,13 @@ var Character = (function () {
           for (var i=0; i < 3; i++) {
             if (this.points[i] >= 1.0) {
               GameState.addResearchPoint(i, Math.floor(this.points[i]));
-              this.researchPoints.push([i,Math.floor(this.points[i])]);
+              this.researchPoints.push([i, Math.floor(this.points[i])]);
               this.points[i] = 0.0;
             }
           }
 
           // Move the notification
-          if (this.researchPoints.length != 0)
+          if (this.researchPoints.length)
             this.float.position += this.float.height*this.dt*(1/3);
 
           // Randomly walk aroud when working
@@ -144,7 +143,7 @@ var Character = (function () {
         this.sprite.draw(ctx);
 
         // Draw state based animations
-        if (this.state[this.activeState] === 'sleep' & this.path.length === 0)
+        if (this.state[this.activeState] === 'sleep' && !this.path.length)
           this.drawSleep(ctx);
         else if (this.state[this.activeState] === 'work')
           this.drawWork(ctx);
@@ -152,17 +151,17 @@ var Character = (function () {
       drawWork: function(ctx) {
         // Show generated research points (An E/C/T floats up from the character
         // slowly fading away). We work our way through the queue.
-        if (this.researchPoints.length != 0)
+        if (this.researchPoints.length)
         {
           ctx.font = "bold 20px Arial";
           var string;
-          if (this.researchPoints[0][0]===0) {
+          if (this.researchPoints[0][0] === 0) {
             string = this.researchPoints[0][1] === 1 ? "E" : this.researchPoints[0][1]+"xE";
             ctx.fillStyle = "rgba(255, 0, 0, " + (1-(this.float.position/(this.float.height))) + ")";
-          } else if (this.researchPoints[0][0]===1) {
+          } else if (this.researchPoints[0][0] === 1) {
             string = this.researchPoints[0][1] === 1 ? "C" : this.researchPoints[0][1]+"xC";
             ctx.fillStyle = "rgba(0, 255, 0, " + (1-(this.float.position/(this.float.height))) + ")";
-          } else if (this.researchPoints[0][0]===2) {
+          } else if (this.researchPoints[0][0] === 2) {
             string = this.researchPoints[0][1] === 1 ? "T" : this.researchPoints[0][1]+"xT";
             ctx.fillStyle = "rgba(0, 0, 255, " + (1-(this.float.position/(this.float.height))) + ")";
           }
@@ -184,15 +183,15 @@ var Character = (function () {
         var zWidth = ctx.measureText("z").width;
 
         if (this.float.position < (this.float.height+this.float.offset))
-        ctx.fillText("z", this.sprite.getX()-zWidth/2+this.float.offset+this.sprite.spriteWidth/2, this.sprite.getY()-this.float.position);
+          ctx.fillText("z", this.sprite.getX()-zWidth/2+this.float.offset+this.sprite.spriteWidth/2, this.sprite.getY()-this.float.position);
         else
-        this.float.reset();
+          this.float.reset();
 
       },
       randomPosition: function() {
         // Move to random position - testing
-        tx = 0;
-        ty = 0;
+        var tx = 0, ty = 0;
+
         do{
           tx = getRandomInt(0,this.map.width-1);
           ty = getRandomInt(0,this.map.height-1);
@@ -206,7 +205,13 @@ var Character = (function () {
       },
       move: function(xDest, yDest) {
         this.path = this.map.generatePath(this.sprite.x, this.sprite.y, xDest, yDest);
+        this.map.occupied[this.charname] = [xDest, yDest];
       },
+      cleanup: function () {
+        amplify.unsubscribe( "dt", this.dtFn);
+        delete this.map.occupied[this.charname];
+        this.sprite.cleanup();
+      }
     }
 
     return Character;
