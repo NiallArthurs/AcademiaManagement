@@ -14,7 +14,7 @@ var editorMode = 0;
 var brushID = 0;
 
 var k = 0;
-while (window.innerHeight < SUPPORTED_RESOUTIONS[k][1]) {k++;}
+//while (window.innerHeight < SUPPORTED_RESOUTIONS[k][1]) {k++;}
 canvas.width = SUPPORTED_RESOUTIONS[k][0];
 canvas.height = SUPPORTED_RESOUTIONS[k][1];
 mapText.width = canvas.width;
