@@ -3,12 +3,14 @@ var ObjectSprite = (function () {
 
   var ObjectSprite = function(_spritesheet, _swidth, _sheight, _sx, _sy, _x, _y, _inputCallback) {
     this.spritesheet = _spritesheet;
+    this.type = "object"
     this.sx = _sx;
     this.sy = _sy;
     this.x = _x; // Tile x
     this.y = _y; // Tile y
     this.spriteWidth = _swidth;
     this.spriteHeight = _sheight;
+    this.update = function () {};
     if (_inputCallback !== undefined)
       this.inputCallback = _inputCallback;
     this.pause = false;
@@ -55,6 +57,9 @@ var ObjectSprite = (function () {
     },
     drawBackground: function(ctx) {
       ctx.drawImage(this.spritesheet, this.sx, this.sy, this.spriteWidth, this.spriteHeight, this.getBackgroundX(), this.getBackgroundY(), this.spriteWidth, this.spriteHeight);
+    },
+    draw: function(ctx) {
+      ctx.drawImage(this.spritesheet, this.sx, this.sy, this.spriteWidth, this.spriteHeight, this.getX(), this.getY(), this.spriteWidth, this.spriteHeight);
     },
     cleanup: function() {
       amplify.unsubscribe("pause", this.pauseFn);

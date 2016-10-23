@@ -14,6 +14,24 @@ var World = (function () {
       this.entities.push(new Character(this.map, names[i]));
     }
 
+    for (var prop in this.map.objects)
+    {
+      if (this.map.objects[prop].zPos)
+      {
+        var objSprite = new ObjectSprite(this.map.atlas, this.map.objects[prop].width,
+        this.map.objects[prop].height, this.map.objects[prop].xPos, this.map.objects[prop].yPos,
+        this.map.objects[prop].xTile, this.map.objects[prop].yTile);
+
+        // Popup notifications for foreground objects
+        if (this.map.objects[prop].popupText !== undefined) {
+          objSprite.notifyText = this.map.objects[prop].popupText;
+          objSprite.inputCallback = function() {amplify.publish("popup-text",
+            this.getX(), this.getY(), this.notifyText);};
+        }
+        this.entities.push(objSprite);
+      }
+    }
+
     this.ctx = _canvas.getContext("2d");
     this.width = _canvas.width;
     this.height = _canvas.height;
@@ -108,7 +126,12 @@ var World = (function () {
       // Sort entities by y position
       var drawOrder = [];
       for (i=0; i < this.entities.length; i++)
-      drawOrder.push([i, this.entities[i].sprite.y]);
+      {
+        if (this.entities[i].type === "object")
+          drawOrder.push([i, this.entities[i].y]);
+        else
+          drawOrder.push([i, this.entities[i].sprite.y]);
+      }
 
       drawOrder.sort(function(a, b){
         return a[1]-b[1];

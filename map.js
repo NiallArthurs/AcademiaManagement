@@ -25,6 +25,15 @@ var Map2D = (function () {
         }
       }
     }
+
+    // Set any object collisions
+    for (var prop in this.objects) {
+      for (var k=0; k < this.objects[prop].collision.length; k++) {
+        this.gridOrig.setWalkableAt(this.objects[prop].xTile+this.objects[prop].collision[k][0],
+          this.objects[prop].yTile+this.objects[prop].collision[k][1], false);
+      }
+    }
+
     this.finder = new PF.AStarFinder();
 
     // Add background objects to map
@@ -35,16 +44,17 @@ var Map2D = (function () {
         this.objects[prop].height, this.objects[prop].xPos, this.objects[prop].yPos,
         this.objects[prop].xTile, this.objects[prop].yTile);
 
-        objSprite.notifyText = this.objects[prop].popupText;
-        objSprite.inputCallback = function() {
-          amplify.publish("popup-text", this.getX(), this.getY(), this.notifyText);};
+        if (this.objects[prop].popupText !== undefined) {
+          objSprite.notifyText = this.objects[prop].popupText;
+          objSprite.inputCallback = function() {amplify.publish("popup-text",
+            this.getX(), this.getY(), this.notifyText);};
+        }
 
         this.objectSprites.push(objSprite);
-
       }
     }
 
-    // Render map to offscreen canvas
+    // Render map and background objects to offscreen canvas
     this.offscreenRender = document.createElement('canvas');
     this.offscreenRender.width = TILE_SIZE*this.width;
     this.offscreenRender.height = TILE_SIZE*this.height;
@@ -61,6 +71,14 @@ var Map2D = (function () {
         if (x === this.occupied[prop][0] && y === this.occupied[prop][1])
           return true;
 
+      // Check objects
+      for (var prop in this.objects) {
+        for (var k=0; k < this.objects[prop].collision.length; k++) {
+          if (x === this.objects[prop].xTile+this.objects[prop].collision[k][0] &&
+              y === this.objects[prop].yTile+this.objects[prop].collision[k][1])
+            return true;
+        }
+      }
 
       return false;
     },
