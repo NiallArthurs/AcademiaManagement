@@ -20,9 +20,9 @@ var Sprite = (function () {
     this.pauseFn = this.pauseSprite.bind(this);
     this.dtFn = this.tick.bind(this);
     this.mousedownFn = this.inputMouseDown.bind(this);
-    amplify.subscribe("pause", this.pauseFn);
-    amplify.subscribe( "dt", this.dtFn);
-    amplify.subscribe( "mousedown", this.mousedownFn);
+    amplify.subscribe('pause', this.pauseFn);
+    amplify.subscribe('dt', this.dtFn);
+    amplify.subscribe('mousedown', this.mousedownFn);
   };
 
   Sprite.prototype = {
@@ -30,7 +30,7 @@ var Sprite = (function () {
       if (val) {
         this.pause = true;
       } else if (!val) {
-        this.pause = false
+        this.pause = false;
       }
     },
     inputMouseDown: function (data) {
@@ -38,9 +38,9 @@ var Sprite = (function () {
         return;
 
       // Sprite should handle mouse events.
-      if (typeof this.inputCallback  === "function") {
-          var x = data["ev"].pageX - data["offsetLeft"];
-          var y = data["ev"].pageY - data["offsetTop"];
+      if (typeof this.inputCallback  === 'function') {
+          var x = data.ev.pageX - data.offsetLeft;
+          var y = data.ev.pageY - data.offsetTop;
 
           var xPos = this.getX();
           var yPos = this.getY();
@@ -53,9 +53,9 @@ var Sprite = (function () {
         return;
 
       this.time += dt;
-      if (this.time >= this.animations[this.state]["speed"])
+      if (this.time >= this.animations[this.state].speed)
       {
-          this.frame = (this.frame + 1) % this.animations[this.state]["frames"].length;
+          this.frame = (this.frame + 1) % this.animations[this.state].frames.length;
           this.time = 0;
       }
     },
@@ -74,18 +74,18 @@ var Sprite = (function () {
       return cameraScreenPosition[1] + TILE_SIZE*(this.y - cameraMapPosition[1])-(this.spriteHeight-TILE_SIZE);
     },
     getSX: function() {
-      return this.animations[this.state]["frames"][this.frame]*this.spriteWidth % this.width;
+      return this.animations[this.state].frames[this.frame]*this.spriteWidth % this.width;
     },
     getSY: function() {
-      return this.spriteHeight*Math.floor(this.animations[this.state]["frames"][this.frame]/(this.width/this.spriteWidth));
+      return this.spriteHeight*Math.floor(this.animations[this.state].frames[this.frame]/(this.width/this.spriteWidth));
     },
     draw: function(ctx) {
       ctx.drawImage(this.spritesheet, this.getSX(), this.getSY(), this.spriteWidth, this.spriteHeight, this.getX(), this.getY(), this.spriteWidth, this.spriteHeight);
     },
     cleanup: function() {
-      amplify.unsubscribe("pause", this.pauseFn);
-      amplify.unsubscribe("dt", this.dtFn);
-      amplify.unsubscribe("mousedown", this.mousedownFn);
+      amplify.unsubscribe('pause', this.pauseFn);
+      amplify.unsubscribe('dt', this.dtFn);
+      amplify.unsubscribe('mousedown', this.mousedownFn);
     }
   }
 

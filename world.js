@@ -25,17 +25,17 @@ var World = (function () {
         // Popup notifications for foreground objects
         if (this.map.objects[prop].popupText !== undefined) {
           objSprite.notifyText = this.map.objects[prop].popupText;
-          objSprite.inputCallback = function() {amplify.publish("popup-text",
+          objSprite.inputCallback = function() {amplify.publish('popup-text',
             this.getX(), this.getY(), this.notifyText);};
         }
         this.entities.push(objSprite);
       }
     }
 
-    this.ctx = _canvas.getContext("2d");
+    this.ctx = _canvas.getContext('2d');
     this.width = _canvas.width;
     this.height = _canvas.height;
-    this.bgcolor = "#54AB47";
+    this.bgcolor = '#54AB47';
     this.dt = 0;
     this.cameraSpeed = 6;
     var self = this;
@@ -43,21 +43,21 @@ var World = (function () {
     window.addEventListener('keydown', function (e) {
       self.key = e.keyCode;
       self.keyDown = true;
-    })
+    });
 
     window.addEventListener('keyup', function (e) {
       self.keyDown = false;
-    })
+    });
 
-    amplify.subscribe("popup-text", function (x, y, text, fun) {
+    amplify.subscribe('popup-text', function (x, y, text, fun) {
       self.createNotify(x, y, text, fun);
     });
 
-    amplify.subscribe("dt", function (dt) {
+    amplify.subscribe('dt', function (dt) {
       self.dt = dt;
     });
 
-    amplify.subscribe("popup-menu", function (x, y, menu) {
+    amplify.subscribe('popup-menu', function (x, y, menu) {
       self.createMenu(x, y, menu);
     });
   };
@@ -75,14 +75,14 @@ var World = (function () {
       this.ui.push(new Menu(x, y, menu));
     },
     pauseGame: function(val) {
-      if (val == true)
+      if (val === true)
       {
         this.pause = true;
-        amplify.publish( "pause", true);
+        amplify.publish('pause', true);
       }
       else {
         this.pause = false;
-        amplify.publish( "pause", false);
+        amplify.publish('pause', false);
       }
     },
     update: function () {
@@ -102,9 +102,10 @@ var World = (function () {
 
       if (!this.pause)
       {
-        for (var i=0; i < this.entities.length;  i++)
+        for (var j=0; j < this.entities.length;  j++)
         {
-          this.entities[i].update();
+          if (this.entities[j].type !== 'object')
+          this.entities[j].update();
         }
       }
     },
@@ -125,12 +126,12 @@ var World = (function () {
 
       // Sort entities by y position
       var drawOrder = [];
-      for (i=0; i < this.entities.length; i++)
+      for (var k=0; k < this.entities.length; k++)
       {
-        if (this.entities[i].type === "object")
-          drawOrder.push([i, this.entities[i].y]);
+        if (this.entities[k].type === 'object')
+          drawOrder.push([k, this.entities[k].y]);
         else
-          drawOrder.push([i, this.entities[i].sprite.y]);
+          drawOrder.push([k, this.entities[k].sprite.y]);
       }
 
       drawOrder.sort(function(a, b){
@@ -138,21 +139,26 @@ var World = (function () {
       });
 
       // Draw entities
-      for (j=0; j < this.entities.length; j++) {
+      for (var j=0; j < this.entities.length; j++) {
         var i = drawOrder[j][0];
         this.entities[i].draw(this.ctx);
       }
 
       // Draw FPS
-      this.ctx.fillStyle = "white";
-      this.ctx.font = "25px Arial";
+      this.ctx.fillStyle = 'white';
+      this.ctx.font = '20px Arial';
+      this.ctx.textBaseline = 'middle';
       var time = Time.getCurrent();
-      var timeString = "Y: "+time[0]+" M: "+time[1]+ " D: "+time[2];
-      var RPstring = ", RP E: "+GameState.experimentPoints+ " T: "+ GameState.theoryPoints + " C: "+ GameState.computationPoints;
+      var timeString = 'Y: '+time[0]+' M: '+time[1]+ ' D: '+time[2];
+      var RPstring = 'Research Points Exp: '+GameState.experimentPoints+ '. Theo: '+ GameState.theoryPoints + '. Comp: '+ GameState.computationPoints;
       if (this.pause)
-        this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt) + " (Paused)",10,30);
+        this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt) + ' (Paused)',10,20);
       else
-        this.ctx.fillText(timeString+" FPS: "+Math.floor(1/dt)+ RPstring,10,30);
+      {
+        this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt),10,20);
+        this.ctx.fillText(RPstring,10,20+20);
+
+      }
 
       // Draw any ui elements
       for (k=0; k < this.ui.length; k++)

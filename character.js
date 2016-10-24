@@ -11,25 +11,26 @@ var Character = (function () {
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.dt = 0;
+    this.type = 'character';
     this.speed = 1; // Movement speed - pixels/second
     this.state = ['work', 'sleep', 'rest'];
     // Randomly assign state for now
     this.activeState = getRandomInt(0,2);
-    this.sprite = new Sprite(char, 32, 42,32*3,42*4,  animations, "walkdown", this.inputMouseDown.bind(this));
-    this.sprite.x = this.map.startPosition[0];  // Current x tile
-    this.sprite.y = this.map.startPosition[1]; // Current y tile
+    this.sprite = new Sprite(char, 32, 42,32*3,42*4,  animations, 'walkdown', this.inputMouseDown.bind(this));
+    var ranPos = this.randomPosition();
+    this.sprite.x = ranPos[0];  // Current x tile
+    this.sprite.y = ranPos[1]; // Current y tile
     this.points = [0.0, 0.0, 0.0];
-    this.randomMove();
     // Parameters for notifications which float up from the character
     this.float = {position: 0,
       offset: getRandomInt(-5, 5),
       height: getRandomInt(10, 20),
-      reset: function() {this.position=0; this.offset=getRandomInt(-5,5); this.height=getRandomInt(10, 20);}}
+      reset: function() {this.position=0; this.offset=getRandomInt(-5,5); this.height=getRandomInt(10, 20);}};
 
     this.researchPoints = [];
     // subscribe to dt
     this.dtFn = this.tick.bind(this);
-    amplify.subscribe( "dt", this.dtFn);
+    amplify.subscribe( 'dt', this.dtFn);
     };
 
     Character.prototype = {
@@ -38,22 +39,22 @@ var Character = (function () {
       },
       inputMouseDown: function (data) {
         var self = this;
-        var menu = [["Text Notification", function() {amplify.publish("popup-text", self.sprite.getX(), self.sprite.getY(), "My name is "+self.charname+", E: "+self.points[0]+ ", C: "+self.points[1]+", T: "+self.points[2]);}],
-        ["Move", function() { if (self.path.length == 0) self.randomMove();}],
-        ["Work", function () {if (self.state[self.activeState] != "work") self.activeState = 0;}],
-        ["Sleep", function () {if (self.state[self.activeState] != "sleep") self.activeState = 1;}]];
+        var menu = [['Text Notification', function() {amplify.publish('popup-text', self.sprite.getX(), self.sprite.getY(), 'My name is '+self.charname);}],
+        ['Move', function() {if (self.path.length === 0) self.randomMove();}],
+        ['Work', function () {if (self.state[self.activeState] !== 'work') self.activeState = 0;}],
+        ['Sleep', function () {if (self.state[self.activeState] !== 'sleep') self.activeState = 1;}]];
 
-        amplify.publish("popup-menu", this.sprite.getX(), this.sprite.getY(), menu);
+        amplify.publish('popup-menu', this.sprite.getX(), this.sprite.getY(), menu);
       },
       update: function () {
         // If the path isn't empty have the character follow it.
-        if (this.path.length != 0)
+        if (this.path.length !== 0)
         {
-          if (this.sprite.x == this.path[0][0] && this.sprite.y == this.path[0][1]) {
+          if (this.sprite.x === this.path[0][0] && this.sprite.y === this.path[0][1]) {
             this.path.shift();
           }
 
-          if (this.path.length != 0) {
+          if (this.path.length !== 0) {
             // Move the character position along the path
             if (this.sprite.x - this.path[0][0] > 0) {
               if (this.sprite.x - (this.speed*this.dt) < this.path[0][0]) {
@@ -62,7 +63,7 @@ var Character = (function () {
               else {
                 this.sprite.x -= (this.speed*this.dt);
               }
-              this.sprite.setState("walkleft");
+              this.sprite.setState('walkleft');
               this.direction = 2;
             }
             else if (this.sprite.x - this.path[0][0] < 0) {
@@ -72,7 +73,7 @@ var Character = (function () {
               else {
                 this.sprite.x += (this.speed*this.dt);
               }
-              this.sprite.setState("walkright");
+              this.sprite.setState('walkright');
               this.direction = 3;
             }
             else if (this.sprite.y - this.path[0][1] > 0) {
@@ -81,7 +82,7 @@ var Character = (function () {
               } else {
                 this.sprite.y -= (this.speed*this.dt);
               }
-              this.sprite.setState("walkup");
+              this.sprite.setState('walkup');
               this.direction = 0;
             }
             else if (this.sprite.y - this.path[0][1] < 0) {
@@ -91,22 +92,22 @@ var Character = (function () {
               else {
                 this.sprite.y += (this.speed*this.dt);
               }
-              this.sprite.setState("walkdown");
+              this.sprite.setState('walkdown');
               this.direction = 1;
             }
           }
         } else {
-          if (this.direction == 1) {
-            this.sprite.setState("down");
+          if (this.direction === 1) {
+            this.sprite.setState('down');
           }
-          else if (this.direction == 0) {
-            this.sprite.setState("up");
+          else if (this.direction === 0) {
+            this.sprite.setState('up');
           }
-          else if (this.direction == 3) {
-            this.sprite.setState("right");
+          else if (this.direction === 3) {
+            this.sprite.setState('right');
           }
-          else if (this.direction == 2) {
-            this.sprite.setState("left");
+          else if (this.direction === 2) {
+            this.sprite.setState('left');
           }
         }
 
@@ -153,17 +154,17 @@ var Character = (function () {
         // slowly fading away). We work our way through the queue.
         if (this.researchPoints.length)
         {
-          ctx.font = "bold 20px Arial";
+          ctx.font = 'bold 20px Arial';
           var string;
           if (this.researchPoints[0][0] === 0) {
-            string = this.researchPoints[0][1] === 1 ? "E" : this.researchPoints[0][1]+"xE";
-            ctx.fillStyle = "rgba(255, 0, 0, " + (1-(this.float.position/(this.float.height))) + ")";
+            string = this.researchPoints[0][1] === 1 ? 'E' : this.researchPoints[0][1]+'xE';
+            ctx.fillStyle = 'rgba(255, 0, 0, ' + (1-(this.float.position/(this.float.height))) + ')';
           } else if (this.researchPoints[0][0] === 1) {
-            string = this.researchPoints[0][1] === 1 ? "C" : this.researchPoints[0][1]+"xC";
-            ctx.fillStyle = "rgba(0, 255, 0, " + (1-(this.float.position/(this.float.height))) + ")";
+            string = this.researchPoints[0][1] === 1 ? 'C' : this.researchPoints[0][1]+'xC';
+            ctx.fillStyle = 'rgba(0, 255, 0,' + (1-(this.float.position/(this.float.height))) + ')';
           } else if (this.researchPoints[0][0] === 2) {
-            string = this.researchPoints[0][1] === 1 ? "T" : this.researchPoints[0][1]+"xT";
-            ctx.fillStyle = "rgba(0, 0, 255, " + (1-(this.float.position/(this.float.height))) + ")";
+            string = this.researchPoints[0][1] === 1 ? 'T' : this.researchPoints[0][1]+'xT';
+            ctx.fillStyle = 'rgba(0, 0, 255, ' + (1-(this.float.position/(this.float.height))) + ')';
           }
 
           var sWidth = ctx.measureText(string).width;
@@ -178,8 +179,8 @@ var Character = (function () {
       },
       drawSleep: function(ctx) {
         // Use a combination of the float parameters to get a random sleep patern
-        ctx.font = this.float.height+"px Arial";
-        ctx.fillStyle = "rgba(0, 0, 0, " + (1-(this.float.position/(this.float.height+this.float.offset))) + ")";
+        ctx.font = this.float.height+'px Arial';
+        ctx.fillStyle = 'rgba(0, 0, 0, ' + (1-(this.float.position/(this.float.height+this.float.offset))) + ')';
         var zWidth = ctx.measureText("z").width;
 
         if (this.float.position < (this.float.height+this.float.offset))
@@ -208,11 +209,11 @@ var Character = (function () {
         this.map.occupied[this.charname] = [xDest, yDest];
       },
       cleanup: function () {
-        amplify.unsubscribe( "dt", this.dtFn);
+        amplify.unsubscribe( 'dt', this.dtFn);
         delete this.map.occupied[this.charname];
         this.sprite.cleanup();
       }
-    }
+    };
 
     return Character;
   })();

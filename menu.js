@@ -14,26 +14,26 @@ var MenuItem = (function () {
     this.inputMouseDownFn = _inputMouseDownCallback;
   };
 
-  MenuItem.prototype = Object.create(MouseEvent.prototype)
+  MenuItem.prototype = Object.create(MouseEvent.prototype);
   MenuItem.prototype.constructor = MenuItem;
 
   MenuItem.prototype.inputMouseDownCallback = function () {
     this.hide = 1;
-    if (typeof this.inputMouseDownCallback === "function")
+    if (typeof this.inputMouseDownCallback === 'function')
     {
       this.inputMouseDownFn();
     }
-  }
+  };
 
   MenuItem.prototype.draw = function(ctx) {
 
     if (this.hover) {
-      ctx.fillStyle = "green";
+      ctx.fillStyle = 'green';
       ctx.fillRect(this.xPos, this.yPos, this.width, this.height);
-      ctx.fillStyle = "white";
+      ctx.fillStyle = 'white';
       ctx.fillText(this.text, this.xPos+this.offset, this.yPos+this.height/2);
     } else {
-      ctx.fillStyle = "black";
+      ctx.fillStyle = 'black';
       ctx.fillText(this.text, this.xPos+this.offset, this.yPos+this.height/2);
     }
   };
@@ -60,7 +60,7 @@ var Menu = (function () {
     this.yPos = _y;
     this.cleanupTest = false;
     this.dtFn = this.tick.bind(this);
-    amplify.subscribe( "dt", this.dtFn);
+    amplify.subscribe( 'dt', this.dtFn);
   };
 
   Menu.prototype.tick = function(dt) {
@@ -84,14 +84,14 @@ var Menu = (function () {
     {
       this.alpha = 0;
       this.visible = false;
-      amplify.unsubscribe( "dt", this.dtFn);
+      amplify.unsubscribe( 'dt', this.dtFn);
     }
 
   };
 
   Menu.prototype.draw = function(ctx) {
 
-    ctx.font = "20px Arial";
+    ctx.font = '20px Arial';
 
     if (this.drawStartup)
     {
@@ -113,12 +113,12 @@ var Menu = (function () {
 
     ctx.globalAlpha = this.alpha;
     // Box centered above tile
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(this.xPos, this.yPos, this.width, this.height);
-    ctx.strokeStyle = "green";
+    ctx.strokeStyle = 'green';
     ctx.strokeRect(this.xPos, this.yPos, this.width, this.height);
-    ctx.fillStyle = "rgba(0, 0, 0, " + this.alpha + ")";
-    ctx.textBaseline = "middle";
+    ctx.fillStyle = 'rgba(0, 0, 0, ' + this.alpha + ')';
+    ctx.textBaseline = 'middle';
 
     for (var k = 0; k < this.menu.length; k++)
     {

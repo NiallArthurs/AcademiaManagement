@@ -17,10 +17,10 @@ var Notify = (function () {
     this.drawStartup = 1;
     this.dtFn = this.tick.bind(this);
 
-    amplify.subscribe( "dt", this.dtFn);
+    amplify.subscribe( 'dt', this.dtFn);
   };
 
-  Notify.prototype = Object.create(MouseEvent.prototype)
+  Notify.prototype = Object.create(MouseEvent.prototype);
   Notify.prototype.constructor = Notify;
 
   Notify.prototype.tick = function(dt) {
@@ -39,7 +39,7 @@ var Notify = (function () {
       {
         this.alpha = 0;
         this.visible = false;
-        amplify.unsubscribe( "dt", this.dtFn);
+        amplify.unsubscribe( 'dt', this.dtFn);
       }
   };
 
@@ -50,8 +50,8 @@ var Notify = (function () {
 
   Notify.prototype.draw = function(ctx) {
 
-      ctx.font = "20px Arial";
-      ctx.strokeStyle = "green";
+      ctx.font = '20px Arial';
+      ctx.strokeStyle = 'green';
 
       // Assign the width and height for the notification (once when we are given the canvas context)
       if (this.drawStartup)
@@ -66,10 +66,10 @@ var Notify = (function () {
 
       ctx.globalAlpha = this.alpha;
       // Box centered above tile
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(this.xPos, this.yPos, this.width, this.height);
-      ctx.fillStyle = "rgba(0, 0, 0, " + this.alpha + ")";
-      ctx.textBaseline = "middle";
+      ctx.fillStyle = 'rgba(0, 0, 0, ' + this.alpha + ')';
+      ctx.textBaseline = 'middle';
       ctx.fillText(this.text, this.xPos+this.offset, this.yPos+this.height/2);
       ctx.strokeRect(this.xPos, this.yPos, this.width, this.height);
 

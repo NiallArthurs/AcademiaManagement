@@ -72,10 +72,10 @@ var Map2D = (function () {
           return true;
 
       // Check objects
-      for (var prop in this.objects) {
-        for (var k=0; k < this.objects[prop].collision.length; k++) {
-          if (x === this.objects[prop].xTile+this.objects[prop].collision[k][0] &&
-              y === this.objects[prop].yTile+this.objects[prop].collision[k][1])
+      for (var obj in this.objects) {
+        for (var k=0; k < this.objects[obj].collision.length; k++) {
+          if (x === this.objects[obj].xTile+this.objects[obj].collision[k][0] &&
+              y === this.objects[obj].yTile+this.objects[obj].collision[k][1])
             return true;
         }
       }
