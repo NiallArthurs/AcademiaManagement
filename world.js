@@ -19,8 +19,8 @@ var World = (function () {
       if (this.map.objects[prop].zPos)
       {
         var objSprite = new ObjectSprite(this.map.atlas, this.map.objects[prop].width,
-        this.map.objects[prop].height, this.map.objects[prop].xPos, this.map.objects[prop].yPos,
-        this.map.objects[prop].xTile, this.map.objects[prop].yTile);
+          this.map.objects[prop].height, this.map.objects[prop].xPos, this.map.objects[prop].yPos,
+          this.map.objects[prop].xTile, this.map.objects[prop].yTile, this.map.objects[prop].zPos);
 
         // Popup notifications for foreground objects
         if (this.map.objects[prop].popupText !== undefined) {
@@ -40,24 +40,24 @@ var World = (function () {
     this.cameraSpeed = 6;
     var self = this;
 
-    window.addEventListener('keydown', function (e) {
+    window.addEventListener('keydown', function keyDown(e) {
       self.key = e.keyCode;
       self.keyDown = true;
     });
 
-    window.addEventListener('keyup', function (e) {
+    window.addEventListener('keyup', function keyUp(e) {
       self.keyDown = false;
     });
 
-    amplify.subscribe('popup-text', function (x, y, text, fun) {
+    amplify.subscribe('popup-text', function popup(x, y, text, fun) {
       self.createNotify(x, y, text, fun);
     });
 
-    amplify.subscribe('dt', function (dt) {
+    amplify.subscribe('dt', function tick(dt) {
       self.dt = dt;
     });
 
-    amplify.subscribe('popup-menu', function (x, y, menu) {
+    amplify.subscribe('popup-menu', function menu(x, y, menu) {
       self.createMenu(x, y, menu);
     });
   };
@@ -105,7 +105,7 @@ var World = (function () {
         for (var j=0; j < this.entities.length;  j++)
         {
           if (this.entities[j].type !== 'object')
-          this.entities[j].update();
+            this.entities[j].update();
         }
       }
     },
@@ -129,18 +129,17 @@ var World = (function () {
       for (var k=0; k < this.entities.length; k++)
       {
         if (this.entities[k].type === 'object')
-          drawOrder.push([k, this.entities[k].y]);
+          drawOrder.push({pos: k, y: this.entities[k].y, z: this.entities[k].z});
         else
-          drawOrder.push([k, this.entities[k].sprite.y]);
+          drawOrder.push({pos: k, y: this.entities[k].sprite.y, z: this.entities[k].z});
       }
 
-      drawOrder.sort(function(a, b){
-        return a[1]-b[1];
-      });
+      // Order initially by y and then by z (allows for objects to be stacked)
+      drawOrder.sort(orderByProperty('y','z'))
 
       // Draw entities
       for (var j=0; j < this.entities.length; j++) {
-        var i = drawOrder[j][0];
+        var i = drawOrder[j].pos;
         this.entities[i].draw(this.ctx);
       }
 

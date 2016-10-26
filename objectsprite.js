@@ -1,7 +1,7 @@
 // Object Sprite class (for non-animated sprites taken from an atlas)
 var ObjectSprite = (function () {
 
-  var ObjectSprite = function(_spritesheet, _swidth, _sheight, _sx, _sy, _x, _y, _inputCallback) {
+  var ObjectSprite = function(_spritesheet, _swidth, _sheight, _sx, _sy, _x, _y, _zpos, _inputCallback) {
     this.spritesheet = _spritesheet;
     this.type = 'object'
     this.sx = _sx;
@@ -10,6 +10,7 @@ var ObjectSprite = (function () {
     this.y = _y; // Tile y
     this.spriteWidth = _swidth;
     this.spriteHeight = _sheight;
+    this.z = _zpos;
     if (_inputCallback !== undefined)
       this.inputCallback = _inputCallback;
     this.pause = false;

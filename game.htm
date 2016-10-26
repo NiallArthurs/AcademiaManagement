@@ -239,11 +239,11 @@
   var world = new World(canvas);
   var lastTime;
 
-  canvas.addEventListener('mousedown', function(e){
+  canvas.addEventListener('mousedown', function mouseDown(e){
     amplify.publish( 'mousedown', {ev:e, offsetLeft: canvas.offsetLeft, offsetTop: canvas.offsetTop});
   }, false);
 
-  canvas.addEventListener('mousemove', function(e){
+  canvas.addEventListener('mousemove', function mouseMove(e){
     amplify.publish( 'mousemove', {ev:e, offsetLeft: canvas.offsetLeft, offsetTop: canvas.offsetTop});
   }, false);
 

@@ -5,9 +5,9 @@ var Character = (function () {
     this.map = _map;
     this.charname = _name;
     this.level = 1;
-    this.experiments = getRandomInt(1, 40)/(10*60);
-    this.theory = getRandomInt(1, 40)/(10*60);
-    this.computation = getRandomInt(1, 40)/(10*60);
+    this.experiments = getRandomInt(1, 40)/(5*60);
+    this.theory = getRandomInt(1, 40)/(5*60);
+    this.computation = getRandomInt(1, 40)/(5*60);
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.dt = 0;
@@ -20,6 +20,7 @@ var Character = (function () {
     var ranPos = this.randomPosition();
     this.sprite.x = ranPos[0];  // Current x tile
     this.sprite.y = ranPos[1]; // Current y tile
+    this.z = 0;
     this.points = [0.0, 0.0, 0.0];
     // Parameters for notifications which float up from the character
     this.float = {position: 0,
@@ -39,10 +40,10 @@ var Character = (function () {
       },
       inputMouseDown: function (data) {
         var self = this;
-        var menu = [['Text Notification', function() {amplify.publish('popup-text', self.sprite.getX(), self.sprite.getY(), 'My name is '+self.charname);}],
-        ['Move', function() {if (self.path.length === 0) self.randomMove();}],
-        ['Work', function () {if (self.state[self.activeState] !== 'work') self.activeState = 0;}],
-        ['Sleep', function () {if (self.state[self.activeState] !== 'sleep') self.activeState = 1;}]];
+        var menu = [['Text Notification', function characterMenu() {amplify.publish('popup-text', self.sprite.getX(), self.sprite.getY(), 'My name is '+self.charname);}],
+        ['Move', function characterSetMove() {if (self.path.length === 0) self.randomMove();}],
+        ['Work', function characterSetWork() {if (self.state[self.activeState] !== 'work') self.activeState = 0;}],
+        ['Sleep', function characterSetSleep() {if (self.state[self.activeState] !== 'sleep') self.activeState = 1;}]];
 
         amplify.publish('popup-menu', this.sprite.getX(), this.sprite.getY(), menu);
       },
