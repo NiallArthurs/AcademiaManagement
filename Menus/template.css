@@ -118,7 +118,7 @@
   width: 70px;
   height: 40px;
   text-align: center;
-  font-size: 11pt;
+  font-size: 10pt;
   margin-left: 1px;
   margin-right: 3px;
   padding-top: 1px;
@@ -147,6 +147,14 @@
   margin-left: 6px;
   margin-right: -2px;
   border: 2px inset rgb(255,248,255);
+}
+
+.preloadedAsset {
+  float: left;
+  width: 0px;
+  height: 0px;
+  margin: 0px;
+  padding: 0px;
 }
 
 .titleBarButton {
@@ -184,12 +192,6 @@ canvas {
   margin: 0px;
   padding: 0px;
   z-index: 10;
-}
-
-img {
-  float: left;
-  margin: 0px;
-  padding: 0px;
 }
 
 main {

@@ -14,9 +14,9 @@
           The Internet 2.0 - <span id = "pageTitle"></span>
         </section>
         <section id = "buttonContainer">
-          <div class = "titleBarButton" style = "font-size: 12pt;" onclick="changeZPosition(false)">–</div>
-          <div class = "titleBarButton" onclick="toggleWindowMode()">❐</div>
-          <div class = "titleBarButton" onclick="changeZPosition(false)">✖</div>
+          <div class = "titleBarButton" style = "font-size: 12pt;" onclick="browser.changeZPosition(false)">–</div>
+          <div class = "titleBarButton" onclick="browser.toggleWindowMode()">❐</div>
+          <div class = "titleBarButton" onclick="browser.changeZPosition(false)">✖</div>
         </section>
       </header>
       <nav id = "dummyMenus">
@@ -30,13 +30,13 @@
         <section id = "controlButtonContainer">
           <div class = "controlButton" onclick = "backButton();"><img src = "assets/browserIcons/back.png" alt = "Back"><br>Back</div>
           <div class = "controlButton"><img src = "assets/browserIcons/forward.png" alt = "Forward"><br>Forward</div>
-          <div class = "controlButton" onclick = "homeButton();"><img src = "assets/browserIcons/home.png" alt = "Home"><br>Home</div>
+          <div class = "controlButton" onclick = "browser.homeButton();"><img src = "assets/browserIcons/home.png" alt = "Home"><br>Home</div>
           <div class = "verticalBreak"></div>
           <section id = "addressBarContainer">
             Address
             <input id = "addressBar" type = "url" value = "">
           </section>
-          <div id = "goButton" onclick = "changePage(getAddressBarURL());">Go</div>
+          <div id = "goButton" onclick = "browser.changePage(browser.getAddressBarURL());">Go</div>
           <div class = "verticalBreak"></div>
         </section>
       </nav>
@@ -53,9 +53,9 @@
     </section>
   </main>
 
-  <img id = "MapTilesetImage" width = "0" height = "0" src = "assets/tileset.png">
-  <img id = "ObjectAtlas" width = "0" height = "0" src = "assets/objects.png">
-  <img id = "char" width = "0" height = "0" src = "assets/char3.png">
+  <img class = "preloadedAsset" id = "MapTilesetImage" src = "assets/tileset.png">
+  <img class = "preloadedAsset" id = "ObjectAtlas" src = "assets/objects.png">
+  <img class = "preloadedAsset" id = "char" src = "assets/char3.png">
 
   <script src="extern/amplify.core.min.js"></script>
   <script src="extern/pathfinding-browser.min.js"></script>
@@ -254,6 +254,7 @@
                     width: 32,
                     height:64,
                     zPos: 1,
+                    popupText:  'Yoko\'s Table'
                     }
             },
     tileset: MapTilesetImage,
@@ -282,6 +283,8 @@
     walkright: {frames: [9, 10, 9, 11], speed: 0.2},
     walkup: {frames: [0, 1, 0, 2], speed: 0.2}
   };
+
+  browser.homeButton();
 
   // Names for testing
   var names = ['Dave','Chris','Mike', 'Jack','John','Jake','Jamie'];
