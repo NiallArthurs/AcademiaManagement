@@ -63,22 +63,14 @@ var Map2D = (function () {
 
   Map2D.prototype = {
     collision: function (x, y) {
-      if (this.layout[x][y] !== 0)
+      // The grid contains collision information for the map and objects.
+      if (!this.gridOrig.isWalkableAt(x, y))
         return true;
 
       // Check for collision with character positions
       for (var prop in this.occupied)
         if (x === this.occupied[prop][0] && y === this.occupied[prop][1])
           return true;
-
-      // Check objects
-      for (var obj in this.objects) {
-        for (var k=0; k < this.objects[obj].collision.length; k++) {
-          if (x === this.objects[obj].xTile+this.objects[obj].collision[k][0] &&
-              y === this.objects[obj].yTile+this.objects[obj].collision[k][1])
-            return true;
-        }
-      }
 
       return false;
     },
