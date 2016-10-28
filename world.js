@@ -156,7 +156,6 @@ var World = (function () {
       {
         this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt),10,20);
         this.ctx.fillText(RPstring,10,20+20);
-
       }
 
       // Draw any ui elements
