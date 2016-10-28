@@ -9,11 +9,12 @@ var MouseEvent = (function () {
     this.mouseX = 0;
     this.mouseY = 0;
     this.hoverActive = _hover;
-    this.hover = 0;
-    this.hoverFn = this.inputMouseMove.bind(this);
+    this.hover = false;
     this.mousedownFn = this.inputMouseDown.bind(this);
+    this.clickOut = false;
 
     if (this.hoverActive) {
+      this.hoverFn = this.inputMouseMove.bind(this);
       amplify.subscribe( "mousemove", this.hoverFn);
     }
 
@@ -28,10 +29,10 @@ var MouseEvent = (function () {
 
       if (x >= this.xPos && x <= this.xPos+this.width && y >= this.yPos  && y <= this.yPos+this.height)
       {
-        this.hover = 1;
+        this.hover = true;
       }
       else {
-        this.hover = 0;
+        this.hover = false;
       }
     },
     inputMouseDown: function (data) {
@@ -45,6 +46,9 @@ var MouseEvent = (function () {
         {
           this.inputMouseDownCallback();
         }
+      }
+      else {
+        this.clickOut = true;
       }
     },
     cleanup: function() {

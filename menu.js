@@ -46,6 +46,7 @@ var MenuItem = (function () {
 var Menu = (function () {
 
   var Menu = function(_x, _y, _menu) {
+    MouseEvent.call(this, _x, _y, 0, 0, false);
     this.dt = 0;
     this.visible = true;
     this.hide = 0;
@@ -63,7 +64,15 @@ var Menu = (function () {
     amplify.subscribe( 'dt', this.dtFn);
   };
 
+
+  Menu.prototype = Object.create(MouseEvent.prototype);
+  Menu.prototype.constructor = Menu;
+
   Menu.prototype.tick = function(dt) {
+
+    if (this.clickOut === true)
+      this.hide = 1;
+
     this.dt = dt;
     // Menu fade in and out
     if ((this.alpha < 1.0) && (this.hide === 0))
