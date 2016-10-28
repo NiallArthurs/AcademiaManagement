@@ -2,6 +2,7 @@ var addressBar = document.getElementById("addressBar");
 var menuContainer = document.getElementById("menuContainer");
 var pageContainer = document.getElementById("pageContainer");
 var pageTitle = document.getElementById("pageTitle");
+var menuActive = false;
 
 var isFullscreen = true;
 
@@ -23,10 +24,10 @@ homeButton();
 function changeZPosition(isOpen) {
   if (isOpen) {
     menuContainer.style.zIndex = "11";
-    world.pauseGame(true);
+    menuActive = true;
   } else {
     menuContainer.style.zIndex = "1";
-    world.pauseGame(false);
+    menuActive = false;
   }
 }
 

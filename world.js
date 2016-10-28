@@ -95,7 +95,7 @@ var World = (function () {
       }
 
       // Pause when ui elements active
-      if (this.ui.length)
+      if (this.ui.length || menuActive)
         this.pauseGame(true);
       else
         this.pauseGame(false);
@@ -110,6 +110,10 @@ var World = (function () {
       }
     },
     keyInput: function() {
+
+      if (this.pause)
+        return;
+
       if (this.keyDown && this.key == 37 && cameraMapPosition[0] > 0) {cameraMapPosition[0] -= this.dt*this.cameraSpeed;}
       else if (this.keyDown && this.key == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= this.dt*this.cameraSpeed;}
       else if (this.keyDown && this.key == 39 && cameraMapPosition[0] < this.map.width) {cameraMapPosition[0] += this.dt*this.cameraSpeed;}
