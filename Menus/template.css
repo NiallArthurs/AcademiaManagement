@@ -1,6 +1,6 @@
 #addressBar {
   box-sizing: border-box;
-  width: 90%;
+  width: 88%;
   height: 30px;
   margin-top: -2px;
   padding-left: 5px;
@@ -64,11 +64,16 @@
 }
 
 #menuContainer {
-  width: calc(100% - 2px);
-  height: calc(100% - 2px);
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 1278px;
+  height: 718px;
   cursor: default;
   background-color: rgb(192,192,192);
+  margin: 0px;
   padding: 1px;
+  z-index: 1;
 }
 
 #pageContainer {
@@ -165,6 +170,33 @@
   height: 42px;
   width: 2px;
   border: 1px inset rgb(255,248,255);
+}
+
+body {
+  margin: 0px;
+  padding: 0px;
+}
+
+canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  margin: 0px;
+  padding: 0px;
+  z-index: 10;
+}
+
+img {
+  float: left;
+  margin: 0px;
+  padding: 0px;
+}
+
+main {
+  width: 1280px;
+  height: 720px;
+  margin: 0x;
+  padding: 0px;
 }
 
 span > u {
