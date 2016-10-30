@@ -95,7 +95,7 @@ var World = (function () {
       }
 
       // Pause when ui elements active
-      if (this.ui.length || menuActive)
+      if (this.ui.length || browser.active)
         this.pauseGame(true);
       else
         this.pauseGame(false);

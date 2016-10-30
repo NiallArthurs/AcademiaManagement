@@ -1,0 +1,11 @@
+#universityHeader {
+  display: flex;
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 30px;
+  height: 90px;
+  padding: 10px 0px 0px 0px;
+  background-color: #106db6;
+  color: #FFFFFF;
+  border-bottom: 1px solid #666666;
+}

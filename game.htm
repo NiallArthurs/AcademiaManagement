@@ -2,21 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <link rel = "stylesheet" href = "Menus/template.css">
+  <link id = "mainStyle" rel = "stylesheet" href = "style.css">
+  <link id = "websiteSytle" rel = "stylesheet" href = "websites/unversity.css">
 </head>
 
 <body>
   <main>
-    <canvas id="gameArea"> </canvas>
+    <canvas id = "gameArea"> </canvas>
     <section id = "menuContainer">
       <header id = "titleBar">
         <section>
           The Internet 2.0 - <span id = "pageTitle"></span>
         </section>
         <section id = "buttonContainer">
-          <div class = "titleBarButton" style = "font-size: 12pt;" onclick="browser.changeZPosition(false)">–</div>
-          <div class = "titleBarButton" onclick="browser.toggleWindowMode()">❐</div>
-          <div class = "titleBarButton" onclick="browser.changeZPosition(false)">✖</div>
+          <div class = "titleBarButton" style = "font-size: 12pt;" onclick = "browser.changeZPosition(false)">–</div>
+          <div class = "titleBarButton" onclick = "browser.toggleWindowMode()">❐</div>
+          <div class = "titleBarButton" onclick = "browser.changeZPosition(false)">✖</div>
         </section>
       </header>
       <nav id = "dummyMenus">
@@ -57,22 +58,21 @@
   <img class = "preloadedAsset" id = "ObjectAtlas" src = "assets/objects.png">
   <img class = "preloadedAsset" id = "char" src = "assets/char3.png">
 
-  <script src="extern/amplify.core.min.js"></script>
-  <script src="extern/pathfinding-browser.min.js"></script>
+  <script src = "extern/amplify.core.min.js"></script>
+  <script src = "extern/pathfinding-browser.min.js"></script>
 
-  <script src = "Menus/browser.js"></script>
-
-  <script src="world.js"></script>
-  <script src="time.js"></script>
-  <script src="gamestate.js"></script>
-  <script src="misc.js"></script>
-  <script src="sprite.js"></script>
-  <script src="map.js"></script>
-  <script src="character.js"></script>
-  <script src="mouse.js"></script>
-  <script src="notify.js"></script>
-  <script src="menu.js"></script>
-  <script src="objectsprite.js"></script>
+  <script src = "browser.js"></script>
+  <script src = "world.js"></script>
+  <script src = "time.js"></script>
+  <script src = "gamestate.js"></script>
+  <script src = "misc.js"></script>
+  <script src = "sprite.js"></script>
+  <script src = "map.js"></script>
+  <script src = "character.js"></script>
+  <script src = "mouse.js"></script>
+  <script src = "notify.js"></script>
+  <script src = "menu.js"></script>
+  <script src = "objectsprite.js"></script>
 
   <script>
 

@@ -77,11 +77,10 @@
 }
 
 #pageContainer {
-  height: calc(100% - 164px);
+  height: calc(100% - 154px);
   cursor: auto;
   background-color: white;
   border: 2px inset rgb(255,248,255);
-  padding: 5px;
   overflow-y: scroll;
 }
 
