@@ -38,32 +38,26 @@ var World = (function () {
     this.bgcolor = '#54AB47';
     this.dt = 0;
     this.cameraSpeed = 6;
-    var self = this;
 
-    window.addEventListener('keydown', function keyDown(e) {
-      self.key = e.keyCode;
-      self.keyDown = true;
-    });
+    this.keyDownFn = this.inputKeyDown.bind(this);
+    this.keyUpFn = this.inputKeyUp.bind(this);
+    this.createNotifyFn = this.createNotify.bind(this);
+    this.createMenuFn = this.createMenu.bind(this);
 
-    window.addEventListener('keyup', function keyUp(e) {
-      self.keyDown = false;
-    });
-
-    amplify.subscribe('popup-text', function popup(x, y, text, fun) {
-      self.createNotify(x, y, text, fun);
-    });
-
-    amplify.subscribe('dt', function tick(dt) {
-      self.dt = dt;
-    });
-
-    amplify.subscribe('popup-menu', function menu(x, y, menu) {
-      self.createMenu(x, y, menu);
-    });
+    window.addEventListener('keydown', this.keyDownFn);
+    window.addEventListener('keyup', this.keyUpFn);
+    amplify.subscribe('popup-text', this.createNotifyFn);
+    amplify.subscribe('popup-menu', this.createMenuFn);
   };
 
   World.prototype = {
-
+    inputKeyDown: function(e) {
+      this.key = e.keyCode;
+      this.keyDown = true;
+    },
+    inputKeyUp: function(e) {
+      this.keyDown = false;
+    },
     createNotify: function (x, y, text, fun) {
       this.ui.push(new Notify(x, y, text, fun));
     },
@@ -121,6 +115,11 @@ var World = (function () {
       else if (this.keyDown && this.key == 32) {this.centerCamera();}
     },
     draw: function (dt) {
+
+      // If the browser is active we don't need to redraw the world (wait until ui elements are removed)
+      if (browser.active && !this.ui.length)
+	return;
+
       // Draw background
       this.ctx.fillStyle = this.bgcolor;
       this.ctx.fillRect(0, 0, this.width, this.height);
@@ -128,7 +127,7 @@ var World = (function () {
       // Draw map
       this.map.draw(this.ctx);
 
-      // Sort entities by y position
+      // Sort entities
       var drawOrder = [];
       for (var k=0; k < this.entities.length; k++)
       {
@@ -141,7 +140,7 @@ var World = (function () {
       // Order initially by y and then by z (allows for objects to be stacked)
       drawOrder.sort(orderByProperty('y','z'))
 
-      // Draw entities
+      // Draw entities using the above order
       for (var j=0; j < this.entities.length; j++) {
         var i = drawOrder[j].pos;
         this.entities[i].draw(this.ctx);
@@ -154,6 +153,7 @@ var World = (function () {
       var time = Time.getCurrent();
       var timeString = 'Y: '+time[0]+' M: '+time[1]+ ' D: '+time[2];
       var RPstring = 'Research Points Exp: '+GameState.experimentPoints+ '. Theo: '+ GameState.theoryPoints + '. Comp: '+ GameState.computationPoints;
+
       if (this.pause)
         this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt) + ' (Paused)',10,20);
       else
