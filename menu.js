@@ -28,12 +28,12 @@ var MenuItem = (function () {
   MenuItem.prototype.draw = function(ctx) {
 
     if (this.hover) {
-      ctx.fillStyle = 'green';
+      ctx.fillStyle = uiStyle.menu.hoverbgcolor;
       ctx.fillRect(this.xPos, this.yPos, this.width, this.height);
-      ctx.fillStyle = 'white';
+      ctx.fillStyle = uiStyle.menu.hovertextcolor;
       ctx.fillText(this.text, this.xPos+this.offset, this.yPos+this.height/2);
     } else {
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = uiStyle.menu.textcolor;
       ctx.fillText(this.text, this.xPos+this.offset, this.yPos+this.height/2);
     }
   };
@@ -50,11 +50,9 @@ var Menu = (function () {
     this.dt = 0;
     this.visible = true;
     this.hide = 0;
-    this.offset = 5;
+    this.offset = uiStyle.menu.padding;
     this.alpha = 0;
-    this.speed = 4;
-    this.drawStartup = 1;
-    this.width = 0;
+    this.speed = uiStyle.menu.fadespeed;
     this.menuInfo = _menu;
     this.menu = [];
     this.xPos = _x;
@@ -62,8 +60,23 @@ var Menu = (function () {
     this.cleanupTest = false;
     this.dtFn = this.tick.bind(this);
     amplify.subscribe( 'dt', this.dtFn);
-  };
+    this.font = uiStyle.menu.fontsize + 'px ' + uiStyle.menu.font;
 
+    for (var i = 0; i < this.menuInfo.length; i++)
+    {
+      if (getTextWidth(this.menuInfo[i][0], this.font) > this.width)
+        this.width = getTextWidth(this.menuInfo[i][0], this.font);
+    }
+
+    this.width += 2*this.offset;
+
+    for (var j = 0; j < this.menuInfo.length; j++)
+      this.menu.push(new MenuItem(this.xPos, this.yPos+j*(uiStyle.menu.fontsize+2*this.offset),
+      this.menuInfo[j][0], this.width, (uiStyle.menu.fontsize+2*this.offset),
+      this.offset, this.menuInfo[j][1]));
+
+    this.height = this.menu.length*(uiStyle.menu.fontsize + 2*this.offset);
+  };
 
   Menu.prototype = Object.create(MouseEvent.prototype);
   Menu.prototype.constructor = Menu;
@@ -100,33 +113,15 @@ var Menu = (function () {
 
   Menu.prototype.draw = function(ctx) {
 
-    ctx.font = '20px Arial';
-
-    if (this.drawStartup)
-    {
-      for (var i = 0; i < this.menuInfo.length; i++)
-      {
-        if (ctx.measureText(this.menuInfo[i][0]).width > this.width)
-          this.width = ctx.measureText(this.menuInfo[i][0]).width;
-      }
-
-      this.width += 2*this.offset;
-
-      for (var j = 0; j < this.menuInfo.length; j++)
-        this.menu.push(new MenuItem(this.xPos, this.yPos+j*(20+2*this.offset), this.menuInfo[j][0], this.width, (20+2*this.offset), this.offset, this.menuInfo[j][1]));
-
-      this.height = this.menu.length*(20 + 2*this.offset);
-
-      this.drawStartup = 0;
-    }
-
+    ctx.font = this.font;
     ctx.globalAlpha = this.alpha;
     // Box centered above tile
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = uiStyle.menu.bgcolor;
     ctx.fillRect(this.xPos, this.yPos, this.width, this.height);
-    ctx.strokeStyle = 'green';
+    ctx.strokeStyle = uiStyle.menu.border;
     ctx.strokeRect(this.xPos, this.yPos, this.width, this.height);
-    ctx.fillStyle = 'rgba(0, 0, 0, ' + this.alpha + ')';
+    ctx.fillStyle = uiStyle.menu.textcolor;
+    ctx.globalAlpha = this.alpha;
     ctx.textBaseline = 'middle';
 
     for (var k = 0; k < this.menu.length; k++)

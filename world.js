@@ -35,9 +35,8 @@ var World = (function () {
     this.ctx = _canvas.getContext('2d');
     this.width = _canvas.width;
     this.height = _canvas.height;
-    this.bgcolor = '#54AB47';
     this.dt = 0;
-    this.cameraSpeed = 6;
+    this.cameraSpeed = uiStyle.world.cameraspeed;
 
     this.keyDownFn = this.inputKeyDown.bind(this);
     this.keyUpFn = this.inputKeyUp.bind(this);
@@ -57,6 +56,8 @@ var World = (function () {
     },
     inputKeyUp: function(e) {
       this.keyDown = false;
+      //alert("testy")
+
     },
     createNotify: function (x, y, text, fun) {
       this.ui.push(new Notify(x, y, text, fun));
@@ -105,23 +106,26 @@ var World = (function () {
     },
     keyInput: function() {
 
-      if (this.pause)
+      if (this.pause || !this.keyDown)
         return;
 
-      if (this.keyDown && this.key == 37 && cameraMapPosition[0] > 0) {cameraMapPosition[0] -= this.dt*this.cameraSpeed;}
-      else if (this.keyDown && this.key == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= this.dt*this.cameraSpeed;}
-      else if (this.keyDown && this.key == 39 && cameraMapPosition[0] < this.map.width) {cameraMapPosition[0] += this.dt*this.cameraSpeed;}
-      else if (this.keyDown && this.key == 40 && cameraMapPosition[1] < this.map.height) {cameraMapPosition[1] += this.dt*this.cameraSpeed;}
-      else if (this.keyDown && this.key == 32) {this.centerCamera();}
+      if (this.key == 37 && cameraMapPosition[0] > 0) {cameraMapPosition[0] -= this.dt*this.cameraSpeed;}
+      else if (this.key == 38 && cameraMapPosition[1] > 0) {cameraMapPosition[1] -= this.dt*this.cameraSpeed;}
+      else if (this.key == 39 && cameraMapPosition[0] < this.map.width) {cameraMapPosition[0] += this.dt*this.cameraSpeed;}
+      else if (this.key == 40 && cameraMapPosition[1] < this.map.height) {cameraMapPosition[1] += this.dt*this.cameraSpeed;}
+      else if ( this.key == 32) {this.centerCamera();}
+
     },
     draw: function (dt) {
+      
+      this.dt = dt;
 
       // If the browser is active we don't need to redraw the world (wait until ui elements are removed)
       if (browser.active && !this.ui.length)
-	return;
+	      return;
 
       // Draw background
-      this.ctx.fillStyle = this.bgcolor;
+      this.ctx.fillStyle = uiStyle.world.bgcolor;
       this.ctx.fillRect(0, 0, this.width, this.height);
 
       // Draw map

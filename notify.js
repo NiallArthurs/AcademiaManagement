@@ -9,13 +9,16 @@ var Notify = (function () {
     this.dt = 0;
     this.visible = true;
     this.hide = 0;
-    this.textWidth = 0;
-    this.textHeight = 0;
-    this.offset = 5;
+    this.offset = uiStyle.notify.padding;
     this.alpha = 0;
-    this.speed = 4;
-    this.drawStartup = 1;
+    this.speed = uiStyle.notify.fadespeed;
     this.dtFn = this.tick.bind(this);
+    this.font = uiStyle.notify.fontsize+'px '+uiStyle.notify.font;
+    this.textWidth = getTextWidth(this.text, this.font);
+    this.width = this.textWidth + 2*this.offset;
+    this.height = uiStyle.notify.fontsize + 2* this.offset;
+    this.xPos = this.xPos-this.textWidth/2-this.offset+TILE_SIZE/2;
+    this.yPos = this.yPos-this.offset;
 
     amplify.subscribe( 'dt', this.dtFn);
   };
@@ -50,27 +53,16 @@ var Notify = (function () {
 
   Notify.prototype.draw = function(ctx) {
 
-      ctx.font = '20px Arial';
-      ctx.strokeStyle = 'green';
-
-      // Assign the width and height for the notification (once when we are given the canvas context)
-      if (this.drawStartup)
-      {
-        this.textWidth = ctx.measureText(this.text).width;
-	      this.width = this.textWidth + 2*this.offset;
-        this.height = 20 + 2* this.offset;
-      	this.xPos = this.xPos-this.textWidth/2-this.offset+16;
-	      this.yPos = this.yPos-this.offset;
-	      this.drawStartup = 0;
-      }
-
+      ctx.font = this.font;
       ctx.globalAlpha = this.alpha;
       // Box centered above tile
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = uiStyle.notify.bgcolor;
       ctx.fillRect(this.xPos, this.yPos, this.width, this.height);
-      ctx.fillStyle = 'rgba(0, 0, 0, ' + this.alpha + ')';
+      ctx.fillStyle = uiStyle.notify.textcolor;
+      ctx.globalAlpha = this.alpha;
       ctx.textBaseline = 'middle';
       ctx.fillText(this.text, this.xPos+this.offset, this.yPos+this.height/2);
+      ctx.strokeStyle = uiStyle.notify.border;
       ctx.strokeRect(this.xPos, this.yPos, this.width, this.height);
 
       // Reset alpha
