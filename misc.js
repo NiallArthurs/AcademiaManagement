@@ -11,6 +11,11 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function randomFloat (min, max)
+{
+	return min + Math.random()*(max-min);
+}
+
 function orderByProperty(prop) {
   var args = Array.prototype.slice.call(arguments, 1);
   return function (a, b) {

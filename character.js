@@ -10,6 +10,7 @@ var Character = (function () {
     this.computation = getRandomInt(1, 40)/(5*60);
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
+    this.effects = [];
     this.dt = 0;
     this.type = 'character';
     this.speed = 1; // Movement speed - pixels/second
@@ -44,7 +45,9 @@ var Character = (function () {
         ['Open Menu', function openBrowser() {browser.changeZPosition(true);}],
         ['Move', function characterSetMove() {if (self.path.length === 0) self.randomMove();}],
         ['Work', function characterSetWork() {if (self.state[self.activeState] !== 'work') self.activeState = 0;}],
-        ['Sleep', function characterSetSleep() {if (self.state[self.activeState] !== 'sleep') self.activeState = 1;}]];
+        ['Sleep', function characterSetSleep() {if (self.state[self.activeState] !== 'sleep') self.activeState = 1;}],
+        ['Explosion', function characterExplosion() {self.effects.push(new Explosion(self.sprite.getX()
+          +self.sprite.spriteWidth/2, self.sprite.getY()+self.sprite.spriteHeight/2, 10));}]];
 
         amplify.publish('popup-menu', this.sprite.getX(), this.sprite.getY(), menu);
       },
@@ -140,6 +143,16 @@ var Character = (function () {
           if (this.path.length === 0)
             this.randomMove();
         }
+
+        for (var k = 0; k < this.effects.length; k++) {
+          this.effects[k].update();
+        }
+
+
+        if (this.effects.length && this.effects[0].hide) {
+          this.effects.shift();
+        }
+
       },
       draw: function(ctx) {
 
@@ -150,6 +163,9 @@ var Character = (function () {
           this.drawSleep(ctx);
         else if (this.state[this.activeState] === 'work')
           this.drawWork(ctx);
+
+        for (var k = 0; k < this.effects.length; k++)
+            this.effects[k].draw(ctx);
       },
       drawWork: function(ctx) {
         // Show generated research points (An E/C/T floats up from the character
