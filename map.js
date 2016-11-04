@@ -15,8 +15,8 @@ var Map2D = (function () {
     this.startPosition = _mapobj.startPosition;
     this.gridOrig = new PF.Grid(this.width, this.height);
     // Create the grid for collisons for use by the path finder
-    for (var i=0; i < this.width; i++) {
-      for (var j=0; j < this.height; j++) {
+    for (var i = this.width; i--;) {
+      for (var j = this.height; j--;) {
         if (this.layout[i][j] === 0) {
           this.gridOrig.setWalkableAt(i, j, true);
         }
@@ -76,8 +76,8 @@ var Map2D = (function () {
     },
     renderOffscreenMap: function() {
       var ctx = this.offscreenRender.getContext('2d');
-      for (var i = 0; i < this.width; i++) {
-        for (var j = 0; j < this.height; j++) {
+      for (var i = this.width; i--;) {
+        for (var j = this.height; j--;) {
 	        // No need to render transparent tile
 	        if (this.layout[i][j] === 1)
 	          continue;
@@ -88,7 +88,7 @@ var Map2D = (function () {
         }
       }
 
-      for (var k=0; k < this.objectSprites.length; k++)
+      for (var k = this.objectSprites.length; k--;)
       {
         this.objectSprites[k].drawBackground(ctx);
       }
@@ -98,8 +98,9 @@ var Map2D = (function () {
       return this.finder.findPath(x0, y0, x, y, grid);
     },
     draw: function(ctx) {
-      ctx.drawImage(this.offscreenRender, cameraScreenPosition[0]-TILE_SIZE*cameraMapPosition[0],
-        cameraScreenPosition[1]-TILE_SIZE*cameraMapPosition[1],this.offscreenRender.width,
+      var x = Math.floor(cameraScreenPosition[0]-TILE_SIZE*cameraMapPosition[0]);
+      var y = Math.floor(cameraScreenPosition[1]-TILE_SIZE*cameraMapPosition[1]);
+      ctx.drawImage(this.offscreenRender, x, y, this.offscreenRender.width,
         this.offscreenRender.height);
     }
   }

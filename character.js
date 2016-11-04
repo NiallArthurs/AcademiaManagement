@@ -144,7 +144,7 @@ var Character = (function () {
             this.randomMove();
         }
 
-        for (var k = 0; k < this.effects.length; k++) {
+        for (var k = this.effects.length; k--;) {
           this.effects[k].update();
         }
 
@@ -164,7 +164,7 @@ var Character = (function () {
         else if (this.state[this.activeState] === 'work')
           this.drawWork(ctx);
 
-        for (var k = 0; k < this.effects.length; k++)
+        for (var k = this.effects.length; k--;)
             this.effects[k].draw(ctx);
       },
       drawWork: function(ctx) {

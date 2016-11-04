@@ -59,10 +59,10 @@ var Menu = (function () {
     this.yPos = _y;
     this.cleanupTest = false;
     this.dtFn = this.tick.bind(this);
-    amplify.subscribe( 'dt', this.dtFn);
+    amplify.subscribe('dt', this.dtFn);
     this.font = uiStyle.menu.fontsize + 'px ' + uiStyle.menu.font;
 
-    for (var i = 0; i < this.menuInfo.length; i++)
+    for (var i = this.menuInfo.length; i--;)
     {
       if (getTextWidth(this.menuInfo[i][0], this.font) > this.width)
         this.width = getTextWidth(this.menuInfo[i][0], this.font);
@@ -70,7 +70,7 @@ var Menu = (function () {
 
     this.width += 2*this.offset;
 
-    for (var j = 0; j < this.menuInfo.length; j++)
+    for (var j = this.menuInfo.length; j--;)
       this.menu.push(new MenuItem(this.xPos, this.yPos+j*(uiStyle.menu.fontsize+2*this.offset),
       this.menuInfo[j][0], this.width, (uiStyle.menu.fontsize+2*this.offset),
       this.offset, this.menuInfo[j][1]));
@@ -96,7 +96,7 @@ var Menu = (function () {
 
     if (this.hide === 1 && !this.cleanupTest)
     {
-      for (var i=0; i < this.menu.length; i++) {
+      for (var i=this.menu.length; i--;) {
         this.menu[i].cleanup();
       }
       this.cleanupTest = true;
@@ -106,7 +106,7 @@ var Menu = (function () {
     {
       this.alpha = 0;
       this.visible = false;
-      amplify.unsubscribe( 'dt', this.dtFn);
+      amplify.unsubscribe('dt', this.dtFn);
     }
 
   };
@@ -124,7 +124,7 @@ var Menu = (function () {
     ctx.globalAlpha = this.alpha;
     ctx.textBaseline = 'middle';
 
-    for (var k = 0; k < this.menu.length; k++)
+    for (var k = this.menu.length; k--;)
     {
       if (this.menu[k].hide === 1)
         this.hide = 1;

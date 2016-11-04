@@ -68,10 +68,10 @@ var Sprite = (function () {
       }
     },
     getX: function() {
-      return cameraScreenPosition[0] + TILE_SIZE*(this.x - cameraMapPosition[0]);
+      return Math.floor(cameraScreenPosition[0] + TILE_SIZE*(this.x - cameraMapPosition[0]));
     },
     getY: function() {
-      return cameraScreenPosition[1] + TILE_SIZE*(this.y - cameraMapPosition[1])-(this.spriteHeight-TILE_SIZE);
+      return Math.floor(cameraScreenPosition[1] + TILE_SIZE*(this.y - cameraMapPosition[1])-(this.spriteHeight-TILE_SIZE));
     },
     getSX: function() {
       return this.animations[this.state].frames[this.frame]*this.spriteWidth % this.width;

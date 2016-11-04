@@ -33,6 +33,10 @@ var World = (function () {
     }
 
     this.ctx = _canvas.getContext('2d');
+    this.ctx.mozImageSmoothingEnabled = false;
+    this.ctx.webkitImageSmoothingEnabled = false;
+    this.ctx.msImageSmoothingEnabled = false;
+    this.ctx.imageSmoothingEnabled = false;
     this.width = _canvas.width;
     this.height = _canvas.height;
     this.dt = 0;
@@ -56,8 +60,6 @@ var World = (function () {
     },
     inputKeyUp: function(e) {
       this.keyDown = false;
-      //alert("testy")
-
     },
     createNotify: function (x, y, text, fun) {
       this.ui.push(new Notify(x, y, text, fun));
@@ -143,7 +145,7 @@ var World = (function () {
 
       // Sort entities
       var drawOrder = [];
-      for (var k=0; k < this.entities.length; k++)
+      for (var k = this.entities.length; k--;)
       {
         if (this.entities[k].type === 'object')
           drawOrder.push({pos: k, y: this.entities[k].y, z: this.entities[k].z});
@@ -177,7 +179,7 @@ var World = (function () {
       }
 
       // Draw any ui elements
-      for (k=0; k < this.ui.length; k++)
+      for (var k = this.ui.length; k--;)
         this.ui[k].draw(this.ctx);
     }
   }

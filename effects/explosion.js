@@ -62,7 +62,7 @@ var Explosion = (function () {
     for (var angle=0; angle < 360; angle += Math.round(360/this.nParticles))
     {
       var particle = new Particle(this.x, this.y);
-		  particle.radius = randomFloat(10, 30);
+      particle.radius = randomFloat(10, 30);
       particle.scaleSpeed = randomFloat(1.0, 4.0);
       var speed = randomFloat(60.0, 200.0);
       particle.velocityX = speed * Math.cos(angle*Math.PI/180.0);
