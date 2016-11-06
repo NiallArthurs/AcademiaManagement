@@ -11,7 +11,7 @@ var Particle = (function () {
     this.dt = 0;
     this.hide = false;
 
-    amplify.subscribe( "dt", this.tickFn);
+    amplify.subscribe('dt', this.tickFn);
   };
 
   Particle.prototype = {
@@ -20,12 +20,10 @@ var Particle = (function () {
     },
     update: function() {
 
-      if (this.scaleSpeed != -1)
-      {
+      if (this.scaleSpeed != -1) {
         this.scale -= this.scaleSpeed * this.dt;
 
-        if (this.scale <= 0)
-        {
+        if (this.scale <= 0) {
           this.scale = 0;
           this.hide = true;
         }
@@ -42,7 +40,7 @@ var Particle = (function () {
       ctx.fill();
     },
     cleanup:function() {
-      amplify.unsubscribe( "dt", this.tickFn);
+      amplify.unsubscribe('dt', this.tickFn);
     }
   };
 
@@ -55,15 +53,15 @@ var Explosion = (function () {
     this.x = _x || 0;
     this.y = _y || 0;
     this.particles = [];
-    this.hide = false;
+    this.visible = true;
     this.nParticles = _nParticles || 10;
 
     var colors = ['red', 'yellow', 'orange']
     for (var angle=0; angle < 360; angle += Math.round(360/this.nParticles))
     {
       var particle = new Particle(this.x, this.y);
-      particle.radius = randomFloat(10, 30);
-      particle.scaleSpeed = randomFloat(1.0, 4.0);
+      particle.radius = randomFloat(1, 5);
+      particle.scaleSpeed = randomFloat(0.5, 2.0);
       var speed = randomFloat(60.0, 200.0);
       particle.velocityX = speed * Math.cos(angle*Math.PI/180.0);
       particle.velocityY = speed * Math.sin(angle*Math.PI/180.0);
@@ -76,31 +74,27 @@ var Explosion = (function () {
   Explosion.prototype = {
     update: function() {
 
-      if (this.hide)
+      if (!this.visible)
         return;
 
       var count = 0;
 
-      for (var i = this.particles.length; i--;)
-      {
+      for (var i = this.particles.length; i--;) {
         this.particles[i].update();
         if (this.particles[i].hide)
           count++;
       }
 
-      if (this.particles.length === count)
-      {
-        this.hide = true;
-        for (var j = this.particles.length; j--;)
-        {
+      if (this.particles.length === count) {
+        this.visible = false;
+        for (var j = this.particles.length; j--;) {
           this.particles[j].cleanup();
         }
       }
 
     },
     draw: function(ctx) {
-      for (var k = this.particles.length; k--;)
-      {
+      for (var k = this.particles.length; k--;) {
         this.particles[k].draw(ctx)
       }
     }

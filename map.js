@@ -40,7 +40,7 @@ var Map2D = (function () {
     for (var prop in this.objects) {
       if (!this.objects[prop].zPos)
       {
-        var objSprite = new ObjectSprite(this.atlas, this.objects[prop].width,
+        var objSprite = new ObjectSprite(prop, this.atlas, this.objects[prop].width,
         this.objects[prop].height, this.objects[prop].xPos, this.objects[prop].yPos,
         this.objects[prop].xTile, this.objects[prop].yTile);
 

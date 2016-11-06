@@ -18,7 +18,7 @@ var World = (function () {
     {
       if (this.map.objects[prop].zPos)
       {
-        var objSprite = new ObjectSprite(this.map.atlas, this.map.objects[prop].width,
+        var objSprite = new ObjectSprite(prop, this.map.atlas, this.map.objects[prop].width,
           this.map.objects[prop].height, this.map.objects[prop].xPos, this.map.objects[prop].yPos,
           this.map.objects[prop].xTile, this.map.objects[prop].yTile, this.map.objects[prop].zPos);
 
@@ -46,6 +46,7 @@ var World = (function () {
     this.keyUpFn = this.inputKeyUp.bind(this);
     this.createNotifyFn = this.createNotify.bind(this);
     this.createMenuFn = this.createMenu.bind(this);
+    this.eventManager = new EventManager(this.entities, this.map);
 
     window.addEventListener('keydown', this.keyDownFn);
     window.addEventListener('keyup', this.keyUpFn);
@@ -72,8 +73,7 @@ var World = (function () {
       this.ui.push(new Menu(x, y, menu));
     },
     pauseGame: function(val) {
-      if (val === true)
-      {
+      if (val === true) {
         this.pause = true;
         amplify.publish('pause', true);
       }
@@ -85,8 +85,7 @@ var World = (function () {
     update: function () {
       // Delete ui elements which are no longer visible
       var i = this.ui.length;
-      while (i--)
-      {
+      while (i--) {
         if (!this.ui[i].visible)
         this.ui.splice(i, 1);
       }
@@ -97,13 +96,13 @@ var World = (function () {
       else
         this.pauseGame(false);
 
-      if (!this.pause)
-      {
-        for (var j=0; j < this.entities.length;  j++)
-        {
+      if (!this.pause) {
+        for (var j=0; j < this.entities.length;  j++) {
           if (this.entities[j].type !== 'object')
             this.entities[j].update();
         }
+
+        this.eventManager.update();
       }
     },
     keyInput: function() {
@@ -145,8 +144,7 @@ var World = (function () {
 
       // Sort entities
       var drawOrder = [];
-      for (var k = this.entities.length; k--;)
-      {
+      for (var k = this.entities.length; k--;) {
         if (this.entities[k].type === 'object')
           drawOrder.push({pos: k, y: this.entities[k].y, z: this.entities[k].z});
         else
@@ -162,6 +160,8 @@ var World = (function () {
         this.entities[i].draw(this.ctx);
       }
 
+      this.eventManager.draw(this.ctx);
+
       // Draw FPS
       this.ctx.fillStyle = 'white';
       this.ctx.font = '20px Arial';
@@ -172,8 +172,7 @@ var World = (function () {
 
       if (this.pause)
         this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt) + ' (Paused)',10,20);
-      else
-      {
+      else {
         this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt),10,20);
         this.ctx.fillText(RPstring,10,20+20);
       }

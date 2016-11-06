@@ -3,7 +3,7 @@ var Character = (function () {
 
   var Character = function(_map, _name) {
     this.map = _map;
-    this.charname = _name;
+    this.name = _name;
     this.level = 1;
     this.experiments = getRandomInt(1, 40)/(5*60);
     this.theory = getRandomInt(1, 40)/(5*60);
@@ -32,7 +32,7 @@ var Character = (function () {
     this.researchPoints = [];
     // subscribe to dt
     this.dtFn = this.tick.bind(this);
-    amplify.subscribe( 'dt', this.dtFn);
+    amplify.subscribe('dt', this.dtFn);
     };
 
     Character.prototype = {
@@ -41,13 +41,14 @@ var Character = (function () {
       },
       inputMouseDown: function (data) {
         var self = this;
-        var menu = [['Text Notification', function characterMenu() {amplify.publish('popup-text', self.sprite.getX(), self.sprite.getY(), 'My name is '+self.charname);}],
+        var menu = [['Text Notification', function characterMenu() {amplify.publish('popup-text', self.sprite.getX(), self.sprite.getY(), 'My name is '+self.name);}],
         ['Open Menu', function openBrowser() {browser.changeZPosition(true);}],
         ['Move', function characterSetMove() {if (self.path.length === 0) self.randomMove();}],
         ['Work', function characterSetWork() {if (self.state[self.activeState] !== 'work') self.activeState = 0;}],
         ['Sleep', function characterSetSleep() {if (self.state[self.activeState] !== 'sleep') self.activeState = 1;}],
         ['Explosion', function characterExplosion() {self.effects.push(new Explosion(self.sprite.getX()
-          +self.sprite.spriteWidth/2, self.sprite.getY()+self.sprite.spriteHeight/2, 10));}]];
+          +self.sprite.spriteWidth/2, self.sprite.getY()+self.sprite.spriteHeight/2, 30));}],
+        ['Field', function characterField() {self.effects.push(new Field(function x(){return self.sprite.getX()+self.sprite.spriteWidth/2;}, function y(){return self.sprite.getY()+self.sprite.spriteHeight/2} ));}]];
 
         amplify.publish('popup-menu', this.sprite.getX(), this.sprite.getY(), menu);
       },
@@ -224,11 +225,11 @@ var Character = (function () {
       },
       move: function(xDest, yDest) {
         this.path = this.map.generatePath(this.sprite.x, this.sprite.y, xDest, yDest);
-        this.map.occupied[this.charname] = [xDest, yDest];
+        this.map.occupied[this.name] = [xDest, yDest];
       },
       cleanup: function () {
         amplify.unsubscribe( 'dt', this.dtFn);
-        delete this.map.occupied[this.charname];
+        delete this.map.occupied[this.name];
         this.sprite.cleanup();
       }
     };

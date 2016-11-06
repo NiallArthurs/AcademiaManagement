@@ -5,18 +5,18 @@ var GameState = {
   experimentPoints: 0,
   computationPoints: 0,
   theoryPoints: 0,
-  fundingTotal: 0,
+  grantFundingTotal: 0,
   grants: [],
   publications: [],
   staff: [],
   // Calculate the total funding available
-  determineTotalFunding: function() {
-    this.fundingTotal = 0;
+  determineTotalGrantFunding: function() {
+    this.grantFundingTotal = 10;
     for (var k=0; k < this.grants.length; k++)
     {
-      this.fundingTotal += this.grants[k].amount;
+      this.grantFundingTotal += this.grants[k].amount;
     }
-    return this.fundingTotal;
+    return this.grantFundingTotal;
   },
   update: function() {
 	   this.cleanGrants();
