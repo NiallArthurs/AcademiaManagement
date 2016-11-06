@@ -95,7 +95,7 @@ var EventManager = (function () {
       return eventAPI;
     },
     setCharacterState: function(character, state) {
-      var char = this.getCharacterFromName(character);
+      var char = this.getEntityFromName(character);
       var states = ['work', 'sleep', 'rest'];
 
       if (states.includes(state) && char !== undefined) {

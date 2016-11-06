@@ -1,5 +1,6 @@
 var defaultStyle = {
-	world:  {
+	world :
+		{
 			bgcolor: '#54AB47',
 			cameraspeed: 6
 		},
