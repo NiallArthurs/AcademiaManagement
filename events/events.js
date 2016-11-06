@@ -12,7 +12,7 @@ var eventsMain = {
     },
     start: function(eAPI) {
       // Run when an event starts
-      t0RP = eAPI.getResearchPoints();
+      this.t0RP = eAPI.getResearchPoints();
       eAPI.displayNotification('You have 10 days to prove your group has theoretical expertise.');
     },
     finish: function(eAPI) {
@@ -20,7 +20,7 @@ var eventsMain = {
       // Should notify of win/failure.
 
       var curRP = eAPI.getResearchPoints()
-      if (curRP[2]-t0RP[2] > 30) {
+      if (curRP[2]-this.t0RP[2] > 30) {
           eAPI.displayNotification('Wow! Your group rock with theory.');
       } else {
           eAPI.displayNotification('Maybe some of your staff need to attend more courses?');
