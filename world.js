@@ -177,9 +177,12 @@ var World = (function () {
         this.ctx.fillText(RPstring,10,20+20);
       }
 
-      // Draw any ui elements
-      for (var k = this.ui.length; k--;)
-        this.ui[k].draw(this.ctx);
+      // Draw any ui elements (one at a time)
+      if (this.ui.length) {
+        if (!this.ui[0].active)
+          this.ui[0].active = true;
+        this.ui[0].draw(this.ctx);
+      }
     }
   }
 

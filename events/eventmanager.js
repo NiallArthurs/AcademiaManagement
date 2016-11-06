@@ -27,6 +27,10 @@ var EventManager = (function () {
                 this.events[obj].active = true;
                 this.events[obj].start(this.getEventsAPI());
                 this.events[obj].t0 = time;
+                // If we start an event today wait until tomorrow before starting
+                // another event.
+                this.last = time;
+                return;
               }
             }
           }
@@ -92,8 +96,8 @@ var EventManager = (function () {
     },
     setCharacterState: function(character, state) {
       var char = this.getCharacterFromName(character);
+      var states = ['work', 'sleep', 'rest'];
 
-      states = ['work', 'sleep', 'rest'];
       if (states.includes(state) && char !== undefined) {
         char.activeState = states.indexOf(state);
       }

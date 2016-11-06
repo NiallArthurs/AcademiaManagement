@@ -1,4 +1,33 @@
 var eventsMain = {
+  'TheoryPro' : {
+    duration : 10, // Duration of event
+    probability : 0.2, // enabled approximately every 5 minutes.
+    t0RP : [0, 0, 0],
+    prequisites: function (eAPI) {
+      // Return true/false depending on whether the prequisites are met
+      return true;
+    },
+    update: function(eAPI) {
+      // A function which is run each timestep.
+    },
+    start: function(eAPI) {
+      // Run when an event starts
+      t0RP = eAPI.getResearchPoints();
+      eAPI.displayNotification('You have 10 days to prove your group has theoretical expertise.');
+    },
+    finish: function(eAPI) {
+      // Run when the duration of the event is up.
+      // Should notify of win/failure.
+
+      var curRP = eAPI.getResearchPoints()
+      if (curRP[2]-t0RP[2] > 30) {
+          eAPI.displayNotification('Wow! Your group rock with theory.');
+      } else {
+          eAPI.displayNotification('Maybe some of your staff need to attend more courses?');
+      }
+    }
+
+  },
   'NegationField' : {
     duration : 5, // Duration of event
     probability : 0.2, // enabled approximately every 5 minutes.
@@ -59,6 +88,7 @@ var eventsMain = {
       var mapObj = eAPI.getMapObjects();
 
       var furniture = Object.keys(mapObj)[0];
+      eAPI.displayNotification('You need to contact the building manager.');
       eAPI.displayNotification('It looks like something is wrong with the ' + furniture + '.');
       eAPI.addEffect(furniture, 'explosion');
     },

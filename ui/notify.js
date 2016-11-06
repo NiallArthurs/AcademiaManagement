@@ -19,7 +19,7 @@ var Notify = (function () {
     this.height = uiStyle.notify.fontsize + 2* this.offset;
     this.xPos = this.xPos-this.textWidth/2-this.offset+TILE_SIZE/2;
     this.yPos = this.yPos-this.offset;
-
+    this.active = false;
     amplify.subscribe( 'dt', this.dtFn);
   };
 
@@ -47,6 +47,9 @@ var Notify = (function () {
   };
 
   Notify.prototype.inputMouseDownCallback = function() {
+      if (!this.active)
+        return;
+        
       this.hide = 1;
       this.cleanup();
   };

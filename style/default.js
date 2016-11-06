@@ -1,7 +1,7 @@
 var defaultStyle = {
 	world:  {
 			bgcolor: '#54AB47',
-			cameraspeed: 8
+			cameraspeed: 6
 		},
 	menu :
 		{
@@ -13,7 +13,7 @@ var defaultStyle = {
 			font: 'arial',
 			hoverbgcolor: 'green',
 			hovertextcolor: 'white',
-			fadespeed: 8
+			fadespeed: 6
 		},
 	notify :
 		{
@@ -23,6 +23,6 @@ var defaultStyle = {
 		  	textcolor: 'black',
 		  	fontsize: 20,
 		  	font: 'arial',
-			fadespeed: 8
+			fadespeed: 6
 		 }
 };
