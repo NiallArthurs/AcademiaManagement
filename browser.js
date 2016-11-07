@@ -39,8 +39,8 @@ var browser = {
   initialize : function () {
     this.websites = websiteDictionary;
     this.homeButton();
-    window.addEventListener('keydown', this.keyDownFn);
-    window.addEventListener('keyup', this.keyUpFn);
+    window.addEventListener('keydown', this.keyDownFn.bind(this));
+    window.addEventListener('keyup', this.keyUpFn.bind(this));
   },
   keyDownFn : function(e) {
     this.key = e.keyCode;
@@ -50,6 +50,9 @@ var browser = {
     if (this.active && this.keyDown) {
       if (document.activeElement.id == "addressBar" && this.key == 13) {
         this.changePage(this.getAddressBarURL());
+      }
+      if (this.key == 27) {
+        this.changeZPosition(false);
       }
     }
   },
