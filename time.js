@@ -8,6 +8,9 @@ var Time = {
   tick: function (dt) {
     this.time += dt;
   },
+  getTime: function() {
+	return this.time/60;
+  },
   getDay: function () {
     return Math.floor(this.time/60);
   },

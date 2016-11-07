@@ -9,9 +9,22 @@ var EventManager = (function () {
     this.events = eventsMain;
     this.last = -1;
     this.multipliers = {};
+    this.queue = [];
   };
 
   EventManager.prototype = {
+    addQueue: function(_duration, _callback) {
+      this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback})
+    },
+    checkQueue: function() {
+      // The queue is used to defer functions for an arbitrary duration
+      for (var k = this.queue.length;k--;) {
+        if (Time.getTime() - this.queue[k].t0 >= this.queue[k].duration) {
+          this.queue[k].callback();
+          this.queue.splice(k, 1);
+        }
+      }
+    },
     attempt: function() {
       // Attempt to start events and close any events which are complete.
       var time = Time.getDay();
@@ -44,27 +57,13 @@ var EventManager = (function () {
       var i = this.effects.length;
 
       while (i--) {
-        var del = false;
-        if (typeof this.effects[i].duration !== undefined) {
-            if (Time.getDay() - this.effects[i].t0 >= this.effects[i].duration) {
-              if (typeof this.effects[i].cleanup !== undefined) {
-                this.effects[i].cleanup();
-              }
-              del = true;
-            }
-        }
-
         if (!this.effects[i].visible) {
-          del = true;
+          this.effects.splice(i, 1);
         }
-      }
-
-      if (del) {
-        this.effects.splice(i, 1);
       }
 
       this.attempt();
-      this.checkMultipliers();
+      this.checkQueue();
 
       for (var obj in this.events) {
         if (this.events[obj].active)
@@ -82,7 +81,7 @@ var EventManager = (function () {
       }
     },
     getEventsAPI: function() {
-      // Here we create an API objects which exposes all functions which an event can carry out.
+      // Here we create an API object which exposes all functions which an event can carry out.
       var eventAPI = {};
       eventAPI.getCharacters = this.getCharacters.bind(this);
       eventAPI.getMapObjects = this.getMapObjects.bind(this);
@@ -90,25 +89,42 @@ var EventManager = (function () {
       eventAPI.addEffect = this.addEffect.bind(this);
       eventAPI.displayNotification = this.displayNotification.bind(this);
       eventAPI.getResearchPoints = this.getResearchPoints.bind(this);
-      eventAPI.setCharacterState = this.setCharacterState.bind(this);
       eventAPI.getPublications = this.getPublications.bind(this);
       eventAPI.getGrantValue = GameState.determineTotalGrantFunding.bind(GameState);
       eventAPI.getCurrentTime = Time.getCurrent.bind(Time)
-      eventAPI.setMultiplier = this.setMultiplier.bind(this);
+      eventAPI.setCharacterProperty = this.setCharacterProperty.bind(this);
       return eventAPI;
     },
-    checkMultipliers: function() {
-      for (var obj in this.multipliers) {
-        var redo = false;
-        for (var k = this.multipliers[obj].length; k--;) {
-          if (Time.getDay() - this.multipliers[obj][k][1] >= this.multipliers[obj][k][0]) {
-            this.multipliers[obj].splice(k, 1);
-            redo = true;
-          }
-        }
-        if (redo)
-          this.calcAndAssign(obj);
+    setCharacterProperty(character, property, value, duration) {
+      switch (property) {
+        case 'multiplier':
+          this.setMultiplier(character, value, duration);
+          break;
+        case 'state':
+          this.setCharacterState(character, value);
+          break;
+        case 'speed':
+          this.setCharacterSpeed(character, value, duration);
+          break;
+        default:
+          return;
       }
+    },
+    setCharacterSpeed(character, speed, duration) {
+      var tmpChar = this.getEntityFromName(character);
+
+      if (tmpChar === undefined)
+        return;
+
+      tmpChar[1].speed = speed;
+
+      this.addQueue(duration, function(){
+        // Reset character walkspeed to default
+        if (tmpChar[1] === undefined)
+          return;
+
+        tmpChar[1].speed = uiStyle.character.walkspeed;
+      });
     },
     setMultiplier: function(character, multiplier, duration) {
       var tmp = this.getEntityFromName(character);
@@ -119,8 +135,14 @@ var EventManager = (function () {
       if (this.multipliers[character] === undefined) {
         this.multipliers[character] = [];
       }
+
       // Multipliers are stackable (so you can have multiple buffs at the same time).
-      this.multipliers[character].push([duration, Time.getDay(), multiplier]);
+      this.multipliers[character].push(multiplier);
+
+      var self = this;
+      var len = this.multipliers[character].len;
+      this.addQueue(duration, function(){self.multipliers[character].splice(len-1, 1);});
+
       this.calcAndAssign(character);
     },
     calcAndAssign: function(character) {
@@ -129,12 +151,7 @@ var EventManager = (function () {
       if (tmp === undefined)
         return;
 
-      var calc = 1.0;
-      if (this.multipliers[character].length) {
-        for (var k = 0; k < this.multipliers[character].length; k++)
-            calc *=this.multipliers[character][k][2];
-      }
-      alert(calc);
+      var calc = this.multipliers[character].reduce(function(a,b){return a*b;}, 1.0);
       tmp[1].multiplier = calc;
     },
     setCharacterState: function(character, state) {
@@ -199,8 +216,16 @@ var EventManager = (function () {
         var effect = new Explosion(xPos(), yPos(), 30);
       } else if (type === 'field') {
         var effect = new Field(xPos, yPos);
-        effect.duration = duration;
-        effect.t0 = Time.getDay();
+
+        var self = this;
+        var len = this.effects.length;
+        // The position the effect will be added to is len not len-1
+        this.addQueue(duration, function() {
+          if (typeof self.effects[len].cleanup !== undefined) {
+            self.effects[len].cleanup();
+          }
+          self.effects.splice(len, 1);
+        });
       }
 
       this.effects.push(effect);
@@ -216,7 +241,8 @@ var EventManager = (function () {
             chars[this.entities[k].name] = {'x': this.entities[k].sprite.x,
               'y': this.entities[k].sprite.y, 'level': this.entities[k].level,
               'state': this.entities[k].state[this.entities[k].activeState],
-              'multiplier': this.entities[k].multiplier};
+              'multiplier': this.entities[k].multiplier,
+              'walkspeed': this.entities[k].speed};
       }
       return chars;
     },
