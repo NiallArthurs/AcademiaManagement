@@ -47,6 +47,23 @@ var eventsMain = {
     },
     update: function(eAPI) {
       // A function which is run each timestep.
+      var chars = eAPI.getCharacters();
+
+      var x = chars[this.charName].x;
+      var y = chars[this.charName].y;
+
+      for (var obj in chars) {
+        if (obj !== this.charName) {
+          var nx = chars[obj].x;
+          var ny = chars[obj].y;
+          if (Math.sqrt((nx-x)*(nx-x)+(ny-y)*(ny-y)) <= 2) {
+            if (chars[obj].multiplier !== 0.0) {
+              eAPI.setMultiplier(obj, 0.0, 2.0);
+            }
+          }
+        }
+
+      }
     },
     start: function(eAPI) {
       // Run when an event starts

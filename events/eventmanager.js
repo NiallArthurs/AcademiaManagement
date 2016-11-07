@@ -8,6 +8,7 @@ var EventManager = (function () {
     this.effects = [];
     this.events = eventsMain;
     this.last = -1;
+    this.multipliers = {};
   };
 
   EventManager.prototype = {
@@ -63,10 +64,11 @@ var EventManager = (function () {
       }
 
       this.attempt();
+      this.checkMultipliers();
 
       for (var obj in this.events) {
         if (this.events[obj].active)
-          this.events[obj].update();
+          this.events[obj].update(this.getEventsAPI());
       }
 
       for (var k = this.effects.length; k--;) {
@@ -92,14 +94,59 @@ var EventManager = (function () {
       eventAPI.getPublications = this.getPublications.bind(this);
       eventAPI.getGrantValue = GameState.determineTotalGrantFunding.bind(GameState);
       eventAPI.getCurrentTime = Time.getCurrent.bind(Time)
+      eventAPI.setMultiplier = this.setMultiplier.bind(this);
       return eventAPI;
     },
+    checkMultipliers: function() {
+      for (var obj in this.multipliers) {
+        var redo = false;
+        for (var k = this.multipliers[obj].length; k--;) {
+          if (Time.getDay() - this.multipliers[obj][k][1] >= this.multipliers[obj][k][0]) {
+            this.multipliers[obj].splice(k, 1);
+            redo = true;
+          }
+        }
+        if (redo)
+          this.calcAndAssign(obj);
+      }
+    },
+    setMultiplier: function(character, multiplier, duration) {
+      var tmp = this.getEntityFromName(character);
+
+      if (tmp === undefined)
+        return;
+
+      if (this.multipliers[character] === undefined) {
+        this.multipliers[character] = [];
+      }
+      // Multipliers are stackable (so you can have multiple buffs at the same time).
+      this.multipliers[character].push([duration, Time.getDay(), multiplier]);
+      this.calcAndAssign(character);
+    },
+    calcAndAssign: function(character) {
+      var tmp = this.getEntityFromName(character);
+
+      if (tmp === undefined)
+        return;
+
+      var calc = 1.0;
+      if (this.multipliers[character].length) {
+        for (var k = 0; k < this.multipliers[character].length; k++)
+            calc *=this.multipliers[character][k][2];
+      }
+      alert(calc);
+      tmp[1].multiplier = calc;
+    },
     setCharacterState: function(character, state) {
-      var char = this.getEntityFromName(character);
+      var tmp = this.getEntityFromName(character);
+
+      if (tmp === undefined)
+        return;
+
       var states = ['work', 'sleep', 'rest'];
 
-      if (states.includes(state) && char !== undefined) {
-        char.activeState = states.indexOf(state);
+      if (states.includes(state) && tmp !== undefined) {
+        tmp[1].activeState = states.indexOf(state);
       }
     },
     getResearchPoints: function() {
@@ -168,7 +215,8 @@ var EventManager = (function () {
           if (this.entities[k].type === 'character')
             chars[this.entities[k].name] = {'x': this.entities[k].sprite.x,
               'y': this.entities[k].sprite.y, 'level': this.entities[k].level,
-              'state': this.entities[k].state[this.entities[k].activeState]};
+              'state': this.entities[k].state[this.entities[k].activeState],
+              'multiplier': this.entities[k].multiplier};
       }
       return chars;
     },

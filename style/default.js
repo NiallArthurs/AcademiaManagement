@@ -2,7 +2,11 @@ var defaultStyle = {
 	world :
 		{
 			bgcolor: '#54AB47',
-			cameraspeed: 6
+			cameraspeed: 6,
+		},
+	character :
+		{
+			walkspeed: 1
 		},
 	menu :
 		{
@@ -20,10 +24,10 @@ var defaultStyle = {
 		{
 			padding: 5,
 			bgcolor: 'white',
-		  	border: 'green',
-		  	textcolor: 'black',
-		  	fontsize: 20,
-		  	font: 'arial',
+		  border: 'green',
+		  textcolor: 'black',
+		  fontsize: 20,
+		  font: 'arial',
 			fadespeed: 6
 		 }
 };

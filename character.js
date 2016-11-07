@@ -8,12 +8,13 @@ var Character = (function () {
     this.experiments = getRandomInt(1, 40)/(5*60);
     this.theory = getRandomInt(1, 40)/(5*60);
     this.computation = getRandomInt(1, 40)/(5*60);
+    this.multiplier = 1;
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.effects = [];
     this.dt = 0;
     this.type = 'character';
-    this.speed = 1; // Movement speed - pixels/second
+    this.speed = uiStyle.character.walkspeed; // Movement speed - pixels/second
     this.state = ['work', 'sleep', 'rest'];
     // Randomly assign state for now
     this.activeState = getRandomInt(0,2);
@@ -117,16 +118,14 @@ var Character = (function () {
           }
         }
 
-        if (this.state[this.activeState] === 'sleep')
-        {
+        if (this.state[this.activeState] === 'sleep') {
           this.float.position += this.float.height*this.dt;
         }
         else if (this.state[this.activeState] === 'work') {
           // If we are working start to generate research points
-
-          this.points[0] += this.dt*this.level*this.experiments;
-          this.points[1] += this.dt*this.level*this.computation;
-          this.points[2] += this.dt*this.level*this.theory;
+          this.points[0] += this.dt*this.level*this.multiplier*this.experiments;
+          this.points[1] += this.dt*this.level*this.multiplier*this.computation;
+          this.points[2] += this.dt*this.level*this.multiplier*this.theory;
 
           for (var i=0; i < 3; i++) {
             if (this.points[i] >= 1.0) {
