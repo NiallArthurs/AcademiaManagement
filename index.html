@@ -313,6 +313,7 @@
     var dt = (now - lastTime) / 1000.0; // Time in seconds since last
 
     world.update();
+    browser.update();
 
     if (!isNaN(dt)) {
       if (!world.pause)

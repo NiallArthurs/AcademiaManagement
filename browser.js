@@ -1,6 +1,8 @@
 var browser = {
   isFullscreen : true,
   active : false,
+  key : 0,
+  keyDown : false,
   websites : {},
   changePage : function(url) {
     addressBar.value = url;
@@ -37,6 +39,22 @@ var browser = {
   initialize : function () {
     this.websites = websiteDictionary;
     this.homeButton();
+    window.addEventListener('keydown', this.keyDownFn);
+    window.addEventListener('keyup', this.keyUpFn);
+  },
+  keyDownFn : function(e) {
+    this.key = e.keyCode;
+    this.keyDown = true;
+  },
+  keyInput : function() {
+    if (this.active && this.keyDown) {
+      if (document.activeElement.id == "addressBar" && this.key == 13) {
+        this.changePage(this.getAddressBarURL());
+      }
+    }
+  },
+  keyUpFn : function(e) {
+    this.keyDown = false;
   },
   templateChangePage : function(url) {
     addressBar.value = url;
@@ -64,6 +82,9 @@ var browser = {
       menuContainer.style.width = "1280px";
       menuContainer.style.height = "720px";
     }
+  },
+  update: function() {
+    this.keyInput();
   }
 }
 
