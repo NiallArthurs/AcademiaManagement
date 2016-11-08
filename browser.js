@@ -1,10 +1,10 @@
 var browser = {
-  isFullscreen : true,
-  active : false,
-  key : 0,
-  keyDown : false,
-  websites : {},
-  changePage : function(url) {
+  isFullscreen : true, //Boolean for screensize
+  active : false, //Boolean for if browser is open
+  key : 0, //Keycode of most recent keyboard input
+  keyDown : false, //Boolean for if a key is down
+  websites : {}, //Dictionary of the websites available
+  changePage : function(url) { //Displays the page associated with the url
     addressBar.value = url;
     if (this.websites[url] != undefined) {
       pageTitle.innerHTML = this.websites[url].title;
@@ -16,16 +16,7 @@ var browser = {
       pageContainer.innerHTML = this.websites["404"].content;
     }
   },
-  changeZPosition : function (isOpen) {
-    if (isOpen) {
-      menuContainer.style.zIndex = "11";
-      this.active = true;
-    } else {
-      menuContainer.style.zIndex = "1";
-      this.active = false;
-    }
-  },
-  getAddressBarURL : function() {
+  getAddressBarURL : function() { //Gets the url in the address bar
     var addressString = addressBar.value.toLowerCase();
     var firstFive = addressString.substr(0,5);
     if (firstFive != "arpa.") {
@@ -33,33 +24,33 @@ var browser = {
     }
     return addressString;
   },
-  homeButton : function () {
+  homeButton : function () { //Loads the home page
     this.changePage("arpa.towerblock.ac/staffportal");
   },
-  initialize : function () {
+  initialize : function () { //Initialzes the browser at the beginning of the game
     this.websites = websiteDictionary;
     this.homeButton();
     window.addEventListener('keydown', this.keyDownFn.bind(this));
     window.addEventListener('keyup', this.keyUpFn.bind(this));
   },
-  keyDownFn : function(e) {
+  keyDownFn : function(e) { //Stores key information on a key press
     this.key = e.keyCode;
     this.keyDown = true;
   },
-  keyInput : function() {
+  keyInput : function() { //Checks and run corresponding functions for each keypress
     if (this.active && this.keyDown) {
       if (document.activeElement.id == "addressBar" && this.key == 13) {
         this.changePage(this.getAddressBarURL());
       }
       if (this.key == 27) {
-        this.changeZPosition(false);
+        this.toggle(false);
       }
     }
   },
-  keyUpFn : function(e) {
+  keyUpFn : function(e) { //Resets when a key is no longer pressed
     this.keyDown = false;
   },
-  templateChangePage : function(url) {
+  templateChangePage : function(url) { //Page change function for templating
     addressBar.value = url;
     if (this.websites[url] != undefined) {
       pageTitle.innerHTML = this.websites[url].title;
@@ -71,7 +62,16 @@ var browser = {
       pageContainer.innerHTML = this.websites["404"].content;
     }
   },
-  toggleWindowMode : function() {
+  toggle : function (isOpen) { //Moves the browser infront/behind of the game canvas
+    if (isOpen) {
+      menuContainer.style.zIndex = "11";
+      this.active = true;
+    } else {
+      menuContainer.style.zIndex = "1";
+      this.active = false;
+    }
+  },
+  toggleWindowMode : function() { //Toggles between fullscreen and windowed mode
     if (this.isFullscreen) {
       this.isFullscreen = false;
       menuContainer.style.top = "60px";
@@ -86,7 +86,7 @@ var browser = {
       menuContainer.style.height = "720px";
     }
   },
-  update: function() {
+  update: function() { //Runs updates needed each game loop
     this.keyInput();
   }
 }

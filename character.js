@@ -43,7 +43,6 @@ var Character = (function () {
       inputMouseDown: function (data) {
         var self = this;
         var menu = [['Text Notification', function characterMenu() {amplify.publish('popup-text', self.sprite.getX(), self.sprite.getY(), 'My name is '+self.name);}],
-        ['Open Menu', function openBrowser() {browser.changeZPosition(true);}],
         ['Move', function characterSetMove() {if (self.path.length === 0) self.randomMove();}],
         ['Work', function characterSetWork() {if (self.state[self.activeState] !== 'work') self.activeState = 0;}],
         ['Sleep', function characterSetSleep() {if (self.state[self.activeState] !== 'sleep') self.activeState = 1;}],

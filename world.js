@@ -125,6 +125,9 @@ var World = (function () {
       else if (this.key == 32) {
         this.centerCamera();
       }
+      else if (this.key == 77) {
+        browser.toggle(true);
+      }
 
     },
     draw: function (dt) {
