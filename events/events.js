@@ -1,3 +1,69 @@
+/*
+ *
+ * Events usage:
+ *
+ * Two variables must be defined:
+ *  'duration' - The duration in days (minutes) a function can run.
+ *  'probability' - THe probability an event will start per day.
+ *
+ * Each event should contain four functions:
+ *  prequisites() - Returns true or false depending whether the prequisites are met.
+ *  start() - This function runs when an event is started.
+ *  update() - This function runs every time step.
+ *  finish() -This function runs when the duration is reached.
+ *
+ * Each of the above functions is provided with an API object with access to the
+ * following functions:
+ *
+ * displayNotification(text) - Displays the provided text in a notification
+ *                             aligned to the center of the canvas.
+ *
+ * getResearchPoints() - Returns an array containing the number of research points
+ *                       in the format [computationPoints, experimentPoints, theoryPoints].
+ *
+ * getCharacters() - Returns an object with character information in the format:
+ *
+ *                  {
+ *                    'CharNameA' :
+ *                              {
+ *                              x: Character tile X position,
+ *                              y: Character tile Y position,
+ *                              level: Character Level,
+ *                              state: Character state,
+ *                              multiplier: Character RP multiplier,
+ *                              walkspeed: Character walkspeed,
+ *                              },
+ *				...
+ *                  }
+ *
+ * getDay() - Retuns the total number of days + 1 since the game started.
+ *
+ * getCurrentTime() - Returns an array with [year, month, day].
+ *
+ * getMapObjects() - Returns an object with map information in the format:
+ *
+ *		    {
+ *		      'MapObjectNameA' :
+ *				 {
+ *				 x: Map object tile X position,
+ *				 y: Map object tile Y position,
+ *				 },
+ *				...
+ *		    }
+ *
+ * setCharacterProperty(character, property, value, duration) - Assign a property a given character (some properties need a duration)
+ *			The properties which are supported: 'multiplier' (needs a duration), 'state', 'speed' (needs a duration)
+ *
+ * addEffect(entity, type, duration) - Applies an effect to an entity (map object or character) for some time.
+ *				       The supported effects are 'field', 'explosion'. The first argument is the character name or
+ *                                     map object name.
+ *
+ * getGrantValue() - Returns the total value of grants.
+ *
+ * getPublications() - Returns an object with details regarding publications.
+ *
+ */
+
 var eventsMain = {
   'TheoryPro' : {
     duration : 10, // Duration of event
@@ -47,7 +113,7 @@ var eventsMain = {
       return false;
     },
     update: function(eAPI) {
-      // For efficiency We only check every 10 timesteps
+      // For efficiency we only check every 10 timesteps
       if (this.ntt % 10 === 0)
       {
         var chars = eAPI.getCharacters();
@@ -68,7 +134,6 @@ var eventsMain = {
               }
             }
           }
-
         }
       }
 
@@ -101,7 +166,7 @@ var eventsMain = {
   },
   'ExplodeFurniture' : {
     duration : 1, // Duration of event
-    probability : 0.5, // enabled approximately every 5 minutes.
+    probability : 0.2, // enabled approximately every 5 minutes.
     prequisites: function (eAPI) {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working

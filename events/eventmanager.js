@@ -91,7 +91,8 @@ var EventManager = (function () {
       eventAPI.getResearchPoints = this.getResearchPoints.bind(this);
       eventAPI.getPublications = this.getPublications.bind(this);
       eventAPI.getGrantValue = GameState.determineTotalGrantFunding.bind(GameState);
-      eventAPI.getCurrentTime = Time.getCurrent.bind(Time)
+      eventAPI.getCurrentTime = Time.getCurrent.bind(Time);
+      eventAPI.getDay = Time.getDay.bind(Time)
       eventAPI.setCharacterProperty = this.setCharacterProperty.bind(this);
       return eventAPI;
     },

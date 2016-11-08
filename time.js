@@ -12,7 +12,7 @@ var Time = {
     this.time += dt;
   },
   getTime: function() {
-	return this.time/60;
+    return this.time/60;
   },
   getDay: function () {
     return Math.floor(this.time/60) + 1;
