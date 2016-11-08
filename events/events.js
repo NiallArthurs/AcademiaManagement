@@ -3,19 +3,19 @@
  * Events usage:
  *
  * Two variables must be defined:
- *  'duration' - The duration in days (minutes) a function can run.
- *  'probability' - THe probability an event will start per day.
+ *  'duration' - The duration in days (minutes) an event runs.
+ *  'probability' - The probability an event will start per day.
  *
  * Each event should contain four functions:
- *  prequisites() - Returns true or false depending whether the prequisites are met.
+ *  prequisites() - Returns true or false depending on whether the prequisites are met.
  *  start() - This function runs when an event is started.
- *  update() - This function runs every time step.
- *  finish() -This function runs when the duration is reached.
+ *  update() - This function runs every time-step.
+ *  finish() -This function runs when the event is finished (duration is reached).
  *
- * Each of the above functions is provided with an API object with access to the
+ * Each of the above functions has an argument which is an API object with access to the
  * following functions:
  *
- * displayNotification(text) - Displays the provided text in a notification
+ * displayNotification(text) - Displays the provided text in a notification which is
  *                             aligned to the center of the canvas.
  *
  * getResearchPoints() - Returns an array containing the number of research points
@@ -44,14 +44,14 @@
  *
  *		    {
  *		      'MapObjectNameA' :
- *				 {
- *				 x: Map object tile X position,
- *				 y: Map object tile Y position,
- *				 },
- *				...
+ *				    {
+ *				    x: Map object tile X position,
+ *				    y: Map object tile Y position,
+ *				    },
+ *				    ...
  *		    }
  *
- * setCharacterProperty(character, property, value, duration) - Assign a property a given character (some properties need a duration)
+ * setCharacterProperty(character, property, value, duration) - Assign a property for a given character (some properties need a duration)
  *			The properties which are supported: 'multiplier' (needs a duration), 'state', 'speed' (needs a duration)
  *
  * addEffect(entity, type, duration) - Applies an effect to an entity (map object or character) for some time.

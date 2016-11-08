@@ -10,6 +10,20 @@ var EventManager = (function () {
     this.last = -1;
     this.multipliers = {};
     this.queue = [];
+
+    // Create the event API object exposing required functions.
+    this.eventAPI = {};
+    this.eventAPI.getCharacters = this.getCharacters.bind(this);
+    this.eventAPI.getMapObjects = this.getMapObjects.bind(this);
+    //this.eventAPI.changeSprite = this.changeSprite.bind(this);
+    this.eventAPI.addEffect = this.addEffect.bind(this);
+    this.eventAPI.displayNotification = this.displayNotification.bind(this);
+    this.eventAPI.getResearchPoints = this.getResearchPoints.bind(this);
+    this.eventAPI.getPublications = this.getPublications.bind(this);
+    this.eventAPI.getGrantValue = GameState.determineTotalGrantFunding.bind(GameState);
+    this.eventAPI.getCurrentTime = Time.getCurrent.bind(Time);
+    this.eventAPI.getDay = Time.getDay.bind(Time);
+    this.eventAPI.setCharacterProperty = this.setCharacterProperty.bind(this);
   };
 
   EventManager.prototype = {
@@ -33,13 +47,13 @@ var EventManager = (function () {
           if (this.events[obj].active) {
             if ((time - this.events[obj].t0) >= this.events[obj].duration) {
               this.events[obj].active = false;
-              this.events[obj].finish(this.getEventsAPI());
+              this.events[obj].finish(this.eventAPI);
             }
           } else {
-            if (this.events[obj].prequisites(this.getEventsAPI())) {
+            if (this.events[obj].prequisites(this.eventAPI)) {
               if (Math.random() < this.events[obj].probability) {
                 this.events[obj].active = true;
-                this.events[obj].start(this.getEventsAPI());
+                this.events[obj].start(this.eventAPI);
                 this.events[obj].t0 = time;
                 // If we start an event today wait until tomorrow before starting
                 // another event.
@@ -67,7 +81,7 @@ var EventManager = (function () {
 
       for (var obj in this.events) {
         if (this.events[obj].active)
-          this.events[obj].update(this.getEventsAPI());
+          this.events[obj].update(this.eventAPI);
       }
 
       for (var k = this.effects.length; k--;) {
@@ -79,22 +93,6 @@ var EventManager = (function () {
       for (var k = this.effects.length; k--;) {
           this.effects[k].draw(ctx);
       }
-    },
-    getEventsAPI: function() {
-      // Here we create an API object which exposes all functions which an event can carry out.
-      var eventAPI = {};
-      eventAPI.getCharacters = this.getCharacters.bind(this);
-      eventAPI.getMapObjects = this.getMapObjects.bind(this);
-      //eventAPI.changeSprite = this.changeSprite.bind(this);
-      eventAPI.addEffect = this.addEffect.bind(this);
-      eventAPI.displayNotification = this.displayNotification.bind(this);
-      eventAPI.getResearchPoints = this.getResearchPoints.bind(this);
-      eventAPI.getPublications = this.getPublications.bind(this);
-      eventAPI.getGrantValue = GameState.determineTotalGrantFunding.bind(GameState);
-      eventAPI.getCurrentTime = Time.getCurrent.bind(Time);
-      eventAPI.getDay = Time.getDay.bind(Time)
-      eventAPI.setCharacterProperty = this.setCharacterProperty.bind(this);
-      return eventAPI;
     },
     setCharacterProperty(character, property, value, duration) {
       switch (property) {
