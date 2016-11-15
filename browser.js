@@ -10,6 +10,10 @@ var browser = {
       pageTitle.innerHTML = this.websites[url].title;
       websiteStyle.href = this.websites[url].stylesheet;
       pageContainer.innerHTML = this.websites[url].content;
+
+      if (typeof this.websites[url].onload === 'function') {
+        this.websites[url].onload();
+      }
     } else {
       pageTitle.innerHTML = this.websites["404"].title;
       websiteStyle.href = this.websites["404"].stylesheet;
@@ -86,9 +90,14 @@ var browser = {
       menuContainer.style.height = "720px";
     }
   },
-  update: function() { //Runs updates needed each game loop
+  update : function() { //Runs updates needed each game loop
     this.keyInput();
   }
+}
+
+var testInfo = {
+  name : "Supereme Leader",
+  date : "1st January 2016"
 }
 
 var websiteDictionary = {
@@ -127,8 +136,71 @@ var websiteDictionary = {
         <section class = 'headerPadding'>\
         </section>\
       </header>\
-      <nav>\
+      <nav id = 'universityNavigation'>\
       </nav>\
+      <section id = 'universityMainBody'>\
+        <section class = 'contentContainer'>\
+          <header class = 'contentHeader'>\
+            Wow Content!\
+          </header>\
+          <section class = 'contentMain'>\
+      "
+      + Mustache.render("Hello {{name}} the date is {{date}}", testInfo) +
+      "\
+          </section>\
+        </section>\
+        <section class = 'navigationContainer'>\
+          <header class = 'navigationHeader'>\
+            Quick Links\
+          </header>\
+          <section class = 'navigationMain'>\
+            <a href = '#' onclick = 'browser.changePage(\"arpa.towerblock.ac/email\")'>Email</a>\
+          </section>\
+        </section>\
+      </section>\
+      "
+  },
+  "arpa.towerblock.ac/email" : {
+    title : "Towerblock Polytechnic Email",
+    stylesheet : "websites/university.css",
+    onload : function onLoad() {EmailManager.populateBox('inbox');},
+    content :
+      "\
+      <header id = 'universityHeader'>\
+        <section class = 'headerPadding'>\
+          Towerblock\
+          <br>\
+          Polytechnic\
+        </section>\
+        <section id = 'headingContainer'>\
+          <h1 class = 'pageHeading'>\
+            Staff Portal\
+          </h1>\
+          <h2 class = 'tagline'>\
+            Staff Resource Pages\
+          </h2>\
+        </section>\
+        <section class = 'headerPadding'>\
+        </section>\
+      </header>\
+      <nav id = 'universityNavigation'>\
+      </nav>\
+      <section id = 'universityMainBody'>\
+        <section class = 'navigationContainer'>\
+          <header class = 'navigationHeader'>\
+          </header>\
+          <section class = 'navigationMain'>\
+          </section>\
+        </section>\
+        <section class = 'contentContainer'>\
+          <header class = 'contentHeader'>\
+            Email Inbox\
+          </header>\
+          <section id = 'emailMain'>\
+            .\
+          </section>\
+        </section>\
+      </section>\
       "
   },
   "404" : {

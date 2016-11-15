@@ -148,6 +148,10 @@
   border: 2px inset rgb(255,248,255);
 }
 
+.link {
+  color: #555555;
+}
+
 .preloadedAsset {
   float: left;
   width: 0px;
