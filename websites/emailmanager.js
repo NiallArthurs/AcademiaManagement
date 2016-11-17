@@ -1,7 +1,7 @@
 DEFAULT_ADDRESS = 's.strawb@towerblock.ac';
 
 var EmailManager = {
-  'inbox' : [{sender:"Dipesh"},{sender:"Niall"}],
+  'inbox' : [{sender:'Dipesh',subject:'Your Email system sucks!',time:Time.getCurrent()},{sender:'Niall',subject:'Whatever Dippy.',time:[2012,1,2]}],
   'sent' : [],
   //Used to create new emails.
   createEmail : function(_subject, _content, _responses, _sender, _receiver) {
@@ -25,7 +25,10 @@ var EmailManager = {
   },
   createSummary : function(_email) {
     html = document.getElementById("emailMain").innerHTML;
-    html += " " + _email.sender;
+    html += '<div class="emailSummaryLine"><span class="emailSummarySender">'
+    + _email.sender + '</span><span class="emailSummarySubject">'
+    + _email.subject + '</span><span class="emailSummaryTime">'
+    + Time.createDateString(_email.time) + '</span></div>';
     document.getElementById("emailMain").innerHTML = html;
   },
   //Used to return an email by its position in the box.
@@ -42,7 +45,9 @@ var EmailManager = {
   },
   populateBox : function(_box) {
     contents = this.getBox(_box);
-    contents.forEach(this.createSummary);
+    for (var i = contents.length; i--;) {
+      this.createSummary(contents[i]);
+    }
   },
   //Used to generate and process an email response.
   sendResponse : function(_id, _response) {

@@ -5,6 +5,9 @@
 */
 var DAYS_IN_MONTH = 30;
 var MONTHS_IN_YEAR = 4;
+var STARTING_DAY = 1;
+var STARTING_MONTH = 1;
+var STARTING_YEAR = 2012;
 
 var Time = {
   time: 0,
@@ -15,22 +18,25 @@ var Time = {
     return this.time/60;
   },
   getDay: function () {
-    return Math.floor(this.time/60) + 1;
+    return Math.floor(this.time/60) + STARTING_DAY;
   },
   getMonth: function () {
-    return Math.floor((this.getDay() - 1)/DAYS_IN_MONTH) + 1;
+    return Math.floor((this.getDay() - STARTING_DAY)/DAYS_IN_MONTH) + STARTING_MONTH;
   },
   getSeason: function() {
     var season = ['spring', 'summer', 'autumn', 'winter'];
     return season[this.getMonth()];
   },
   getYear: function () {
-    return Math.floor((this.getMonth() - 1)/MONTHS_IN_YEAR);
+    return Math.floor((this.getMonth() - STARTING_MONTH)/MONTHS_IN_YEAR) + STARTING_YEAR;
   },
   getCurrent: function () {
     var year = this.getYear();
-    var month = this.getMonth() - (year * MONTHS_IN_YEAR);
-    var day = this.getDay() - ((year * MONTHS_IN_YEAR + month - 1) * DAYS_IN_MONTH);
+    var month = this.getMonth() - ((year - STARTING_YEAR) * MONTHS_IN_YEAR);
+    var day = this.getDay() - (((year - STARTING_YEAR) * MONTHS_IN_YEAR + month - STARTING_MONTH) * DAYS_IN_MONTH);
     return [year, month, day];
+  },
+  createDateString: function(_array) {
+    return _array[2] + '/' + _array[1] + '/' + _array[0];
   }
 };
