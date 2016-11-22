@@ -1,18 +1,21 @@
 var HOMEPAGE = 'arpa.towerblock.ac/staffportal';
 
-var browser = {
+var Browser = {
   isFullscreen : true, //Boolean for screensize
   active : false, //Boolean for if browser is open
-  current : HOMEPAGE,
+  current : '',
   key : 0, //Keycode of most recent keyboard input
   keyDown : false, //Boolean for if a key is down
   websites : {}, //Dictionary of the websites available
   changePage : function(url) { //Displays the page associated with the url
+    if (url == this.current) {
+      return;
+    }
     addressBar.value = url;
     if (this.websites[url] != undefined) {
       pageTitle.innerHTML = this.websites[url].title;
       websiteStyle.href = this.websites[url].stylesheet;
-      pageContainer.innerHTML = this.websites[url].content;
+      this.textRender(this.websites[url].content);
       this.current = url;
 
       if (typeof this.websites[url].onload === 'function') {
@@ -21,7 +24,7 @@ var browser = {
     } else {
       pageTitle.innerHTML = this.websites['404'].title;
       websiteStyle.href = this.websites['404'].stylesheet;
-      pageContainer.innerHTML = this.websites['404'].content;
+      this.textRender(this.websites['404'].content);
       this.current = '404';
     }
   },
@@ -59,6 +62,11 @@ var browser = {
   keyUpFn : function(e) { //Resets when a key is no longer pressed
     this.keyDown = false;
   },
+  refresh : function() {
+    page = this.current;
+    this.changePage('blank');
+    this.changePage(page);
+  },
   templateChangePage : function(url) { //Page change function for templating
     addressBar.value = url;
     if (this.websites[url] != undefined) {
@@ -71,8 +79,15 @@ var browser = {
       pageContainer.innerHTML = this.websites['404'].content;
     }
   },
+  textRender : function(_text, _location) {
+    if (_location == undefined) {
+      _location = document.getElementById('pageContainer');
+    }
+    _location.innerHTML = Mustache.render(_text, GameState);
+  },
   toggle : function (isOpen) { //Moves the browser infront/behind of the game canvas
     if (isOpen) {
+      this.refresh();
       menuContainer.style.zIndex = '11';
       this.active = true;
     } else {
@@ -101,11 +116,6 @@ var browser = {
       this.homeButton();
     }
   }
-}
-
-var testInfo = {
-  name : 'Supreme Leader',
-  date : '1st January 2016'
 }
 
 var websiteDictionary = {
@@ -152,9 +162,8 @@ var websiteDictionary = {
             Wow Content!\
           </header>\
           <section class = 'contentMain'>\
-      "
-      + Mustache.render("Hello {{name}} the date is {{date}}", testInfo) +
-      "\
+            Experiment Points: {{experimentPoints}}. Theory Points:\
+            {{theoryPoints}}. Computation Points: {{computationPoints}}.\
           </section>\
         </section>\
         <section class = 'navigationContainer'>\
@@ -162,7 +171,7 @@ var websiteDictionary = {
             Quick Links\
           </header>\
           <section class = 'navigationMain'>\
-            <a href = '#' onclick = 'browser.changePage(\"arpa.towerblock.ac/email\")'>\
+            <a href='#' onclick='Browser.changePage(\"arpa.towerblock.ac/email\")'>\
               Email\
             </a>\
           </section>\
@@ -184,10 +193,10 @@ var websiteDictionary = {
         </section>\
         <section id = 'headingContainer'>\
           <h1 class = 'pageHeading'>\
-            Staff Portal\
+            Email Portal\
           </h1>\
           <h2 class = 'tagline'>\
-            Staff Resource Pages\
+            Official University Email\
           </h2>\
         </section>\
         <section class = 'headerPadding'>\
@@ -200,17 +209,28 @@ var websiteDictionary = {
           <header class = 'navigationHeader'>\
           </header>\
           <section class = 'navigationMain'>\
+            <a href='#' onclick='EmailManager.populateBox(\"inbox\")'>\
+              Inbox\
+            </a>\
+            <a href='#' onclick='EmailManager.populateBox(\"sent\")'>\
+              Sent\
+            </a>\
           </section>\
         </section>\
-        <section class = 'contentContainer'>\
-          <header class = 'contentHeader'>\
-            Email Inbox\
+        <section id = 'emailContainer'>\
+          <header id = 'emailHeader'>\
+            \
           </header>\
           <section id = 'emailMain'>\
           </section>\
         </section>\
       </section>\
       "
+  },
+  'blank' : {
+    title : '',
+    stylesheet : '',
+    content : ''
   },
   "404" : {
     title : "404 Not Found",

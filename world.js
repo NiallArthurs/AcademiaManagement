@@ -91,7 +91,7 @@ var World = (function () {
       }
 
       // Pause when ui elements active
-      if (this.ui.length || browser.active)
+      if (this.ui.length || Browser.active)
         this.pauseGame(true);
       else
         this.pauseGame(false);
@@ -126,7 +126,7 @@ var World = (function () {
         this.centerCamera();
       }
       else if (this.key == 77) {
-        browser.toggle(true);
+        Browser.toggle(true);
       }
 
     },
@@ -135,7 +135,7 @@ var World = (function () {
       this.dt = dt;
 
       // If the browser is active we don't need to redraw the world (wait until ui elements are removed)
-      if (browser.active && !this.ui.length)
+      if (Browser.active && !this.ui.length)
 	      return;
 
       // Draw background

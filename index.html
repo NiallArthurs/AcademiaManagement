@@ -15,9 +15,9 @@
           The Internet 2.0 - <span id = "pageTitle"></span>
         </section>
         <section id = "buttonContainer">
-          <div class = "titleBarButton" style = "font-size: 12pt;" onclick = "browser.toggle(false)">–</div>
-          <div class = "titleBarButton" onclick = "browser.toggleWindowMode()">❐</div>
-          <div class = "titleBarButton" onclick = "browser.toggle(false)">✖</div>
+          <div class = "titleBarButton" style = "font-size: 12pt;" onclick = "Browser.toggle(false)">–</div>
+          <div class = "titleBarButton" onclick = "Browser.toggleWindowMode()">❐</div>
+          <div class = "titleBarButton" onclick = "Browser.toggle(false)">✖</div>
         </section>
       </header>
       <nav id = "dummyMenus">
@@ -29,15 +29,15 @@
         <span class = "hoverButton"><u>H</u>elp</span>
         <hr>
         <section id = "controlButtonContainer">
-          <div class = "controlButton" onclick = "backButton();"><img src = "assets/browser/icons/back.png" alt = "Back"><br>Back</div>
+          <div class = "controlButton"><img src = "assets/browser/icons/back.png" alt = "Back"><br>Back</div>
           <div class = "controlButton"><img src = "assets/browser/icons/forward.png" alt = "Forward"><br>Forward</div>
-          <div class = "controlButton" onclick = "browser.homeButton();"><img src = "assets/browser/icons/home.png" alt = "Home"><br>Home</div>
+          <div class = "controlButton" onclick = "Browser.homeButton();"><img src = "assets/browser/icons/home.png" alt = "Home"><br>Home</div>
           <div class = "verticalBreak"></div>
           <section id = "addressBarContainer">
             Address
             <input id = "addressBar" type = "url" value = "">
           </section>
-          <div id = "goButton" onclick = "browser.changePage(browser.getAddressBarURL());">Go</div>
+          <div id = "goButton" onclick = "Browser.changePage(Browser.getAddressBarURL());">Go</div>
           <div class = "verticalBreak"></div>
         </section>
       </nav>
@@ -66,9 +66,9 @@
   <script src = "effects/explosion.js"></script>
   <script src = "effects/field.js"></script>
   <script src = "time.js"></script>
+  <script src = "gamestate.js"></script>
   <script src = "browser.js"></script>
   <script src = "websites/emailManager.js"></script>
-  <script src = "gamestate.js"></script>
   <script src = "events/events.js"></script>
   <script src = "events/eventmanager.js"></script>
   <script src = "world.js"></script>
@@ -295,7 +295,7 @@
     walkup: {frames: [0, 1, 0, 2], speed: 0.2}
   };
 
-  browser.initialize();
+  Browser.initialize();
 
   // Names for testing
   var names = ['Dave','Chris','Mike', 'Jack','John','Jake','Jamie'];
@@ -315,7 +315,7 @@
     var dt = (now - lastTime) / 1000.0; // Time in seconds since last
 
     world.update();
-    browser.update();
+    Browser.update();
 
     if (!isNaN(dt)) {
       if (!world.pause)
