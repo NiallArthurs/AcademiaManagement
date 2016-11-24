@@ -82,6 +82,7 @@ var EventManager = (function () {
                     self.events[obj].finish(self.eventAPI);
                   }
                 });
+                this.last = time;
               }
             }
           }
@@ -89,33 +90,6 @@ var EventManager = (function () {
         }
       }
       this.last = time;
-    },
-    attempt: function() {
-      // Attempt to start events and close any events which are complete.
-      var time = Time.getDay();
-      if (time - this.last > 0) {
-        for (var obj in this.events) {
-          if (this.events[obj].active) {
-            if ((time - this.events[obj].t0) >= this.events[obj].duration) {
-              this.events[obj].active = false;
-              this.events[obj].finish(this.eventAPI);
-            }
-          } else {
-            if (this.events[obj].prequisites(this.eventAPI)) {
-              if (Math.random() < this.events[obj].probability) {
-                this.events[obj].active = true;
-                this.events[obj].start(this.eventAPI);
-                this.events[obj].t0 = time;
-                // If we start an event today wait until tomorrow before starting
-                // another event.
-                this.last = time;
-                return;
-              }
-            }
-          }
-        }
-        this.last = time;
-      }
     },
     update: function() {
       // Delete ui elements which are no longer visible
