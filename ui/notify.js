@@ -2,7 +2,7 @@
 // Text Notification
 var Notify = (function () {
 
-  var Notify = function(_x, _y, _text) {
+  var Notify = function(_x, _y, _text, fun) {
     // Call MouseEvent constructor
     MouseEvent.call(this, _x, _y, 0, 0, false);
     this.text = _text;
@@ -21,6 +21,7 @@ var Notify = (function () {
     this.yPos = this.yPos-this.offset;
     this.active = false;
     amplify.subscribe( 'dt', this.dtFn);
+    this.inputFn = fun;
   };
 
   Notify.prototype = Object.create(MouseEvent.prototype);
@@ -49,9 +50,11 @@ var Notify = (function () {
   Notify.prototype.inputMouseDownCallback = function() {
       if (!this.active)
         return;
-        
+
       this.hide = 1;
       this.cleanup();
+      if (this.inputFn !== undefined)
+        this.inputFn();
   };
 
   Notify.prototype.draw = function(ctx) {

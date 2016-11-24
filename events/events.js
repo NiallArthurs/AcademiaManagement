@@ -67,7 +67,8 @@
 var eventsMain = {
   'TheoryPro' : {
     duration : 10, // Duration of event
-    probability : 0.2, // enabled approximately every 5 minutes.
+    probability : 0.1, // enabled approximately every 5 minutes.
+    type : 'random',
     t0RP : [0, 0, 0],
     prequisites: function (eAPI) {
       // Return true/false depending on whether the prequisites are met
@@ -96,7 +97,8 @@ var eventsMain = {
   },
   'NegationField' : {
     duration : 5, // Duration of event
-    probability : 0.2, // enabled approximately every 5 minutes.
+    probability : 0.1, // enabled approximately every 5 minutes.
+    type : 'random',
     charName : '', // event variable
     ntt: 0,
     prequisites: function (eAPI) {
@@ -167,6 +169,7 @@ var eventsMain = {
   'ExplodeFurniture' : {
     duration : 1, // Duration of event
     probability : 0.2, // enabled approximately every 5 minutes.
+    type: 'random',
     prequisites: function (eAPI) {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
@@ -181,12 +184,46 @@ var eventsMain = {
 
       var furniture = Object.keys(mapObj)[0];
       eAPI.displayNotification('You need to contact the building manager.');
-      eAPI.displayNotification('It looks like something is wrong with the ' + furniture + '.');
-      eAPI.addEffect(furniture, 'explosion');
+
+      var email = ' Doc Brown, \
+                    There seems to have been a problem in the PhD office, \
+                    What do you want us to do? \
+                    Best, \
+                    Dave';
+      var responses = [{short:'They\'ll manage.',long:'The smoke could be good for them.', run: function(){eAPI.displayNotification('I smell smoke.',function() {eAPI.addEffect(furniture, 'explosion');});}},
+                       {short:'Deal with it.',long:'We should get someone to take a look.', run: function(){eAPI.displayNotification('Looks like there was a problem with the table, all fixed now.');}}];
+
+      eAPI.sendEmail('Problem in PhD office', email, responses, 'Dave');
     },
     finish: function(eAPI) {
       // Run when the duration of the event is up.
     }
 
+  },
+  'StartEvent' : {
+    duration : 1, // Duration of event
+    type: 'main',
+    prequisites: function (eAPI) {
+      // Return true/false depending on whether the prequisites are met
+      // Check we have atleast one chracter working
+      return true;
+    },
+    update: function(eAPI) {
+      // A function which is run each timestep.
+    },
+    start: function(eAPI) {
+      // Run when an event starts
+      eAPI.displayNotification('Welcome to the Lab!');
+
+      var email = ' Mr Doe, \
+                    Welcome to Towerblock Polytechnic! \
+                    We hope you have a super productive time working here :) \
+                    Dave From HR';
+      eAPI.sendEmail('HR welcome.', email, [], 'HR');
+    },
+    finish: function(eAPI) {
+      // Run when the duration of the event is up.
+    }
   }
+
 };

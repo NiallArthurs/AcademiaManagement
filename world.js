@@ -9,8 +9,7 @@ var World = (function () {
     this.ui = [];
     this.keyDown = false;
     this.key = 0;
-    for (var i=0; i < 7; i++)
-    {
+    for (var i=0; i < 7; i++) {
       this.entities.push(new Character(this.map, names[i]));
     }
 
