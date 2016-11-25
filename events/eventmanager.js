@@ -89,7 +89,9 @@ var EventManager = (function () {
         }
         }
       }
-      this.last = time;
+      if (time - this.last > 0) {
+        this.last = time;
+      }
     },
     update: function() {
       // Delete ui elements which are no longer visible
