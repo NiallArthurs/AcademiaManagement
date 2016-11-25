@@ -87,6 +87,7 @@ var Browser = {
   },
   toggle : function (isOpen) { //Moves the browser infront/behind of the game canvas
     if (isOpen) {
+      this.homeButton();
       this.refresh();
       menuContainer.style.zIndex = '11';
       this.active = true;
@@ -111,10 +112,7 @@ var Browser = {
     }
   },
   update : function() { //Runs updates needed each game loop
-    this.keyInput();
-    if (!this.active && this.current != HOMEPAGE) {
-      this.homeButton();
-    }
+    this.keyInput()
   }
 }
 
@@ -214,6 +212,9 @@ var websiteDictionary = {
             </a>\
             <a href='#' onclick='EmailManager.populateBox(\"sent\")'>\
               Sent\
+            </a>\
+            <a href='#' onclick='EmailManager.populateBox(\"archived\")'>\
+              Archived\
             </a>\
           </section>\
         </section>\

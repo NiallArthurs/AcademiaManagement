@@ -171,6 +171,7 @@ var World = (function () {
       var time = Time.getCurrent();
       var timeString = 'Y: '+time[0]+' M: '+time[1]+ ' D: '+time[2];
       var RPstring = 'Research Points Exp: '+GameState.experimentPoints+ '. Theo: '+ GameState.theoryPoints + '. Comp: '+ GameState.computationPoints;
+      var emailString = 'Unread Emails: ' + EmailManager.countUnreadEmail();
 
       if (this.pause)
         this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt) + ' (Paused)',10,20);
@@ -178,6 +179,7 @@ var World = (function () {
         this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt),10,20);
         this.ctx.fillText(RPstring,10,20+20);
       }
+      this.ctx.fillText(emailString,10,60);
 
       // Draw any ui elements (one at a time)
       if (this.ui.length) {

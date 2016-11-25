@@ -1,17 +1,24 @@
 DEFAULT_ADDRESS = 's.strawb@towerblock.ac';
 
 var EmailManager = {
-  'inbox' : [{ident:999,
-              read:false,
-              sender:'Dipesh',
-              receiver:DEFAULT_ADDRESS,
-              subject:'Your Email system sucks!',
-              content:'Get the email done NOW!',
-              responses:[{short:'OK',long:'Alright I\'ll get it done now.',run:function(){GameState.addResearchPoint(1,5)}},
-                         {short:'In a minute',long:'Yeah I\'ll get round to it when I can be bothered',run:function(){GameState.addResearchPoint(0,5)}}],
-              time:Time.getCurrent()}],
+  'inbox' : [],
   'sent' : [],
+  'archived' : [],
   'idCounter' : 0,
+  archiveEmail : function(_ident) {
+    this.archived.push(this.getEmail(_ident, 'inbox'));
+    this.inbox.splice(this.getEmailPosition(_ident), 1);
+    this.populateBox('inbox');
+  },
+  countUnreadEmail : function() {
+    var count = 0;
+    for (var i = this.inbox.length; i--;) {
+      if (!this.inbox[i].read) {
+        count += 1;
+      }
+    }
+    return count;
+  },
   //Used to create new emails.
   createEmail : function(_subject, _content, _responses, _sender, _receiver) {
     if (_receiver == undefined) {
@@ -84,10 +91,15 @@ var EmailManager = {
     document.getElementById('emailMain').innerHTML = '<section id="emailPadding"></section>';
     Browser.textRender(email.subject, document.getElementById('emailHeader'));
     Browser.textRender(email.content, document.getElementById('emailPadding'));
-    if (email.responses != undefined) {
+    if (email.responses != undefined && email.responses.length > 0) {
       for (var i = 0; i < email.responses.length; i++) {
         this.createResponseLine(email, i);
       }
+    } else if (_box == 'inbox') {
+      var html = document.getElementById('emailMain').innerHTML;
+      html += '<div class="responseLine" onclick="EmailManager.archiveEmail(\''
+               + _ident + '\')">Archive Email</div>';
+      document.getElementById('emailMain').innerHTML = html;
     }
     email.read = true;
   },
@@ -108,7 +120,7 @@ var EmailManager = {
                     read : false,
                     sender : email.receiver,
                     receiver : email.sender,
-                    subject : 'Re:' + email.subject,
+                    subject : 'Re: ' + email.subject,
                     content : email.responses[_responseID].long,
                     time : Time.getCurrent()
                   });

@@ -65,11 +65,13 @@
  */
 
 var eventsMain = {
-  'TheoryPro' : {
-    duration : 10, // Duration of event
-    probability : 0.1, // enabled approximately every 5 minutes.
+  'ResearchTarget' : {
+    duration : 5, // Duration of event
+    probability : 0.2, // enabled approximately every 5 minutes.
     type : 'random',
     t0RP : [0, 0, 0],
+    researchType : 1,
+    researchTarget : 30,
     prequisites: function (eAPI) {
       // Return true/false depending on whether the prequisites are met
       return true;
@@ -79,16 +81,41 @@ var eventsMain = {
     },
     start: function(eAPI) {
       // Run when an event starts
+      this.researchType = getRandomInt(1,3);
       this.t0RP = eAPI.getResearchPoints();
-      eAPI.displayNotification('You have 10 days to prove your group has theoretical expertise.');
+      var email = 'Prof. Strawb<br><br>\
+                   As part of an up coming budget review we are asking all research groups to meet certain targets.<br>\
+                   We ask that your group meets a target of '
+                   + this.researchTarget + ' ';
+      var subject = '';
+      if (this.researchType == 1) {
+        email += 'computational';
+        subject += 'Computational';
+        eAPI.displayNotification('You have ' + this.duration + ' days to prove your group has computational expertise.');
+      } else if (this.researchType == 2) {
+        email += 'experimental';
+        subject += 'Experimental';
+        eAPI.displayNotification('You have ' + this.duration + ' days to prove your group has experimental expertise.');
+      } else {
+        email += 'theoretical';
+        subject += 'Theoretical';
+        eAPI.displayNotification('You have ' + this.duration + ' days to prove your group has theoretical expertise.');
+      }
+      email += ' research points in the next ' + this.duration + ' days.<br><br>\
+                Regards<br><br>\
+                Prof. Busybody<br>\
+                Head of the Faculty of "Science"\
+               ';
+      subject += ' Research Target'
+      eAPI.sendEmail(subject, email, [], 'Prof. Busybody');
     },
     finish: function(eAPI) {
       // Run when the duration of the event is up.
       // Should notify of win/failure.
 
       var curRP = eAPI.getResearchPoints()
-      if (curRP[2]-this.t0RP[2] > 30) {
-          eAPI.displayNotification('Wow! Your group rock with theory.');
+      if (curRP[this.researchType]-this.t0RP[this.researchType] > this.researchTarget) {
+          eAPI.displayNotification('Wow! Your group rock.');
       } else {
           eAPI.displayNotification('Maybe some of your staff need to attend more courses?');
       }
