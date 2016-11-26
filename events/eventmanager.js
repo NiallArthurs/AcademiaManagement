@@ -2,7 +2,6 @@
 var EventManager = (function () {
 
   var EventManager = function(_entities, _map) {
-    this.dt = 0;
     this.map = _map;
     this.entities = _entities;
     this.effects = [];
@@ -28,14 +27,24 @@ var EventManager = (function () {
   };
 
   EventManager.prototype = {
-    addQueue: function(_duration, _callback) {
-      this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback})
+    addQueue: function(_duration, _callback, _arg) {
+      if (_arg === undefined) {
+        this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback});
+      }
+      else {
+        this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback, arg: _arg});
+      }
     },
     checkQueue: function() {
       // The queue is used to defer functions for an arbitrary duration
       for (var k = this.queue.length; k--;) {
         if (Time.getTime() - this.queue[k].t0 >= this.queue[k].duration) {
+          if (this.queue[k].arg === undefined) {
           this.queue[k].callback();
+        }
+        else {
+          this.queue[k].callback(this.queue[k].arg);
+        }
           this.queue.splice(k, 1);
         }
       }
@@ -46,49 +55,39 @@ var EventManager = (function () {
         if (this.events[obj].type === 'main') {
           if (this.events[obj].complete === undefined && !this.events[obj].active) {
             if (this.events[obj].prequisites(this.eventAPI)) {
+
               this.events[obj].active = true;
-              if (this.events[obj].start !== undefined) {
-                this.events[obj].start(this.eventAPI);
-              }
-              this.events[obj].t0 = time;
+              this.events[obj].start(this.eventAPI);
 
               var self = this;
-              this.addQueue(this.events[obj].duration, function() {
-                self.events[obj].active = false;
-                if (self.events[obj].finish !== undefined) {
-                  self.events[obj].finish(self.eventAPI);
-                }
-                self.events[obj].complete = true;
-              });
+              this.addQueue(this.events[obj].duration, function(ev) {
+                self.events[ev].finish(self.eventAPI);
+                self.events[ev].active = false;
+                self.events[ev].complete = true;
+              }, obj);
             }
           }
         }
         else if (this.events[obj].type === 'random') {
-          if (time - this.last > 0) {
-
-          if (!this.events[obj].active) {
+          if (!this.events[obj].active && time - this.last > 0) {
             if (Math.random() < this.events[obj].probability) {
               if (this.events[obj].prequisites(this.eventAPI)) {
+
                 this.events[obj].active = true;
-                if (this.events[obj].start !== undefined) {
-                  this.events[obj].start(this.eventAPI);
-                }
-                this.events[obj].t0 = time;
+                this.events[obj].start(this.eventAPI);
 
                 var self = this;
-                this.addQueue(this.events[obj].duration, function() {
-                  self.events[obj].active = false;
-                  if (self.events[obj].finish !== undefined) {
-                    self.events[obj].finish(self.eventAPI);
-                  }
-                });
+                this.addQueue(this.events[obj].duration, function(ev) {
+                  self.events[ev].finish(self.eventAPI);
+                  self.events[ev].active = false;
+                }, obj);
                 this.last = time;
               }
             }
           }
         }
-        }
       }
+
       if (time - this.last > 0) {
         this.last = time;
       }
@@ -157,7 +156,7 @@ var EventManager = (function () {
       var tmp = this.getEntityFromName(character);
 
       if (tmp === undefined)
-        return;
+      return;
 
       if (this.multipliers[character] === undefined) {
         this.multipliers[character] = [];
@@ -176,7 +175,7 @@ var EventManager = (function () {
       var tmp = this.getEntityFromName(character);
 
       if (tmp === undefined)
-        return;
+      return;
 
       var calc = this.multipliers[character].reduce(function(a,b){return a*b;}, 1.0);
       tmp[1].multiplier = calc;
@@ -185,7 +184,7 @@ var EventManager = (function () {
       var tmp = this.getEntityFromName(character);
 
       if (tmp === undefined)
-        return;
+      return;
 
       var states = ['work', 'sleep', 'rest'];
 
@@ -217,7 +216,7 @@ var EventManager = (function () {
       var ent = this.getEntityFromName(entity);
 
       if (ent === undefined)
-        return;
+      return;
 
       var xPos, yPos;
       if (ent[0] === 'character') {
@@ -264,11 +263,11 @@ var EventManager = (function () {
       var chars = {};
       for (var k = this.entities.length; k--;) {
         if (this.entities[k].type === 'character')
-          chars[this.entities[k].name] = {'x': this.entities[k].sprite.x,
-          'y': this.entities[k].sprite.y, 'level': this.entities[k].level,
-          'state': this.entities[k].state[this.entities[k].activeState],
-          'multiplier': this.entities[k].multiplier,
-          'walkspeed': this.entities[k].speed};
+        chars[this.entities[k].name] = {'x': this.entities[k].sprite.x,
+        'y': this.entities[k].sprite.y, 'level': this.entities[k].level,
+        'state': this.entities[k].state[this.entities[k].activeState],
+        'multiplier': this.entities[k].multiplier,
+        'walkspeed': this.entities[k].speed};
       }
       return chars;
     },
@@ -276,8 +275,8 @@ var EventManager = (function () {
       var mapObjs = {};
       for (var k = this.entities.length; k--;) {
         if (this.entities[k].type === 'object')
-          mapObjs[this.entities[k].name] = {'x': this.entities[k].x,
-          'y': this.entities[k].y};
+        mapObjs[this.entities[k].name] = {'x': this.entities[k].x,
+        'y': this.entities[k].y};
       }
       return mapObjs;
     },

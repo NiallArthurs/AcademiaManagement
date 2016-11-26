@@ -124,7 +124,7 @@ var eventsMain = {
   },
   'NegationField' : {
     duration : 5, // Duration of event
-    probability : 0.1, // enabled approximately every 5 minutes.
+    probability : 0.2, // enabled approximately every 5 minutes.
     type : 'random',
     charName : '', // event variable
     ntt: 0,
@@ -246,11 +246,125 @@ var eventsMain = {
                     Welcome to Towerblock Polytechnic! \
                     We hope you have a super productive time working here :) \
                     Dave From HR';
-      eAPI.sendEmail('HR welcome.', email, [], 'HR');
+      eAPI.sendEmail('HR Welcome', email, [], 'HR');
     },
     finish: function(eAPI) {
       // Run when the duration of the event is up.
     }
-  }
+  },
+  'PerformanceEnhancingDrug' : {
+    duration : 10, // Duration of event
+    probability : 0.2,
+    type : 'random',
+    charName : '',
+    ntt: 0,
+    spread: false,
+    t0: 0,
+    prequisites: function (eAPI) {
+      // Return true/false depending on whether the prequisites are met
+      // Check we have atleast one chracter working
+      var chars = eAPI.getCharacters();
 
+      for (var obj in chars) {
+        if(chars[obj].state === 'work') {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    start: function(eAPI) {
+
+      this.t0 = eAPI.getDay();
+      // Run when an event starts
+      var chars = eAPI.getCharacters();
+
+      // Find the first character who is working
+      for (var obj in chars) {
+        if(chars[obj].state === 'work') {
+          this.charName = obj;
+          eAPI.setCharacterProperty(obj, 'multiplier', 1.5, 3.0);
+          eAPI.setCharacterProperty(obj, 'speed', 5.0, 10.0);
+          eAPI.displayNotification('Whats wrong with '+this.charName+'?');
+          break;
+        }
+      }
+
+      var email = ' Prof Strawb, <br> <br> \
+                    I have been hearing rumours that one of our groups members has \
+                    discoverd a performance enhancing drug. <br> What would you like us to do? <br><br> \
+                    Kind Regards, <br>\
+                    Barbara <br><br> "Science" Research Group Secretary';
+
+      var self = this;
+      var responses = [{short:'Wait and see.',long:'Let\'s see how effective it is before we take action.', run: function(){eAPI.displayNotification('It appears to be spreading.'); self.spread = true;}},
+                       {short:'Send to counselling.',long:'Send the member of staff to counselling.', run: function(){eAPI.displayNotification('It looks like he should be return to normal shortly.');}}];
+
+      eAPI.sendEmail('Performance Enhancing Drugs', email, responses, 'Barbara');
+    },
+    update: function(eAPI) {
+      // For efficiency we only check every 10 timesteps
+      if (this.spread === true || (eAPI.getDay() - this.t0) >= 5) {
+
+        eAPI.setCharacterProperty(this.charName, 'multiplier', 0.0, 1.0);
+
+        if (!this.spread) {
+          eAPI.displayNotification('Something appears to be spreading amongst your staff.');
+          this.spread = true;
+        }
+
+        if (this.ntt % 10 === 0) {
+
+          var chars = eAPI.getCharacters();
+          var x = chars[this.charName].x;
+          var y = chars[this.charName].y;
+
+          // Check whether characters are within two tiles of the chosen character
+          // and set the multiplier to zero for two minutes
+          for (var obj in chars) {
+            if (obj !== this.charName) {
+              var nx = chars[obj].x;
+              var ny = chars[obj].y;
+              if (Math.sqrt((nx-x)*(nx-x)+(ny-y)*(ny-y)) <= 2) {
+                if (chars[obj].walkspeed !== 5.0) {
+                  eAPI.setCharacterProperty(obj, 'multiplier', 0.1, 2.0);
+                  eAPI.setCharacterProperty(obj, 'speed', 5.0, 2.0);
+                  }
+              }
+            }
+          }
+        }
+        this.ntt += 1;
+      }
+    },
+    finish: function(eAPI) {
+      this.ntt = 0;
+
+      var chars = eAPI.getCharacters();
+
+      var count = 0
+      for (var obj in chars) {
+        if (chars[obj].walkspeed === 5)
+        {
+          count++;
+        }
+      }
+
+      // A cost depending on the number of users will be applied/reported in the email.
+      var cost = count * 5000;
+
+      if (this.spread) {
+        var email = ' Prof Strawb, <br> <br> \
+                      I am writing to inform you a number of your group members have\
+                      become addicted to a performance enhancing drug. As the source wasn\'t \
+                      initially dealt with we will have to send all effected members to a \
+                      rehabilitation center. The cost of their stay will be charged to your deparment.<br><br> \
+                      Kind Regards, <br>\
+                      Susan <br><br> Head of Student Services';
+
+        var self = this;
+        eAPI.sendEmail('Student Services Notification', email, [], 'Susan');
+      }
+    }
+  }
 };
