@@ -38,5 +38,8 @@ var Time = {
   },
   createDateString: function(_array) {
     return _array[2] + '/' + _array[1] + '/' + _array[0];
+  },
+  getDayFromCurrent: function(_array) {
+    return (_array[0]*MONTHS_IN_YEAR + _array[1])*DAYS_IN_MONTH + _array[2];
   }
 };

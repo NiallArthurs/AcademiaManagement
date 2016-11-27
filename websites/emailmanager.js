@@ -20,28 +20,23 @@ var EmailManager = {
     return count;
   },
   //Used to create new emails.
-  createEmail : function(_subject, _content, _responses, _sender, _receiver) {
+  createEmail : function(_subject, _content, _responses, _sender, _receiver, _timeout) {
+    var email = {
+      ident : this.idCounter,
+      read : false,
+      sender : _sender,
+      subject : _subject,
+      content : _content,
+      responses : _responses,
+      time : Time.getCurrent(),
+      timeout : _timeout
+    };
     if (_receiver == undefined) {
-      this.inbox.push({ident : this.idCounter,
-                       read : false,
-                       sender : _sender,
-                       receiver : DEFAULT_ADDRESS,
-                       subject : _subject,
-                       content : _content,
-                       responses : _responses,
-                       time : Time.getCurrent()
-                     });
+      email.receiver = DEFAULT_ADDRESS;
     } else {
-      this.inbox.push({ident : this.idCounter,
-                       read : false,
-                       sender : _sender,
-                       receiver : _receiver,
-                       subject : _subject,
-                       content : _content,
-                       responses : _responses,
-                       time : Time.getCurrent()
-                     });
+      email.receiver = _receiver;
     }
+    this.inbox.push(email);
     this.idCounter++;
   },
   createResponseLine : function(_email, _index) {
@@ -91,6 +86,12 @@ var EmailManager = {
     document.getElementById('emailMain').innerHTML = '<section id="emailPadding"></section>';
     Browser.textRender(email.subject, document.getElementById('emailHeader'));
     Browser.textRender(email.content, document.getElementById('emailPadding'));
+    if (email.timeout != undefined) {
+      if (Time.getDayFromCurrent(email.time) + email.timeout >= Time.getDay()) {
+        email.responses = [];
+        email.timeout = undefined;
+      }
+    }
     if (email.responses != undefined && email.responses.length > 0) {
       for (var i = 0; i < email.responses.length; i++) {
         this.createResponseLine(email, i);
@@ -121,10 +122,12 @@ var EmailManager = {
                     sender : email.receiver,
                     receiver : email.sender,
                     subject : 'Re: ' + email.subject,
-                    content : email.responses[_responseID].long,
+                    content : email.responses[_responseID].long + '<hr>' + email.content,
                     time : Time.getCurrent()
                   });
     email.responses[_responseID].run();
+    email.responses = [];
+    this.archived.push(email);
     this.idCounter++;
   }
 };

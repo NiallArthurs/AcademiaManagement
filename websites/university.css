@@ -17,6 +17,7 @@
   border: 1px solid #106db6;
   border-radius: 15px;
   padding-top: 39px;
+  overflow: auto;
 }
 
 #emailPadding {
@@ -150,6 +151,12 @@
   height: 35px;
   padding: 7px 10px 0px 10px;
   border-bottom: 1px solid #106db6;
+  text-align: center;
+}
+
+.responseLine:hover {
+  color: white;
+  background-color: #106db6
 }
 
 .tagline {
