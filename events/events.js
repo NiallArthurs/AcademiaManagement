@@ -230,6 +230,8 @@ var eventsMain = {
   'StartEvent' : {
     duration : 1, // Duration of event
     type: 'main',
+    character: undefined,
+    once : false,
     prequisites: function (eAPI) {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
@@ -237,9 +239,23 @@ var eventsMain = {
     },
     update: function(eAPI) {
       // A function which is run each timestep.
+
+      if (character !== undefined)
+      {
+        if (!character.path().length)
+        {
+          var pos = eAPI.getRandomMapPosition();
+          character.moveTo(pos[0], pos[1]);
+        }
+      }
     },
     start: function(eAPI) {
       // Run when an event starts
+
+      // Add temporary character
+      var pos = eAPI.getRandomMapPosition();
+      character = eAPI.createTemporaryCharacter('Dummy', pos[0], pos[1]);
+
       eAPI.displayNotification('Welcome to the Lab!');
 
       var email = ' Mr Doe, \
@@ -250,6 +266,7 @@ var eventsMain = {
     },
     finish: function(eAPI) {
       // Run when the duration of the event is up.
+      character.remove();
     }
   },
   'PerformanceEnhancingDrug' : {
@@ -329,7 +346,7 @@ var eventsMain = {
                 if (chars[obj].walkspeed !== 5.0) {
                   eAPI.setCharacterProperty(obj, 'multiplier', 0.1, 2.0);
                   eAPI.setCharacterProperty(obj, 'speed', 5.0, 2.0);
-                  }
+                }
               }
             }
           }
@@ -342,10 +359,9 @@ var eventsMain = {
 
       var chars = eAPI.getCharacters();
 
-      var count = 0
+      var count = 0;
       for (var obj in chars) {
-        if (chars[obj].walkspeed === 5)
-        {
+        if (chars[obj].walkspeed === 5) {
           count++;
         }
       }

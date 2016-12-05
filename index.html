@@ -61,7 +61,10 @@
   <script src = "extern/amplify.core.min.js"></script>
   <script src = "extern/pathfinding-browser.min.js"></script>
   <script src = "extern/mustache.min.js"></script>
+  <script src = "extern/preloadjs-0.6.2.min.js"></script>
 
+  <script src = "loader.js"></script>
+  <script src = "charactermanager.js"></script>
   <script src = "style/default.js"></script>
   <script src = "effects/explosion.js"></script>
   <script src = "effects/field.js"></script>
@@ -80,6 +83,7 @@
   <script src = "ui/mouse.js"></script>
   <script src = "ui/notify.js"></script>
   <script src = "ui/menu.js"></script>
+
 
   <script>
 
@@ -299,7 +303,9 @@
 
   // Names for testing
   var names = ['Dave','Chris','Mike', 'Jack','John','Jake','Jamie'];
-  var world = new World(canvas);
+
+
+  var world = undefined;
   var lastTime;
 
   canvas.addEventListener('mousedown', function mouseDown(e){
@@ -321,7 +327,7 @@
       if (!world.pause)
       Time.tick(dt);
 
-      amplify.publish( "dt", dt);
+      amplify.publish('dt', dt);
     }
 
     world.keyInput();
@@ -332,7 +338,10 @@
     requestAnimationFrame(gameLoop);
   }
 
-  requestAnimationFrame(gameLoop);
+  loadQueue.on("complete", function() {
+    world = new World(canvas);
+    requestAnimationFrame(gameLoop);
+  });
 
 
   </script>

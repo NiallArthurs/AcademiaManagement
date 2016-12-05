@@ -44,20 +44,17 @@ var ObjectSprite = (function () {
             this.inputCallback(x, y);
         }
     },
+    getTileX: function() {
+      return this.x;
+    },
+    getTileY: function() {
+      return this.y;
+    },
     getX: function() {
       return Math.floor(cameraScreenPosition[0] +TILE_SIZE*(this.x - cameraMapPosition[0]));
     },
     getY: function() {
       return Math.floor(cameraScreenPosition[1] + TILE_SIZE*(this.y - cameraMapPosition[1]));
-    },
-    getBackgroundX: function() {
-      return Math.floor(TILE_SIZE*(this.x));
-    },
-    getBackgroundY: function() {
-      return Math.floor(TILE_SIZE*(this.y));
-    },
-    drawBackground: function(ctx) {
-      ctx.drawImage(this.spritesheet, this.sx, this.sy, this.spriteWidth, this.spriteHeight, this.getBackgroundX(), this.getBackgroundY(), this.spriteWidth, this.spriteHeight);
     },
     draw: function(ctx) {
       ctx.drawImage(this.spritesheet, this.sx, this.sy, this.spriteWidth, this.spriteHeight, this.getX(), this.getY(), this.spriteWidth, this.spriteHeight);

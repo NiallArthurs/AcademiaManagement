@@ -2,35 +2,14 @@
 var World = (function () {
 
   var World = function(_canvas) {
-    this.map = new Map2D(testMap);
-    this.centerCamera();
+    //this.map = new Map2D(testMap);
     this.pause = false;
     this.entities = [];
+    TileMap.initializeMap(testMap, this.entities);
+    this.centerCamera();
     this.ui = [];
     this.keyDown = false;
     this.key = 0;
-    for (var i=0; i < 7; i++) {
-      this.entities.push(new Character(this.map, names[i]));
-    }
-
-    for (var prop in this.map.objects)
-    {
-      if (this.map.objects[prop].zPos)
-      {
-        var objSprite = new ObjectSprite(prop, this.map.atlas, this.map.objects[prop].width,
-          this.map.objects[prop].height, this.map.objects[prop].xPos, this.map.objects[prop].yPos,
-          this.map.objects[prop].xTile, this.map.objects[prop].yTile, this.map.objects[prop].zPos);
-
-        // Popup notifications for foreground objects
-        if (this.map.objects[prop].popupText !== undefined) {
-          objSprite.notifyText = this.map.objects[prop].popupText;
-          objSprite.inputCallback = function() {amplify.publish('popup-text',
-            this.getX(), this.getY(), this.notifyText);};
-        }
-        this.entities.push(objSprite);
-      }
-    }
-
     this.ctx = _canvas.getContext('2d');
     this.ctx.mozImageSmoothingEnabled = false;
     this.ctx.webkitImageSmoothingEnabled = false;
@@ -41,11 +20,21 @@ var World = (function () {
     this.dt = 0;
     this.cameraSpeed = uiStyle.world.cameraspeed;
 
+    // Initialise the character manager
+    CharacterManager.initialize(this.entities);
+
+    // Initialise the event manager
+    EventManager.initialize(this.entities);
+
+    // Test Charaacters
+    for (var i=0; i < 1; i++) {
+      this.entities.push(new Character(names[i], CharacterManager.getRandomCharacterSprite()));
+    }
+
     this.keyDownFn = this.inputKeyDown.bind(this);
     this.keyUpFn = this.inputKeyUp.bind(this);
     this.createNotifyFn = this.createNotify.bind(this);
     this.createMenuFn = this.createMenu.bind(this);
-    this.eventManager = new EventManager(this.entities, this.map);
 
     window.addEventListener('keydown', this.keyDownFn);
     window.addEventListener('keyup', this.keyUpFn);
@@ -66,7 +55,7 @@ var World = (function () {
     },
     centerCamera: function() {
       // Center camera position
-      cameraMapPosition = [Math.floor(this.map.width/2), Math.floor(this.map.height/2)];
+      cameraMapPosition = [Math.floor(TileMap.width/2), Math.floor(TileMap.height/2)];
     },
     createMenu: function (x, y, menu) {
       this.ui.push(new Menu(x, y, menu));
@@ -83,8 +72,7 @@ var World = (function () {
     },
     update: function () {
       // Delete ui elements which are no longer visible
-      var i = this.ui.length;
-      while (i--) {
+      for (var i = this.ui.length; i--;) {
         if (!this.ui[i].visible)
         this.ui.splice(i, 1);
       }
@@ -101,7 +89,7 @@ var World = (function () {
             this.entities[j].update();
         }
 
-        this.eventManager.update();
+        EventManager.update();
       }
     },
     keyInput: function() {
@@ -115,10 +103,10 @@ var World = (function () {
       else if (this.key == 38 && cameraMapPosition[1] > 0) {
         cameraMapPosition[1] -= this.dt*this.cameraSpeed;
       }
-      else if (this.key == 39 && cameraMapPosition[0] < this.map.width) {
+      else if (this.key == 39 && cameraMapPosition[0] < TileMap.width) {
         cameraMapPosition[0] += this.dt*this.cameraSpeed;
       }
-      else if (this.key == 40 && cameraMapPosition[1] < this.map.height) {
+      else if (this.key == 40 && cameraMapPosition[1] < TileMap.height) {
         cameraMapPosition[1] += this.dt*this.cameraSpeed;
       }
       else if (this.key == 32) {
@@ -142,15 +130,12 @@ var World = (function () {
       this.ctx.fillRect(0, 0, this.width, this.height);
 
       // Draw map
-      this.map.draw(this.ctx);
+      TileMap.draw(this.ctx);
 
       // Sort entities
       var drawOrder = [];
       for (var k = this.entities.length; k--;) {
-        if (this.entities[k].type === 'object')
-          drawOrder.push({pos: k, y: this.entities[k].y, z: this.entities[k].z});
-        else
-          drawOrder.push({pos: k, y: this.entities[k].sprite.y, z: this.entities[k].z});
+          drawOrder.push({pos: k, y: this.entities[k].getTileY(), z: this.entities[k].z});
       }
 
       // Order initially by y and then by z (allows for objects to be stacked)
@@ -162,7 +147,7 @@ var World = (function () {
         this.entities[i].draw(this.ctx);
       }
 
-      this.eventManager.draw(this.ctx);
+      EventManager.draw(this.ctx);
 
       // Draw FPS
       this.ctx.fillStyle = 'white';
@@ -173,8 +158,9 @@ var World = (function () {
       var RPstring = 'Research Points Exp: '+GameState.experimentPoints+ '. Theo: '+ GameState.theoryPoints + '. Comp: '+ GameState.computationPoints;
       var emailString = 'Unread Emails: ' + EmailManager.countUnreadEmail();
 
-      if (this.pause)
+      if (this.pause) {
         this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt) + ' (Paused)',10,20);
+      }
       else {
         this.ctx.fillText(timeString+' FPS: '+Math.floor(1/dt),10,20);
         this.ctx.fillText(RPstring,10,20+20);

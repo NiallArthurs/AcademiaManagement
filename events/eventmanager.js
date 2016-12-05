@@ -1,32 +1,32 @@
 // Event Manager class
-var EventManager = (function () {
+var EventManager = {
+    effects : [],
+    last : -1,
+    events : eventsMain,
+    multipliers : {},
+    queue : [],
+    entities : undefined,
+    eventAPI : {},
+    initialize: function(_entities) {
+      // Set map and entities
+      this.entities = _entities;
 
-  var EventManager = function(_entities, _map) {
-    this.map = _map;
-    this.entities = _entities;
-    this.effects = [];
-    this.events = eventsMain;
-    this.last = -1;
-    this.multipliers = {};
-    this.queue = [];
-
-    // Create the event API object exposing required functions.
-    this.eventAPI = {};
-    this.eventAPI.getCharacters = this.getCharacters.bind(this);
-    this.eventAPI.getMapObjects = this.getMapObjects.bind(this);
-    //this.eventAPI.changeSprite = this.changeSprite.bind(this);
-    this.eventAPI.addEffect = this.addEffect.bind(this);
-    this.eventAPI.displayNotification = this.displayNotification.bind(this);
-    this.eventAPI.getResearchPoints = this.getResearchPoints.bind(this);
-    this.eventAPI.getPublications = this.getPublications.bind(this);
-    this.eventAPI.sendEmail = EmailManager.createEmail.bind(EmailManager);
-    this.eventAPI.getGrantValue = GameState.determineTotalGrantFunding.bind(GameState);
-    this.eventAPI.getCurrentTime = Time.getCurrent.bind(Time);
-    this.eventAPI.getDay = Time.getDay.bind(Time);
-    this.eventAPI.setCharacterProperty = this.setCharacterProperty.bind(this);
-  };
-
-  EventManager.prototype = {
+      // Populate the event API object exposing required functions.
+      this.eventAPI.getCharacters = this.getCharacters.bind(this);
+      this.eventAPI.getMapObjects = this.getMapObjects.bind(this);
+      //this.eventAPI.changeSprite = this.changeSprite.bind(this);
+      this.eventAPI.addEffect = this.addEffect.bind(this);
+      this.eventAPI.displayNotification = this.displayNotification.bind(this);
+      this.eventAPI.getResearchPoints = this.getResearchPoints.bind(this);
+      this.eventAPI.getPublications = this.getPublications.bind(this);
+      this.eventAPI.sendEmail = EmailManager.createEmail.bind(EmailManager);
+      this.eventAPI.getGrantValue = GameState.determineTotalGrantFunding.bind(GameState);
+      this.eventAPI.getCurrentTime = Time.getCurrent.bind(Time);
+      this.eventAPI.getDay = Time.getDay.bind(Time);
+      this.eventAPI.setCharacterProperty = this.setCharacterProperty.bind(this);
+      this.eventAPI.getRandomMapPosition = TileMap.getRandomPosition.bind(TileMap);
+      this.eventAPI.createTemporaryCharacter = this.createDummyCharacter.bind(this);
+    },
     addQueue: function(_duration, _callback, _arg) {
       if (_arg === undefined) {
         this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback});
@@ -88,9 +88,7 @@ var EventManager = (function () {
         }
       }
 
-      if (time - this.last > 0) {
-        this.last = time;
-      }
+      if (time - this.last > 0) this.last = time;
     },
     update: function() {
       // Delete ui elements which are no longer visible
@@ -121,6 +119,23 @@ var EventManager = (function () {
         this.effects[k].draw(ctx);
       }
     },
+    createDummyCharacter(name, x, y) {
+      var prop = {};
+      prop.x = x;
+      prop.y = y;
+      prop.dummy = true;
+      var char = CharacterManager.createCharacter(name, prop);
+
+      charAPI = {};
+      charAPI.moveTo = char.move.bind(char);
+      charAPI.path = char.getPath.bind(char);
+      charAPI.remove = function () {
+        CharacterManager.removeCharacter(name);
+        this.moveTo = undefined;
+        this.path = undefined;
+      };
+      return charAPI;
+    },
     setCharacterProperty(character, property, value, duration) {
       switch (property) {
         case 'multiplier':
@@ -137,59 +152,40 @@ var EventManager = (function () {
       }
     },
     setCharacterSpeed(character, speed, duration) {
-      var tmpChar = this.getEntityFromName(character);
+      amplify.publish('characterprop', character, 'speed', speed);
 
-      if (tmpChar === undefined)
-        return;
-
-      tmpChar[1].speed = speed;
-
-      this.addQueue(duration, function(){
-        // Reset character walkspeed to default
-        if (tmpChar[1] === undefined)
-          return;
-
-        tmpChar[1].speed = uiStyle.character.walkspeed;
+      // Reset character walkspeed to default
+      this.addQueue(duration, function() {
+        amplify.publish('characterprop', character, 'speed', uiStyle.character.walkspeed);
       });
     },
     setMultiplier: function(character, multiplier, duration) {
       var tmp = this.getEntityFromName(character);
 
-      if (tmp === undefined)
-      return;
+      if (tmp === undefined) return;
 
-      if (this.multipliers[character] === undefined) {
-        this.multipliers[character] = [];
-      }
+      if (this.multipliers[character] === undefined) this.multipliers[character] = [];
 
       // Multipliers are stackable (so you can have multiple buffs at the same time).
       this.multipliers[character].push(multiplier);
 
       var self = this;
       var len = this.multipliers[character].len;
-      this.addQueue(duration, function(){self.multipliers[character].splice(len-1, 1);});
+      this.addQueue(duration, function() {
+        self.multipliers[character].splice(len-1, 1);
+      });
 
       this.calcAndAssign(character);
     },
     calcAndAssign: function(character) {
-      var tmp = this.getEntityFromName(character);
-
-      if (tmp === undefined)
-      return;
-
       var calc = this.multipliers[character].reduce(function(a,b){return a*b;}, 1.0);
-      tmp[1].multiplier = calc;
+      amplify.publish('characterprop', character, 'multiplier', calc);
     },
     setCharacterState: function(character, state) {
-      var tmp = this.getEntityFromName(character);
-
-      if (tmp === undefined)
-      return;
-
       var states = ['work', 'sleep', 'rest'];
 
-      if (states.includes(state) && tmp !== undefined) {
-        tmp[1].activeState = states.indexOf(state);
+      if (states.includes(state)) {
+        amplify.publish('characterprop', character, 'state', states.indexOf(state));
       }
     },
     getResearchPoints: function() {
@@ -215,8 +211,7 @@ var EventManager = (function () {
     addEffect: function(entity, type, duration) {
       var ent = this.getEntityFromName(entity);
 
-      if (ent === undefined)
-      return;
+      if (ent === undefined) return;
 
       var xPos, yPos;
       if (ent[0] === 'character') {
@@ -262,7 +257,7 @@ var EventManager = (function () {
     getCharacters: function() {
       var chars = {};
       for (var k = this.entities.length; k--;) {
-        if (this.entities[k].type === 'character')
+        if (this.entities[k].type === 'character' && this.entities[k].dummy === false)
         chars[this.entities[k].name] = {'x': this.entities[k].sprite.x,
         'y': this.entities[k].sprite.y, 'level': this.entities[k].level,
         'state': this.entities[k].state[this.entities[k].activeState],
@@ -284,7 +279,4 @@ var EventManager = (function () {
       character.oldSprite = character.sprite;
       character.sprite = sprite;
     }
-  };
-
-  return EventManager;
-})();
+};
