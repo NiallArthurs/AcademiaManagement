@@ -256,7 +256,8 @@ var eventsMain = {
     duration : 5, // Duration of event
     type: 'random',
     character: undefined,
-    probability : 0.5,
+    probability : 0.2,
+    once : false,
     prequisites: function (eAPI) {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
@@ -264,21 +265,23 @@ var eventsMain = {
     },
     update: function(eAPI) {
       // A function which is run each timestep.
-
       if (character !== undefined)
       {
-	// Make the character walk around aimlessly
-        if (!character.path().length)
+	      // Make the character walk up to a random character (at event start)
+        if (!character.path().length && !this.once)
         {
-          var pos = eAPI.getRandomMapPosition();
+          var chars = eAPI.getCharacters();
+          var tmp = getRandomProperty(chars);
+          var pos = eAPI.findNearbyLocation(tmp.x, tmp.y);
           character.moveTo(pos[0], pos[1]);
+          this.once = true;
         }
       }
     },
     start: function(eAPI) {
       // Run when an event starts
 
-      // Add temporary character
+      // Add temporary character at random position
       var pos = eAPI.getRandomMapPosition();
       character = eAPI.createTemporaryCharacter('Student', pos[0], pos[1]);
 
@@ -286,6 +289,7 @@ var eventsMain = {
     },
     finish: function(eAPI) {
       // Run when the duration of the event is up.
+      // Removes the character
       character.remove();
     }
   },

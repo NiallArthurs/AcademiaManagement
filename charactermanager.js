@@ -32,6 +32,7 @@ var CharacterManager = {
     // Generate random Character
     if (properties === undefined) {
       this.entities.push(new Character(name, this.getRandomCharacterSprite()));
+      TileMap.setCharacterOccupied(name, this.entities[this.entities.length-1].sprite.x, this.entities[this.entities.length-1].sprite.y);
     }
     else {
       if (properties.sprite === undefined) {

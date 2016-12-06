@@ -44,3 +44,9 @@ function orderByProperty(prop) {
      var metrics = context.measureText(text);
      return metrics.width;
  };
+
+// Returns a random property from an object
+var getRandomProperty = function (obj) {
+    var keys = Object.keys(obj)
+    return obj[keys[ keys.length * Math.random() << 0]];
+};

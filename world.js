@@ -28,7 +28,7 @@ var World = (function () {
 
     // Test Charaacters
     for (var i=0; i < 3; i++) {
-      this.entities.push(new Character(names[i], CharacterManager.getRandomCharacterSprite()));
+      CharacterManager.createCharacter(names[i]);
     }
 
     this.keyDownFn = this.inputKeyDown.bind(this);

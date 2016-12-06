@@ -27,6 +27,7 @@ var EventManager = {
       this.eventAPI.getRandomMapPosition = TileMap.getRandomPosition.bind(TileMap);
       this.eventAPI.testCollision = TileMap.collision.bind(TileMap);
       this.eventAPI.createTemporaryCharacter = this.createDummyCharacter.bind(this);
+      this.eventAPI.findNearbyLocation = this.findNearbyLocation.bind(this);
     },
     addQueue: function(_duration, _callback, _arg) {
       if (_arg === undefined) {
@@ -119,7 +120,37 @@ var EventManager = {
         this.effects[k].draw(ctx);
       }
     },
-    createDummyCharacter(name, x, y) {
+    findNearbyLocation: function(x,y) {
+      if (!TileMap.collision(x,y))
+	     return [x, y];
+
+      var points = [];
+
+      // We make a list of surrounding non-collision tiles.
+      var depth = 3;
+
+      for (var offX = -depth; offX < depth + 1; offX++) {
+        for (var offY = -depth; offY < depth + 1; offY++) {
+          if (offX !== 0 && offY !== 0) {
+            if (!TileMap.collision(x + offX,y + offY))
+            points.push([x + offX, y +offY]);
+          }
+        }
+      }
+
+      if (!points.length)
+        return undefined;
+
+      // Sort the list by distance to destination and return nearest
+      points.sort(function (a,b) {
+        var d1 = (x-a[0])*(x-a[0])+(y-a[1])*(y-a[1]);
+        var d2 = (x-b[0])*(x-b[0])+(y-b[1])*(y-b[1]);
+	       return d1 == d2 ? 0: (d1 > d2 ? 1 : -1);
+	      });
+
+      return points[0];
+    },
+    createDummyCharacter: function(name, x, y) {
       var prop = {};
       prop.x = x;
       prop.y = y;
@@ -128,13 +159,13 @@ var EventManager = {
 
       // We return an object which lets the event control the dummy character.
       // The event must issue the remove command or the character will persist
-      // once the event has finished. 
+      // once the event has finished.
       charAPI = {};
       charAPI.getX = character.getTileX.bind(character);
       charAPI.getY = character.getTileY.bind(character);
       charAPI.moveTo = character.move.bind(character);
       charAPI.path = character.getPath.bind(character);
-      charAPI.remove = function () {
+      charAPI.remove = function() {
         CharacterManager.removeCharacter(name);
 	// Remove all references to character functions (so the garbage collector deletes the object).
         this.moveTo = undefined;
@@ -144,7 +175,7 @@ var EventManager = {
       };
       return charAPI;
     },
-    setCharacterProperty(character, property, value, duration) {
+    setCharacterProperty: function(character, property, value, duration) {
       switch (property) {
         case 'multiplier':
           this.setMultiplier(character, value, duration);
@@ -159,7 +190,7 @@ var EventManager = {
           return;
       }
     },
-    setCharacterSpeed(character, speed, duration) {
+    setCharacterSpeed: function(character, speed, duration) {
       amplify.publish('characterprop', character, 'speed', speed);
 
       // Reset character walkspeed to default
@@ -186,7 +217,7 @@ var EventManager = {
       this.calcAndAssign(character);
     },
     calcAndAssign: function(character) {
-      var calc = this.multipliers[character].reduce(function(a,b){return a*b;}, 1.0);
+      var calc = this.multipliers[character].reduce(function(a, b){return a*b;}, 1.0);
       amplify.publish('characterprop', character, 'multiplier', calc);
     },
     setCharacterState: function(character, state) {
@@ -266,11 +297,11 @@ var EventManager = {
       var chars = {};
       for (var k = this.entities.length; k--;) {
         if (this.entities[k].type === 'character' && this.entities[k].dummy === false)
-        chars[this.entities[k].name] = {'x': this.entities[k].sprite.x,
-        'y': this.entities[k].sprite.y, 'level': this.entities[k].level,
-        'state': this.entities[k].state[this.entities[k].activeState],
-        'multiplier': this.entities[k].multiplier,
-        'walkspeed': this.entities[k].speed};
+          chars[this.entities[k].name] = {'x': this.entities[k].sprite.x,
+            'y': this.entities[k].sprite.y, 'level': this.entities[k].level,
+            'state': this.entities[k].state[this.entities[k].activeState],
+            'multiplier': this.entities[k].multiplier,
+            'walkspeed': this.entities[k].speed};
       }
       return chars;
     },
@@ -278,8 +309,8 @@ var EventManager = {
       var mapObjs = {};
       for (var k = this.entities.length; k--;) {
         if (this.entities[k].type === 'object')
-        mapObjs[this.entities[k].name] = {'x': this.entities[k].x,
-        'y': this.entities[k].y};
+          mapObjs[this.entities[k].name] = {'x': this.entities[k].x,
+            'y': this.entities[k].y};
       }
       return mapObjs;
     },
