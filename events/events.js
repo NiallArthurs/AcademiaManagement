@@ -230,8 +230,33 @@ var eventsMain = {
   'StartEvent' : {
     duration : 1, // Duration of event
     type: 'main',
+    prequisites: function (eAPI) {
+      // Return true/false depending on whether the prequisites are met
+      // Check we have atleast one chracter working
+      return true;
+    },
+    update: function(eAPI) {
+      // A function which is run each timestep.
+    },
+    start: function(eAPI) {
+      // Run when an event starts
+      eAPI.displayNotification('Welcome to the Lab!');
+
+      var email = ' Mr Doe, \
+                    Welcome to Towerblock Polytechnic! \
+                    We hope you have a super productive time working here :) \
+                    Dave From HR';
+      eAPI.sendEmail('HR Welcome', email, [], 'HR');
+    },
+    finish: function(eAPI) {
+      // Run when the duration of the event is up.
+    }
+  },
+  'CharacterExample' : {
+    duration : 5, // Duration of event
+    type: 'random',
     character: undefined,
-    once : false,
+    probability : 0.5,
     prequisites: function (eAPI) {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
@@ -242,6 +267,7 @@ var eventsMain = {
 
       if (character !== undefined)
       {
+	// Make the character walk around aimlessly
         if (!character.path().length)
         {
           var pos = eAPI.getRandomMapPosition();
@@ -254,15 +280,9 @@ var eventsMain = {
 
       // Add temporary character
       var pos = eAPI.getRandomMapPosition();
-      character = eAPI.createTemporaryCharacter('Dummy', pos[0], pos[1]);
+      character = eAPI.createTemporaryCharacter('Student', pos[0], pos[1]);
 
-      eAPI.displayNotification('Welcome to the Lab!');
-
-      var email = ' Mr Doe, \
-                    Welcome to Towerblock Polytechnic! \
-                    We hope you have a super productive time working here :) \
-                    Dave From HR';
-      eAPI.sendEmail('HR Welcome', email, [], 'HR');
+      eAPI.displayNotification('Someone new seems to be wandering around the lab!?!!?');
     },
     finish: function(eAPI) {
       // Run when the duration of the event is up.

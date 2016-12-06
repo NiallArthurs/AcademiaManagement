@@ -25,6 +25,7 @@ var EventManager = {
       this.eventAPI.getDay = Time.getDay.bind(Time);
       this.eventAPI.setCharacterProperty = this.setCharacterProperty.bind(this);
       this.eventAPI.getRandomMapPosition = TileMap.getRandomPosition.bind(TileMap);
+      this.eventAPI.testCollision = TileMap.collision.bind(TileMap);
       this.eventAPI.createTemporaryCharacter = this.createDummyCharacter.bind(this);
     },
     addQueue: function(_duration, _callback, _arg) {
@@ -91,10 +92,9 @@ var EventManager = {
       if (time - this.last > 0) this.last = time;
     },
     update: function() {
-      // Delete ui elements which are no longer visible
-      var i = this.effects.length;
 
-      while (i--) {
+      // Delete ui elements which are no longer visible
+      for (var i = this.effects.length; i--;) {
         if (!this.effects[i].visible) {
           this.effects.splice(i, 1);
         }
@@ -124,15 +124,23 @@ var EventManager = {
       prop.x = x;
       prop.y = y;
       prop.dummy = true;
-      var char = CharacterManager.createCharacter(name, prop);
+      var character = CharacterManager.createCharacter(name, prop);
 
+      // We return an object which lets the event control the dummy character.
+      // The event must issue the remove command or the character will persist
+      // once the event has finished. 
       charAPI = {};
-      charAPI.moveTo = char.move.bind(char);
-      charAPI.path = char.getPath.bind(char);
+      charAPI.getX = character.getTileX.bind(character);
+      charAPI.getY = character.getTileY.bind(character);
+      charAPI.moveTo = character.move.bind(character);
+      charAPI.path = character.getPath.bind(character);
       charAPI.remove = function () {
         CharacterManager.removeCharacter(name);
+	// Remove all references to character functions (so the garbage collector deletes the object).
         this.moveTo = undefined;
         this.path = undefined;
+	this.getX = undefined;
+	this.getY = undefined;
       };
       return charAPI;
     },

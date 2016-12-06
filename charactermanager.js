@@ -15,8 +15,6 @@ var CharacterManager = {
   entities : [],
   initialize: function(entities) {
     this.entities = entities;
-    this.createCharacterFn =  this.createCharacter.bind(this),
-    amplify.subscribe('createcharacter', this.createCharacterFn);
   },
   getRandomCharacterSprite : function() {
     var offscreenCanvas = document.createElement('canvas');

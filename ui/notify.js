@@ -5,6 +5,7 @@ var Notify = (function () {
   var Notify = function(_x, _y, _text, fun) {
     // Call MouseEvent constructor
     MouseEvent.call(this, _x, _y, 0, 0, false);
+    this.type = 'notify';
     this.text = _text;
     this.dt = 0;
     this.visible = true;

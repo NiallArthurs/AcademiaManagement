@@ -27,7 +27,7 @@ var World = (function () {
     EventManager.initialize(this.entities);
 
     // Test Charaacters
-    for (var i=0; i < 1; i++) {
+    for (var i=0; i < 3; i++) {
       this.entities.push(new Character(names[i], CharacterManager.getRandomCharacterSprite()));
     }
 
@@ -94,28 +94,39 @@ var World = (function () {
     },
     keyInput: function() {
 
-      if (this.pause || !this.keyDown)
+      if (!this.keyDown)
         return;
 
-      if (this.key == 37 && cameraMapPosition[0] > 0) {
-        cameraMapPosition[0] -= this.dt*this.cameraSpeed;
+      // If the game is paused a subset of keys are active
+      if (!this.pause) {
+        if (this.key === 37 && cameraMapPosition[0] > 0) {
+          cameraMapPosition[0] -= this.dt*this.cameraSpeed;
+        }
+        else if (this.key === 38 && cameraMapPosition[1] > 0) {
+          cameraMapPosition[1] -= this.dt*this.cameraSpeed;
+        }
+        else if (this.key === 39 && cameraMapPosition[0] < TileMap.width) {
+          cameraMapPosition[0] += this.dt*this.cameraSpeed;
+        }
+        else if (this.key === 40 && cameraMapPosition[1] < TileMap.height) {
+          cameraMapPosition[1] += this.dt*this.cameraSpeed;
+        }
+        else if (this.key === 32) {
+          this.centerCamera();
+        }
+        else if (this.key === 77) {
+          Browser.toggle(true);
+        }
       }
-      else if (this.key == 38 && cameraMapPosition[1] > 0) {
-        cameraMapPosition[1] -= this.dt*this.cameraSpeed;
+      else {
+        if (this.key === 13) {
+          // If a ui element is a notification we call the click behaviour on enter key
+          if (this.ui.length) {
+            if (this.ui[0].type === 'notify')
+            this.ui[0].inputMouseDownCallback();
+          }
+        }
       }
-      else if (this.key == 39 && cameraMapPosition[0] < TileMap.width) {
-        cameraMapPosition[0] += this.dt*this.cameraSpeed;
-      }
-      else if (this.key == 40 && cameraMapPosition[1] < TileMap.height) {
-        cameraMapPosition[1] += this.dt*this.cameraSpeed;
-      }
-      else if (this.key == 32) {
-        this.centerCamera();
-      }
-      else if (this.key == 77) {
-        Browser.toggle(true);
-      }
-
     },
     draw: function (dt) {
 

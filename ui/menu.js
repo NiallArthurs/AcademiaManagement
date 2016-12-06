@@ -48,6 +48,7 @@ var Menu = (function () {
   var Menu = function(_x, _y, _menu) {
     MouseEvent.call(this, _x, _y, 0, 0, false);
     this.dt = 0;
+    this.type = 'menu';
     this.visible = true;
     this.hide = 0;
     this.offset = uiStyle.menu.padding;

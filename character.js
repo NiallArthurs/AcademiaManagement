@@ -24,17 +24,19 @@ var Character = (function () {
     this.z = 0;
     this.points = [0.0, 0.0, 0.0];
     // Parameters for notifications which float up from the character
-    this.float = {position: 0,
+    this.float = {
+      position: 0,
       offset: getRandomInt(-5, 5),
       height: getRandomInt(10, 20),
       reset: function() {
-        this.position=0;
-        this.offset=getRandomInt(-5,5);
-        this.height=getRandomInt(10, 20);
+        this.position = 0;
+        this.offset = getRandomInt(-5,5);
+        this.height = getRandomInt(10, 20);
       }
     };
 
     this.researchPoints = [];
+
     // subscribe to dt
     this.dtFn = this.tick.bind(this);
     this.characterPropertyFn = this.setCharacterProperty.bind(this);
@@ -188,9 +190,9 @@ var Character = (function () {
 
       // Draw state based animations
       if (this.state[this.activeState] === 'sleep' && !this.path.length)
-      this.drawSleep(ctx);
+      	this.drawSleep(ctx);
       else if (this.state[this.activeState] === 'work')
-      this.drawWork(ctx);
+      	this.drawWork(ctx);
     },
     drawWork: function(ctx) {
       // Show generated research points (An E/C/T floats up from the character
@@ -212,7 +214,7 @@ var Character = (function () {
 
         var sWidth = ctx.measureText(string).width;
         if (this.float.position < (this.float.height))
-        ctx.fillText(string, this.sprite.getX()-sWidth/2+this.sprite.spriteWidth/2, this.sprite.getY()-this.float.position);
+          ctx.fillText(string, this.sprite.getX()-sWidth/2+this.sprite.spriteWidth/2, this.sprite.getY()-this.float.position);
         else {
           this.researchPoints.shift();
           this.float.reset();
