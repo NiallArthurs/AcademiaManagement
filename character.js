@@ -186,7 +186,7 @@ var Character = (function () {
 
       // If dummy character we only draw the sprite
       if (this.dummy)
-      return;
+        return;
 
       // Draw state based animations
       if (this.state[this.activeState] === 'sleep' && !this.path.length)

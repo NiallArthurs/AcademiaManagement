@@ -257,40 +257,52 @@ var eventsMain = {
     type: 'random',
     character: undefined,
     probability : 0.2,
-    once : false,
+    follow : '',
     prequisites: function (eAPI) {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
-      return true;
+      var chars = eAPI.getCharacters();
+
+      for (var obj in chars) {
+        if(chars[obj].state === 'work') {
+          return true;
+        }
+      }
+
+      return false;
     },
     update: function(eAPI) {
       // A function which is run each timestep.
-      if (character !== undefined)
+      if (this.character !== undefined)
       {
-	      // Make the character walk up to a random character (at event start)
-        if (!character.path().length && !this.once)
+	      // Make the temporary character follow a character
+        if (!this.character.path().length)
         {
           var chars = eAPI.getCharacters();
-          var tmp = getRandomProperty(chars);
-          var pos = eAPI.findNearbyLocation(tmp.x, tmp.y);
-          character.moveTo(pos[0], pos[1]);
-          this.once = true;
+          var pos = eAPI.findNearbyLocation(chars[this.follow].x, chars[this.follow].y);
+          this.character.moveTo(pos[0], pos[1]);
         }
       }
     },
     start: function(eAPI) {
       // Run when an event starts
+      var chars = eAPI.getCharacters();
+      for (var obj in chars) {
+        if (chars[obj].state === 'work') {
+	        this.follow = obj;
+        }
+      }
 
       // Add temporary character at random position
       var pos = eAPI.getRandomMapPosition();
-      character = eAPI.createTemporaryCharacter('Student', pos[0], pos[1]);
+      this.character = eAPI.createTemporaryCharacter('Student', pos[0], pos[1]);
 
       eAPI.displayNotification('Someone new seems to be wandering around the lab!?!!?');
     },
     finish: function(eAPI) {
       // Run when the duration of the event is up.
       // Removes the character
-      character.remove();
+      this.character.remove();
     }
   },
   'PerformanceEnhancingDrug' : {

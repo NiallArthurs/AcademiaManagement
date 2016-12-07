@@ -121,8 +121,8 @@ var EventManager = {
       }
     },
     findNearbyLocation: function(x,y) {
-      if (!TileMap.collision(x,y))
-	     return [x, y];
+      if (!TileMap.collision(Math.floor(x), Math.floor(y)))
+        return [Math.floor(x), Math.floor(y)];
 
       var points = [];
 
@@ -132,8 +132,8 @@ var EventManager = {
       for (var offX = -depth; offX < depth + 1; offX++) {
         for (var offY = -depth; offY < depth + 1; offY++) {
           if (offX !== 0 && offY !== 0) {
-            if (!TileMap.collision(x + offX,y + offY))
-            points.push([x + offX, y +offY]);
+            if (!TileMap.collision(Math.floor(x) + offX, Math.floor(y) + offY))
+              points.push([Math.floor(x) + offX, Math.floor(y) +offY]);
           }
         }
       }
@@ -143,9 +143,9 @@ var EventManager = {
 
       // Sort the list by distance to destination and return nearest
       points.sort(function (a,b) {
-        var d1 = (x-a[0])*(x-a[0])+(y-a[1])*(y-a[1]);
-        var d2 = (x-b[0])*(x-b[0])+(y-b[1])*(y-b[1]);
-	       return d1 == d2 ? 0: (d1 > d2 ? 1 : -1);
+          var d1 = (x-a[0])*(x-a[0])+(y-a[1])*(y-a[1]);
+          var d2 = (x-b[0])*(x-b[0])+(y-b[1])*(y-b[1]);
+	        return d1 == d2 ? 0: (d1 > d2 ? 1 : -1);
 	      });
 
       return points[0];
@@ -297,8 +297,8 @@ var EventManager = {
       var chars = {};
       for (var k = this.entities.length; k--;) {
         if (this.entities[k].type === 'character' && this.entities[k].dummy === false)
-          chars[this.entities[k].name] = {'x': this.entities[k].sprite.x,
-            'y': this.entities[k].sprite.y, 'level': this.entities[k].level,
+          chars[this.entities[k].name] = {'x': Math.floor(this.entities[k].sprite.x),
+            'y': Math.floor(this.entities[k].sprite.y), 'level': this.entities[k].level,
             'state': this.entities[k].state[this.entities[k].activeState],
             'multiplier': this.entities[k].multiplier,
             'walkspeed': this.entities[k].speed};
