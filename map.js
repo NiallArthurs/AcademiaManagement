@@ -73,8 +73,7 @@ var TileMap = {
     }
   },
   clearObjects: function(entities) {
-    for (var k = entities.length; k--;)
-    {
+    for (var k = entities.length; k--;) {
       if (entities[k].type === 'object') {
         entities.splice(i, k);
       }

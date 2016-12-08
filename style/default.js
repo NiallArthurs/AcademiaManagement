@@ -18,7 +18,7 @@ var defaultStyle = {
 			font: 'arial',
 			hoverbgcolor: 'green',
 			hovertextcolor: 'white',
-			fadespeed: 6
+			fadespeed: 8
 		},
 	notify :
 		{
@@ -28,6 +28,6 @@ var defaultStyle = {
 		  textcolor: 'black',
 		  fontsize: 20,
 		  font: 'arial',
-			fadespeed: 6
+			fadespeed: 8
 		 }
 };

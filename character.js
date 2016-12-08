@@ -83,8 +83,7 @@ var Character = (function () {
     },
     followPath: function() {
       // If the path isn't empty have the character follow it.
-      if (this.path.length !== 0)
-      {
+      if (this.path.length !== 0) {
         if (this.sprite.x === this.path[0][0] && this.sprite.y === this.path[0][1]) {
           this.path.shift();
         }
@@ -197,8 +196,7 @@ var Character = (function () {
     drawWork: function(ctx) {
       // Show generated research points (An E/C/T floats up from the character
       // slowly fading away). We work our way through the queue.
-      if (this.researchPoints.length)
-      {
+      if (this.researchPoints.length) {
         ctx.font = 'bold 20px Arial';
         var string;
         if (this.researchPoints[0][0] === 0) {

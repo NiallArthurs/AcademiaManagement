@@ -25,8 +25,7 @@ var GameState = {
   // If grant duration has elapsed delete it
   cleanGrants: function() {
     var i = this.grants.length;
-    while (i--)
-    {
+    while (i--) {
       if ((Time.getDay()-this.grants[i].start) > this.grants[i].duration)
         this.ui.splice(i, 1);
     }
@@ -39,16 +38,13 @@ var GameState = {
   // Add research point
   addResearchPoint: function (type, number) {
     // 0 - experiment, 1 - computation, 2 - theory
-    if (type === 0)
-    {
+    if (type === 0) {
       this.experimentPoints += number;
     }
-    else if (type === 1)
-    {
+    else if (type === 1) {
       this.computationPoints += number;
     }
-    else if (type === 2)
-    {
+    else if (type === 2) {
       this.theoryPoints += number;
     }
   },

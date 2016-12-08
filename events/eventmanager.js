@@ -7,9 +7,9 @@ var EventManager = {
     queue : [],
     entities : undefined,
     eventAPI : {},
-    initialize: function(_entities) {
+    initialize: function(entities) {
       // Set map and entities
-      this.entities = _entities;
+      this.entities = entities;
 
       // Populate the event API object exposing required functions.
       this.eventAPI.getCharacters = this.getCharacters.bind(this);
@@ -29,24 +29,14 @@ var EventManager = {
       this.eventAPI.createTemporaryCharacter = this.createDummyCharacter.bind(this);
       this.eventAPI.findNearbyLocation = this.findNearbyLocation.bind(this);
     },
-    addQueue: function(_duration, _callback, _arg) {
-      if (_arg === undefined) {
-        this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback});
-      }
-      else {
-        this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback, arg: _arg});
-      }
+    addQueue: function(_duration, _callback) {
+      this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback});
     },
     checkQueue: function() {
       // The queue is used to defer functions for an arbitrary duration
       for (var k = this.queue.length; k--;) {
         if (Time.getTime() - this.queue[k].t0 >= this.queue[k].duration) {
-          if (this.queue[k].arg === undefined) {
           this.queue[k].callback();
-        }
-        else {
-          this.queue[k].callback(this.queue[k].arg);
-        }
           this.queue.splice(k, 1);
         }
       }
@@ -63,10 +53,12 @@ var EventManager = {
 
               var self = this;
               this.addQueue(this.events[obj].duration, function(ev) {
-                self.events[ev].finish(self.eventAPI);
-                self.events[ev].active = false;
-                self.events[ev].complete = true;
-              }, obj);
+                return function () {
+                  self.events[ev].finish(self.eventAPI);
+                  self.events[ev].active = false;
+                  self.events[ev].complete = true;
+                };
+              }(obj));
             }
           }
         }
@@ -80,9 +72,11 @@ var EventManager = {
 
                 var self = this;
                 this.addQueue(this.events[obj].duration, function(ev) {
-                  self.events[ev].finish(self.eventAPI);
-                  self.events[ev].active = false;
-                }, obj);
+                  return function () {
+                    self.events[ev].finish(self.eventAPI);
+                    self.events[ev].active = false;
+                  };
+                }(obj));
                 this.last = time;
               }
             }
@@ -93,16 +87,11 @@ var EventManager = {
       if (time - this.last > 0) this.last = time;
     },
     update: function() {
-
       // Delete ui elements which are no longer visible
-      for (var i = this.effects.length; i--;) {
-        if (!this.effects[i].visible) {
-          this.effects.splice(i, 1);
-        }
-      }
+      this.effects = this.effects.filter((effect) => {return effect.visible});
 
-      this.eventUpdate();
       this.checkQueue();
+      this.eventUpdate();
 
       for (var obj in this.events) {
         if (this.events[obj].active && this.events[obj].update !== undefined) {
@@ -113,7 +102,6 @@ var EventManager = {
       for (var k = this.effects.length; k--;) {
         this.effects[k].update();
       }
-
     },
     draw: function(ctx) {
       for (var k = this.effects.length; k--;) {
@@ -167,11 +155,11 @@ var EventManager = {
       charAPI.path = character.getPath.bind(character);
       charAPI.remove = function() {
         CharacterManager.removeCharacter(name);
-	// Remove all references to character functions (so the garbage collector deletes the object).
-        this.moveTo = undefined;
-        this.path = undefined;
-	this.getX = undefined;
-	this.getY = undefined;
+        // Remove all references to character functions (so the garbage collector deletes the object).
+        this.moveTo = null;
+        this.path = null;
+        this.getX = null;
+        this.getY = null;
       };
       return charAPI;
     },
@@ -210,14 +198,12 @@ var EventManager = {
 
       var self = this;
       var len = this.multipliers[character].len;
-      this.addQueue(duration, function() {
-        self.multipliers[character].splice(len-1, 1);
-      });
+      this.addQueue(duration, () => {self.multipliers[character].splice(len-1, 1)});
 
       this.calcAndAssign(character);
     },
     calcAndAssign: function(character) {
-      var calc = this.multipliers[character].reduce(function(a, b){return a*b;}, 1.0);
+      var calc = this.multipliers[character].reduce((a, b) => {return a*b}, 1.0);
       amplify.publish('characterprop', character, 'multiplier', calc);
     },
     setCharacterState: function(character, state) {
@@ -234,17 +220,15 @@ var EventManager = {
       amplify.publish('popup-text', canvas.width/2, canvas.height/2, text, fun);
     },
     getEntityFromName: function(character) {
-      for (var k = this.entities.length; k--;) {
-        if (this.entities[k].type === 'character') {
-          if (this.entities[k].name === character) {
-            return ['character', this.entities[k]];
-          }
-        } else if (this.entities[k].type === 'object') {
-          if (this.entities[k].name === character) {
-            return ['object', this.entities[k]];
-          }
-        }
+      var search = entities.find((ent) => {return ent.name === character});
+
+      if (search.type === 'character') {
+        return ['character', search];
       }
+      else if (search.type === 'object') {
+        return ['object', search];
+      }
+
       return undefined;
     },
     addEffect: function(entity, type, duration) {
@@ -294,24 +278,17 @@ var EventManager = {
       return GameState.publications;
     },
     getCharacters: function() {
-      var chars = {};
-      for (var k = this.entities.length; k--;) {
-        if (this.entities[k].type === 'character' && this.entities[k].dummy === false)
-          chars[this.entities[k].name] = {'x': Math.floor(this.entities[k].sprite.x),
-            'y': Math.floor(this.entities[k].sprite.y), 'level': this.entities[k].level,
-            'state': this.entities[k].state[this.entities[k].activeState],
-            'multiplier': this.entities[k].multiplier,
-            'walkspeed': this.entities[k].speed};
-      }
+      var chars = this.entities.filter((ent) => {return ent.type === 'character'}).map(
+        (ent) => {return {'x': Math.floor(ent.getTileX()), 'y': Math.floor(ent.getTileY()),
+        'level': ent.level, 'state': ent.state[ent.activeState], 'multiplier': ent.multiplier,
+        'walkspeed': ent.speed, 'name': ent.name}});
+
       return chars;
     },
     getMapObjects: function() {
-      var mapObjs = {};
-      for (var k = this.entities.length; k--;) {
-        if (this.entities[k].type === 'object')
-          mapObjs[this.entities[k].name] = {'x': this.entities[k].x,
-            'y': this.entities[k].y};
-      }
+      var mapObjs = this.entities.filter((ent) => {return ent.type === 'object'}).map((ent) =>
+        {return {'name': ent.name, 'x': ent.x, 'y': ent.y}});
+
       return mapObjs;
     },
     changeSprite: function(character, sprite) {

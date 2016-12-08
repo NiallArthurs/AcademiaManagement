@@ -35,13 +35,11 @@ var Notify = (function () {
       if ((this.alpha < 1.0) && (this.hide === 0))
         this.alpha = this.alpha + this.dt*this.speed;
 
-      if (this.hide === 1)
-      {
+      if (this.hide === 1) {
           this.alpha = this.alpha - this.dt*this.speed;
       }
 
-      if (this.alpha < 0)
-      {
+      if (this.alpha < 0) {
         this.alpha = 0;
         this.visible = false;
         amplify.unsubscribe( 'dt', this.dtFn);

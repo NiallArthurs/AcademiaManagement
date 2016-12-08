@@ -27,8 +27,7 @@ var MouseEvent = (function () {
       var x = data.ev.pageX - data.offsetLeft;
       var y = data.ev.pageY - data.offsetTop;
 
-      if (x >= this.xPos && x <= this.xPos+this.width && y >= this.yPos  && y <= this.yPos+this.height)
-      {
+      if (x >= this.xPos && x <= this.xPos+this.width && y >= this.yPos  && y <= this.yPos+this.height) {
         this.hover = true;
       }
       else {
@@ -40,10 +39,8 @@ var MouseEvent = (function () {
       var x = data.ev.pageX - data.offsetLeft;
       var y = data.ev.pageY - data.offsetTop;
 
-      if (x >= this.xPos && x <= this.xPos+this.width && y >= this.yPos  && y <= this.yPos+this.height)
-      {
-        if (typeof this.inputMouseDownCallback  === 'function')
-        {
+      if (x >= this.xPos && x <= this.xPos+this.width && y >= this.yPos  && y <= this.yPos+this.height) {
+        if (typeof this.inputMouseDownCallback  === 'function') {
           this.inputMouseDownCallback();
         }
       }

@@ -132,38 +132,28 @@ var eventsMain = {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
       var chars = eAPI.getCharacters();
-
-      for (var obj in chars) {
-        if(chars[obj].state === 'work') {
-          return true;
-        }
-      }
-
-      return false;
+      return chars.some((char) => {return char.state === 'work'});
     },
     update: function(eAPI) {
       // For efficiency we only check every 10 timesteps
-      if (this.ntt % 10 === 0)
-      {
+      if (this.ntt % 10 === 0) {
         var chars = eAPI.getCharacters();
 
-        var x = chars[this.charName].x;
-        var y = chars[this.charName].y;
+        var negChar = chars.find((char) => {return char.name === this.charName});
 
         // Check whether characters are within two tiles of the chosen character
         // and set the multiplier to zero for two minutes
-        for (var obj in chars) {
-          if (obj !== this.charName) {
-            var nx = chars[obj].x;
-            var ny = chars[obj].y;
-            if (Math.sqrt((nx-x)*(nx-x)+(ny-y)*(ny-y)) <= 2) {
-              if (chars[obj].multiplier !== 0.0) {
-                eAPI.setCharacterProperty(obj, 'multiplier', 0.0, 2.0);
-                //eAPI.setCharacterProperty(obj, 'speed', 5.0, 1.0);
+        chars.forEach((char) => {
+            if (char.name !== negChar.name) {
+              var nx = char.x;
+              var ny = char.y;
+              if (Math.sqrt((nx-negChar.x)*(nx-negChar.x)+(ny-negChar.y)*(ny-negChar.y)) <= 2) {
+                if (char.multiplier !== 0.0) {
+                  eAPI.setCharacterProperty(char.name, 'multiplier', 0.0, 2.0);
+                }
               }
             }
-          }
-        }
+        });
       }
 
       this.ntt += 1;
@@ -173,13 +163,7 @@ var eventsMain = {
       var chars = eAPI.getCharacters();
 
       // Find the first character who is working
-      for (var obj in chars) {
-        if(chars[obj].state === 'work') {
-          this.charName = obj;
-          break;
-        }
-      }
-
+      this.charName = chars.find((char) => {return char.state === 'work'}).name;
       eAPI.displayNotification('Negation field active '+this.charName+'!');
       eAPI.addEffect(this.charName, 'field', this.duration);
     },
@@ -209,7 +193,7 @@ var eventsMain = {
       // Run when an event starts
       var mapObj = eAPI.getMapObjects();
 
-      var furniture = Object.keys(mapObj)[0];
+      var furniture = mapObj[0].name;
       eAPI.displayNotification('You need to contact the building manager.');
 
       var email = ' Doc Brown, \
@@ -262,24 +246,17 @@ var eventsMain = {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
       var chars = eAPI.getCharacters();
-
-      for (var obj in chars) {
-        if(chars[obj].state === 'work') {
-          return true;
-        }
-      }
-
-      return false;
+      return chars.some((char) => {return char.state === 'work'});
     },
     update: function(eAPI) {
       // A function which is run each timestep.
-      if (this.character !== undefined)
-      {
+      if (this.character !== undefined) {
 	      // Make the temporary character follow a character
-        if (!this.character.path().length)
-        {
+        if (!this.character.path().length) {
           var chars = eAPI.getCharacters();
-          var pos = eAPI.findNearbyLocation(chars[this.follow].x, chars[this.follow].y);
+          var poi =  chars.find((char) => {return char.name === this.follow});
+
+          var pos = eAPI.findNearbyLocation(poi.x, poi.y);
           this.character.moveTo(pos[0], pos[1]);
         }
       }
@@ -287,11 +264,7 @@ var eventsMain = {
     start: function(eAPI) {
       // Run when an event starts
       var chars = eAPI.getCharacters();
-      for (var obj in chars) {
-        if (chars[obj].state === 'work') {
-	        this.follow = obj;
-        }
-      }
+      this.follow = chars.find((char) => {return char.state === 'work'}).name;
 
       // Add temporary character at random position
       var pos = eAPI.getRandomMapPosition();
@@ -317,31 +290,19 @@ var eventsMain = {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
       var chars = eAPI.getCharacters();
-
-      for (var obj in chars) {
-        if(chars[obj].state === 'work') {
-          return true;
-        }
-      }
-
-      return false;
+      return chars.some((char) => {return char.state === 'work'});
     },
     start: function(eAPI) {
 
       this.t0 = eAPI.getDay();
       // Run when an event starts
       var chars = eAPI.getCharacters();
+      this.charName =  chars.find((char) => {return char.state === 'work'}).name;
 
       // Find the first character who is working
-      for (var obj in chars) {
-        if(chars[obj].state === 'work') {
-          this.charName = obj;
-          eAPI.setCharacterProperty(obj, 'multiplier', 1.5, 3.0);
-          eAPI.setCharacterProperty(obj, 'speed', 5.0, 10.0);
-          eAPI.displayNotification('Whats wrong with '+this.charName+'?');
-          break;
-        }
-      }
+      eAPI.setCharacterProperty(this.charName, 'multiplier', 1.5, 3.0);
+      eAPI.setCharacterProperty(this.charName, 'speed', 5.0, 10.0);
+      eAPI.displayNotification('Whats wrong with ' + this.charName + '?');
 
       var email = ' Prof Strawb, <br> <br> \
                     I have been hearing rumours that one of our groups members has \
@@ -351,14 +312,13 @@ var eventsMain = {
 
       var self = this;
       var responses = [{short:'Wait and see.',long:'Let\'s see how effective it is before we take action.', run: function(){eAPI.displayNotification('It appears to be spreading.'); self.spread = true;}},
-                       {short:'Send to counselling.',long:'Send the member of staff to counselling.', run: function(){eAPI.displayNotification('It looks like he should be return to normal shortly.');}}];
+                       {short:'Send to counselling.',long:'Send the member of staff to counselling.', run: function(){eAPI.displayNotification('It looks like he should return to normal shortly.');}}];
 
       eAPI.sendEmail('Performance Enhancing Drugs', email, responses, 'Barbara');
     },
     update: function(eAPI) {
       // For efficiency we only check every 10 timesteps
       if (this.spread === true || (eAPI.getDay() - this.t0) >= 5) {
-
         eAPI.setCharacterProperty(this.charName, 'multiplier', 0.0, 1.0);
 
         if (!this.spread) {
@@ -369,41 +329,28 @@ var eventsMain = {
         if (this.ntt % 10 === 0) {
 
           var chars = eAPI.getCharacters();
-          var x = chars[this.charName].x;
-          var y = chars[this.charName].y;
+          var poi =  chars.find((char) => {return char.name === this.charName});
 
           // Check whether characters are within two tiles of the chosen character
           // and set the multiplier to zero for two minutes
-          for (var obj in chars) {
-            if (obj !== this.charName) {
-              var nx = chars[obj].x;
-              var ny = chars[obj].y;
-              if (Math.sqrt((nx-x)*(nx-x)+(ny-y)*(ny-y)) <= 2) {
-                if (chars[obj].walkspeed !== 5.0) {
-                  eAPI.setCharacterProperty(obj, 'multiplier', 0.1, 2.0);
-                  eAPI.setCharacterProperty(obj, 'speed', 5.0, 2.0);
+          chars.forEach(function (char) {
+            if (char.name !== this.charName) {
+              var nx = char.x;
+              var ny = char.y;
+              if (Math.sqrt((nx-poi.x)*(nx-poi.x)+(ny-poi.y)*(ny-poi.y)) <= 2) {
+                if (char.walkspeed !== 5.0) {
+                  eAPI.setCharacterProperty(char.name, 'multiplier', 0.1, 2.0);
+                  eAPI.setCharacterProperty(char.name, 'speed', 5.0, 2.0);
                 }
               }
             }
-          }
+          });
         }
         this.ntt += 1;
       }
     },
     finish: function(eAPI) {
       this.ntt = 0;
-
-      var chars = eAPI.getCharacters();
-
-      var count = 0;
-      for (var obj in chars) {
-        if (chars[obj].walkspeed === 5) {
-          count++;
-        }
-      }
-
-      // A cost depending on the number of users will be applied/reported in the email.
-      var cost = count * 5000;
 
       if (this.spread) {
         var email = ' Prof Strawb, <br> <br> \

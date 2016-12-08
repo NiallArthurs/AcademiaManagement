@@ -53,15 +53,13 @@ var Sprite = (function () {
         return;
 
       this.time += dt;
-      if (this.time >= this.animations[this.state].speed)
-      {
+      if (this.time >= this.animations[this.state].speed) {
           this.frame = (this.frame + 1) % this.animations[this.state].frames.length;
           this.time = 0;
       }
     },
     setState: function(state) {
-      if (state != this.state)
-      {
+      if (state != this.state) {
         this.state = state;
         this.frame = 0;
         this.time = 0;

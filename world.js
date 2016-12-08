@@ -72,10 +72,7 @@ var World = (function () {
     },
     update: function () {
       // Delete ui elements which are no longer visible
-      for (var i = this.ui.length; i--;) {
-        if (!this.ui[i].visible)
-        this.ui.splice(i, 1);
-      }
+      this.ui = this.ui.filter((el) => {return el.visible});
 
       // Pause when ui elements active
       if (this.ui.length || Browser.active)
@@ -84,10 +81,9 @@ var World = (function () {
         this.pauseGame(false);
 
       if (!this.pause) {
-        for (var j=0; j < this.entities.length;  j++) {
-          if (this.entities[j].type !== 'object')
-            this.entities[j].update();
-        }
+
+        this.entities.filter((ent) => {return ent.type !== 'object'}).forEach(
+          (ent) => {ent.update()});
 
         EventManager.update();
       }
@@ -134,7 +130,7 @@ var World = (function () {
 
       // If the browser is active we don't need to redraw the world (wait until ui elements are removed)
       if (Browser.active && !this.ui.length)
-	      return;
+        return;
 
       // Draw background
       this.ctx.fillStyle = uiStyle.world.bgcolor;
@@ -143,19 +139,16 @@ var World = (function () {
       // Draw map
       TileMap.draw(this.ctx);
 
-      // Sort entities
-      var drawOrder = [];
-      for (var k = this.entities.length; k--;) {
-          drawOrder.push({pos: k, y: this.entities[k].getTileY(), z: this.entities[k].z});
-      }
+      // Populate an array of entit for sorting
+      var drawOrder = this.entities.map((entity, index) =>
+        {return {pos: index, y: entity.getTileY(), z: entity.z}});
 
       // Order initially by y and then by z (allows for objects to be stacked)
       drawOrder.sort(orderByProperty('y','z'))
 
       // Draw entities using the above order
       for (var j=0; j < this.entities.length; j++) {
-        var i = drawOrder[j].pos;
-        this.entities[i].draw(this.ctx);
+        this.entities[drawOrder[j].pos].draw(this.ctx);
       }
 
       EventManager.draw(this.ctx);
