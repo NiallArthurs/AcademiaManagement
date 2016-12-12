@@ -11,10 +11,42 @@ var maleCharacter = {
 };
 
 
+var characterNames = [
+  'Einstein',
+  'Newton',
+  'Euler',
+  'Curie',
+  'Feynman',
+  'Galilei',
+  'Darwin',
+  'Pasteur',
+  'Hawking',
+  'Edison',
+  'Faraday',
+  'Tesla',
+  'Turing',
+  'de Vinci',
+  'Kepler',
+  'Planck',
+  'Dirac',
+  'Hooke',
+  'Likhtman',
+  'Wang',
+  'Gauss',
+  'Nobel',
+  'Berners-Lee',
+  'Descartes',
+  'Amin',
+  'Arthurs'
+];
+
 var CharacterManager = {
   entities : [],
   initialize: function(entities) {
     this.entities = entities;
+  },
+  getRandomCharacterName: function() {
+    return characterNames[getRandomInt(0,characterNames.length-1)];
   },
   getRandomCharacterSprite : function() {
     var offscreenCanvas = document.createElement('canvas');
@@ -47,11 +79,14 @@ var CharacterManager = {
       this.entities[this.entities.length-1].sprite.y = properties.y;
 
       TileMap.setCharacterOccupied(name, properties.x, properties.y);
-      
+
     }
     return this.entities[this.entities.length-1];
   },
   removeCharacter : function(name) {
+    //this.entities.find(ent => ent.name === name).cleanup();
+    //this.entities = this.entities.filter(ent => ent.name !== name);
+
     for (var k = this.entities.length; k--;) {
       if (this.entities[k].name == name) {
         this.entities[k].cleanup();

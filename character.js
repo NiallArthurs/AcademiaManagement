@@ -73,11 +73,10 @@ var Character = (function () {
       this.dt = dt;
     },
     inputMouseDown: function (data) {
-      var self = this;
-      var menu = [['Text Notification', function characterMenu() {amplify.publish('popup-text', self.sprite.getX(), self.sprite.getY(), 'My name is '+self.name);}],
-      ['Move', function characterSetMove() {if (self.path.length === 0) self.randomMove();}],
-      ['Work', function characterSetWork() {if (self.state[self.activeState] !== 'work') self.activeState = 0;}],
-      ['Sleep', function characterSetSleep() {if (self.state[self.activeState] !== 'sleep') self.activeState = 1;}]];
+      var menu = [['Text Notification', () => {amplify.publish('popup-text', this.sprite.getX(), this.sprite.getY(), 'My name is '+this.name);}],
+      ['Move', () => {if (this.path.length === 0) this.randomMove();}],
+      ['Work', () => {if (this.state[this.activeState] !== 'work') this.activeState = 0;}],
+      ['Sleep', () => {if (this.state[this.activeState] !== 'sleep') this.activeState = 1;}]];
 
       amplify.publish('popup-menu', this.sprite.getX(), this.sprite.getY(), menu);
     },

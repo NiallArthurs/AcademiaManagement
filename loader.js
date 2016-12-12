@@ -1,7 +1,9 @@
 // We use the preloadjs to load images (only charaacters here at the moment)
+// This is also used to load events.
 
 var loadQueue = new createjs.LoadQueue(false);
 
+// Images
 loadQueue.loadManifest([{id: 'male-body', src: 'assets/character/body-male.png'},
 			{id: 'male-hair-messy', src: 'assets/character/male-hair-messy.png'},
 			{id: 'male-hair-messy2', src: 'assets/character/male-hair-messy2.png'},

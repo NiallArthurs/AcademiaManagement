@@ -1,12 +1,17 @@
 // Event Manager class
 var EventManager = {
     effects : [],
-    last : -1,
+    last : 0,
     events : eventsMain,
     multipliers : {},
     queue : [],
     entities : undefined,
     eventAPI : {},
+    eventsMain : [],
+    eventsRandom : [],
+    eventOrder : [],
+    eventPos : 0,
+    eventRandNext : getRandomInt(2,5),
     initialize: function(entities) {
       // Set map and entities
       this.entities = entities;
@@ -27,7 +32,13 @@ var EventManager = {
       this.eventAPI.getRandomMapPosition = TileMap.getRandomPosition.bind(TileMap);
       this.eventAPI.testCollision = TileMap.collision.bind(TileMap);
       this.eventAPI.createTemporaryCharacter = this.createDummyCharacter.bind(this);
+      this.eventAPI.getRandomCharacterName = CharacterManager.getRandomCharacterName.bind(CharacterManager);
       this.eventAPI.findNearbyLocation = this.findNearbyLocation.bind(this);
+      this.eventAPI.addQueue = this.addQueue.bind(this);
+
+      // Create the random event queue (We should add all events before initializing)
+      this.last = Time.getDay();
+      alert("Next Random Event:" + this.eventRandNext);
     },
     addQueue: function(_duration, _callback) {
       this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback});
@@ -39,6 +50,52 @@ var EventManager = {
           this.queue[k].callback();
           this.queue.splice(k, 1);
         }
+      }
+    },
+    updateMain: function() {
+      this.eventsMain.filter(ev => !ev.complete && !ev.active && ev.prequisites(this.eventAPI)).forEach((ev, index) => {
+        ev.active = true;
+        ev.start(this.eventAPI);
+
+        this.addQueue(ev.duration, () => {
+            ev.finish(this.eventAPI);
+            ev.active = false;
+            ev.complete = true;
+          });
+      });
+    },
+    updateRandom: function() {
+      var time = Time.getDay();
+
+      if (time - this.last > this.eventRandNext) {
+
+        if (this.eventPos === this.eventOrder.length || this.eventOrder.length !== this.eventsRandom.length) {
+          this.eventOrder = [...Array(this.eventsRandom.length||0)].map((v,i) => i);
+          this.eventOrder = shuffleArray(this.eventOrder);
+          alert(this.eventOrder[0])
+        }
+
+        // This could cause problems if we have no events without prequisites
+        while (!this.eventsRandom[this.eventOrder[this.eventPos]].prequisites(this.eventAPI)) {
+          this.eventPos++;
+        }
+
+        alert('Start event: '+ this.eventsRandom[this.eventOrder[this.eventPos]].name);
+
+        this.eventsRandom[this.eventOrder[this.eventPos]].active = true;
+        this.eventsRandom[this.eventOrder[this.eventPos]].start(this.eventAPI);
+
+        this.addQueue(this.eventsRandom[this.eventOrder[this.eventPos]].duration, function(ev) {
+          return function () {
+            this.eventsRandom[ev].finish(this.eventAPI);
+            this.eventsRandom[ev].active = false;
+          };
+        }(this.eventOrder[this.eventPos]));
+
+        this.eventRandNext = getRandomInt(2,5);
+        alert("Next Random Event:" + this.eventRandNext);
+        this.eventPos++;
+        this.last = time;
       }
     },
     eventUpdate: function () {
@@ -88,10 +145,12 @@ var EventManager = {
     },
     update: function() {
       // Delete ui elements which are no longer visible
-      this.effects = this.effects.filter((effect) => {return effect.visible});
+      this.effects = this.effects.filter(effect => effect.visible);
 
       this.checkQueue();
-      this.eventUpdate();
+      //this.eventUpdate();
+      this.updateMain();
+      this.updateRandom();
 
       for (var obj in this.events) {
         if (this.events[obj].active && this.events[obj].update !== undefined) {
@@ -196,14 +255,13 @@ var EventManager = {
       // Multipliers are stackable (so you can have multiple buffs at the same time).
       this.multipliers[character].push(multiplier);
 
-      var self = this;
       var len = this.multipliers[character].len;
-      this.addQueue(duration, () => {self.multipliers[character].splice(len-1, 1)});
+      this.addQueue(duration, () => {this.multipliers[character].splice(len-1, 1)});
 
       this.calcAndAssign(character);
     },
     calcAndAssign: function(character) {
-      var calc = this.multipliers[character].reduce((a, b) => {return a*b}, 1.0);
+      var calc = this.multipliers[character].reduce((a, b) => a*b, 1.0);
       amplify.publish('characterprop', character, 'multiplier', calc);
     },
     setCharacterState: function(character, state) {
@@ -220,7 +278,7 @@ var EventManager = {
       amplify.publish('popup-text', canvas.width/2, canvas.height/2, text, fun);
     },
     getEntityFromName: function(character) {
-      var search = entities.find((ent) => {return ent.name === character});
+      var search = this.entities.find(ent => ent.name === character);
 
       if (search.type === 'character') {
         return ['character', search];
@@ -230,6 +288,17 @@ var EventManager = {
       }
 
       return undefined;
+    },
+    addEvent: function(name, ev) {
+      this.events[name] = ev;
+
+      if (ev.type === 'random') {
+        ev.name = name;
+        this.eventsRandom.push(ev);
+      } else if (ev.type === 'main') {
+        ev.name = name;
+        this.eventsMain.push(ev);
+      }
     },
     addEffect: function(entity, type, duration) {
       var ent = this.getEntityFromName(entity);
@@ -278,15 +347,15 @@ var EventManager = {
       return GameState.publications;
     },
     getCharacters: function() {
-      var chars = this.entities.filter((ent) => {return ent.type === 'character'}).map(
-        (ent) => {return {'x': Math.floor(ent.getTileX()), 'y': Math.floor(ent.getTileY()),
+      var chars = this.entities.filter(ent => ent.type === 'character').map(
+        ent => {return {'x': Math.floor(ent.getTileX()), 'y': Math.floor(ent.getTileY()),
         'level': ent.level, 'state': ent.state[ent.activeState], 'multiplier': ent.multiplier,
         'walkspeed': ent.speed, 'name': ent.name}});
 
       return chars;
     },
     getMapObjects: function() {
-      var mapObjs = this.entities.filter((ent) => {return ent.type === 'object'}).map((ent) =>
+      var mapObjs = this.entities.filter(ent => ent.type === 'object').map(ent =>
         {return {'name': ent.name, 'x': ent.x, 'y': ent.y}});
 
       return mapObjs;

@@ -64,119 +64,18 @@
  *
  */
 
+ // Load events using preloadjs
+ // Random events
+ loadQueue.loadFile("events/random/performenhance.js");
+ loadQueue.loadFile("events/random/expertise.js");
+ loadQueue.loadFile("events/random/negation.js");
+ loadQueue.loadFile("events/random/visit.js")
+
+ // Main events
+ loadQueue.loadFile("events/main/welcome.js");
+
+// Examples
 var eventsMain = {
-  'ResearchTarget' : {
-    duration : 5, // Duration of event
-    probability : 0.2, // enabled approximately every 5 minutes.
-    type : 'random',
-    t0RP : [0, 0, 0],
-    researchType : 1,
-    researchTarget : 30,
-    prequisites: function (eAPI) {
-      // Return true/false depending on whether the prequisites are met
-      return true;
-    },
-    update: function(eAPI) {
-      // A function which is run each timestep.
-    },
-    start: function(eAPI) {
-      // Run when an event starts
-      this.researchType = getRandomInt(1,3);
-      this.t0RP = eAPI.getResearchPoints();
-      var email = 'Prof. Strawb<br><br>\
-                   As part of an up coming budget review we are asking all research groups to meet certain targets.<br>\
-                   We ask that your group meets a target of '
-                   + this.researchTarget + ' ';
-      var subject = '';
-      if (this.researchType == 1) {
-        email += 'computational';
-        subject += 'Computational';
-        eAPI.displayNotification('You have ' + this.duration + ' days to prove your group has computational expertise.');
-      } else if (this.researchType == 2) {
-        email += 'experimental';
-        subject += 'Experimental';
-        eAPI.displayNotification('You have ' + this.duration + ' days to prove your group has experimental expertise.');
-      } else {
-        email += 'theoretical';
-        subject += 'Theoretical';
-        eAPI.displayNotification('You have ' + this.duration + ' days to prove your group has theoretical expertise.');
-      }
-      email += ' research points in the next ' + this.duration + ' days.<br><br>\
-                Regards<br><br>\
-                Prof. Busybody<br>\
-                Head of the Faculty of "Science"\
-               ';
-      subject += ' Research Target'
-      eAPI.sendEmail(subject, email, [], 'Prof. Busybody');
-    },
-    finish: function(eAPI) {
-      // Run when the duration of the event is up.
-      // Should notify of win/failure.
-
-      var curRP = eAPI.getResearchPoints()
-      if (curRP[this.researchType]-this.t0RP[this.researchType] > this.researchTarget) {
-          eAPI.displayNotification('Wow! Your group rock.');
-      } else {
-          eAPI.displayNotification('Maybe some of your staff need to attend more courses?');
-      }
-    }
-
-  },
-  'NegationField' : {
-    duration : 5, // Duration of event
-    probability : 0.2, // enabled approximately every 5 minutes.
-    type : 'random',
-    charName : '', // event variable
-    ntt: 0,
-    prequisites: function (eAPI) {
-      // Return true/false depending on whether the prequisites are met
-      // Check we have atleast one chracter working
-      var chars = eAPI.getCharacters();
-      return chars.some((char) => {return char.state === 'work'});
-    },
-    update: function(eAPI) {
-      // For efficiency we only check every 10 timesteps
-      if (this.ntt % 10 === 0) {
-        var chars = eAPI.getCharacters();
-
-        var negChar = chars.find((char) => {return char.name === this.charName});
-
-        // Check whether characters are within two tiles of the chosen character
-        // and set the multiplier to zero for two minutes
-        chars.forEach((char) => {
-            if (char.name !== negChar.name) {
-              var nx = char.x;
-              var ny = char.y;
-              if (Math.sqrt((nx-negChar.x)*(nx-negChar.x)+(ny-negChar.y)*(ny-negChar.y)) <= 2) {
-                if (char.multiplier !== 0.0) {
-                  eAPI.setCharacterProperty(char.name, 'multiplier', 0.0, 2.0);
-                }
-              }
-            }
-        });
-      }
-
-      this.ntt += 1;
-    },
-    start: function(eAPI) {
-      // Run when an event starts
-      var chars = eAPI.getCharacters();
-
-      // Find the first character who is working
-      this.charName = chars.find((char) => {return char.state === 'work'}).name;
-      eAPI.displayNotification('Negation field active '+this.charName+'!');
-      eAPI.addEffect(this.charName, 'field', this.duration);
-    },
-    finish: function(eAPI) {
-      // Run when the duration of the event is up.
-      // Should notify of win/failure.
-      this.ntt = 0;
-      eAPI.displayNotification("Negation field disabled.");
-      eAPI.addEffect(this.charName, 'explosion');
-      eAPI.setCharacterProperty(this.charName, 'state', 'sleep');
-    }
-
-  },
   'ExplodeFurniture' : {
     duration : 1, // Duration of event
     probability : 0.2, // enabled approximately every 5 minutes.
@@ -211,31 +110,6 @@ var eventsMain = {
     }
 
   },
-  'StartEvent' : {
-    duration : 1, // Duration of event
-    type: 'main',
-    prequisites: function (eAPI) {
-      // Return true/false depending on whether the prequisites are met
-      // Check we have atleast one chracter working
-      return true;
-    },
-    update: function(eAPI) {
-      // A function which is run each timestep.
-    },
-    start: function(eAPI) {
-      // Run when an event starts
-      eAPI.displayNotification('Welcome to the Lab!');
-
-      var email = ' Mr Doe, \
-                    Welcome to Towerblock Polytechnic! \
-                    We hope you have a super productive time working here :) \
-                    Dave From HR';
-      eAPI.sendEmail('HR Welcome', email, [], 'HR');
-    },
-    finish: function(eAPI) {
-      // Run when the duration of the event is up.
-    }
-  },
   'CharacterExample' : {
     duration : 5, // Duration of event
     type: 'random',
@@ -246,7 +120,7 @@ var eventsMain = {
       // Return true/false depending on whether the prequisites are met
       // Check we have atleast one chracter working
       var chars = eAPI.getCharacters();
-      return chars.some((char) => {return char.state === 'work'});
+      return chars.some(char => char.state === 'work');
     },
     update: function(eAPI) {
       // A function which is run each timestep.
@@ -254,7 +128,7 @@ var eventsMain = {
 	      // Make the temporary character follow a character
         if (!this.character.path().length) {
           var chars = eAPI.getCharacters();
-          var poi =  chars.find((char) => {return char.name === this.follow});
+          var poi =  chars.find(char => char.name === this.follow);
 
           var pos = eAPI.findNearbyLocation(poi.x, poi.y);
           this.character.moveTo(pos[0], pos[1]);
@@ -264,7 +138,7 @@ var eventsMain = {
     start: function(eAPI) {
       // Run when an event starts
       var chars = eAPI.getCharacters();
-      this.follow = chars.find((char) => {return char.state === 'work'}).name;
+      this.follow = chars.find(char => char.state === 'work').name;
 
       // Add temporary character at random position
       var pos = eAPI.getRandomMapPosition();
@@ -276,94 +150,6 @@ var eventsMain = {
       // Run when the duration of the event is up.
       // Removes the character
       this.character.remove();
-    }
-  },
-  'PerformanceEnhancingDrug' : {
-    duration : 10, // Duration of event
-    probability : 0.2,
-    type : 'random',
-    charName : '',
-    ntt: 0,
-    spread: false,
-    t0: 0,
-    prequisites: function (eAPI) {
-      // Return true/false depending on whether the prequisites are met
-      // Check we have atleast one chracter working
-      var chars = eAPI.getCharacters();
-      return chars.some((char) => {return char.state === 'work'});
-    },
-    start: function(eAPI) {
-
-      this.t0 = eAPI.getDay();
-      // Run when an event starts
-      var chars = eAPI.getCharacters();
-      this.charName =  chars.find((char) => {return char.state === 'work'}).name;
-
-      // Find the first character who is working
-      eAPI.setCharacterProperty(this.charName, 'multiplier', 1.5, 3.0);
-      eAPI.setCharacterProperty(this.charName, 'speed', 5.0, 10.0);
-      eAPI.displayNotification('Whats wrong with ' + this.charName + '?');
-
-      var email = ' Prof Strawb, <br> <br> \
-                    I have been hearing rumours that one of our groups members has \
-                    discoverd a performance enhancing drug. <br> What would you like us to do? <br><br> \
-                    Kind Regards, <br>\
-                    Barbara <br><br> "Science" Research Group Secretary';
-
-      var self = this;
-      var responses = [{short:'Wait and see.',long:'Let\'s see how effective it is before we take action.', run: function(){eAPI.displayNotification('It appears to be spreading.'); self.spread = true;}},
-                       {short:'Send to counselling.',long:'Send the member of staff to counselling.', run: function(){eAPI.displayNotification('It looks like he should return to normal shortly.');}}];
-
-      eAPI.sendEmail('Performance Enhancing Drugs', email, responses, 'Barbara');
-    },
-    update: function(eAPI) {
-      // For efficiency we only check every 10 timesteps
-      if (this.spread === true || (eAPI.getDay() - this.t0) >= 5) {
-        eAPI.setCharacterProperty(this.charName, 'multiplier', 0.0, 1.0);
-
-        if (!this.spread) {
-          eAPI.displayNotification('Something appears to be spreading amongst your staff.');
-          this.spread = true;
-        }
-
-        if (this.ntt % 10 === 0) {
-
-          var chars = eAPI.getCharacters();
-          var poi =  chars.find((char) => {return char.name === this.charName});
-
-          // Check whether characters are within two tiles of the chosen character
-          // and set the multiplier to zero for two minutes
-          chars.forEach(function (char) {
-            if (char.name !== this.charName) {
-              var nx = char.x;
-              var ny = char.y;
-              if (Math.sqrt((nx-poi.x)*(nx-poi.x)+(ny-poi.y)*(ny-poi.y)) <= 2) {
-                if (char.walkspeed !== 5.0) {
-                  eAPI.setCharacterProperty(char.name, 'multiplier', 0.1, 2.0);
-                  eAPI.setCharacterProperty(char.name, 'speed', 5.0, 2.0);
-                }
-              }
-            }
-          });
-        }
-        this.ntt += 1;
-      }
-    },
-    finish: function(eAPI) {
-      this.ntt = 0;
-
-      if (this.spread) {
-        var email = ' Prof Strawb, <br> <br> \
-                      I am writing to inform you a number of your group members have\
-                      become addicted to a performance enhancing drug. As the source wasn\'t \
-                      initially dealt with we will have to send all effected members to a \
-                      rehabilitation center. The cost of their stay will be charged to your deparment.<br><br> \
-                      Kind Regards, <br>\
-                      Susan <br><br> Head of Student Services';
-
-        var self = this;
-        eAPI.sendEmail('Student Services Notification', email, [], 'Susan');
-      }
     }
   }
 };

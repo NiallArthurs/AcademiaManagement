@@ -72,7 +72,7 @@ var World = (function () {
     },
     update: function () {
       // Delete ui elements which are no longer visible
-      this.ui = this.ui.filter((el) => {return el.visible});
+      this.ui = this.ui.filter(el => el.visible);
 
       // Pause when ui elements active
       if (this.ui.length || Browser.active)
@@ -82,7 +82,7 @@ var World = (function () {
 
       if (!this.pause) {
 
-        this.entities.filter((ent) => {return ent.type !== 'object'}).forEach(
+        this.entities.filter(ent => ent.type !== 'object').forEach(
           (ent) => {ent.update()});
 
         EventManager.update();
