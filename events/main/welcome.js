@@ -13,7 +13,7 @@ var start = {
   start: function(eAPI) {
     eAPI.displayNotification('Welcome to the Lab!');
 
-    var email = ' Mr Doe, \
+    var email = ' Professor Strawb, \
     Welcome to Towerblock Polytechnic! \
     We hope you have a super productive time working here :) \
     Dave From HR';

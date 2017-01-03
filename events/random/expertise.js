@@ -46,9 +46,26 @@ var researchTarget = {
   finish: function(eAPI) {
     var curRP = eAPI.getResearchPoints()
     if (curRP[this.researchType]-this.t0RP[this.researchType] > this.researchTarget) {
-      eAPI.displayNotification('Wow! Your group rock.');
+      var email = 'Prof. Strawb<br><br>\
+      Congratulations on sucessfully meeting the research target. I am confident that<br>\
+      your groups funding will not be cut.<br><br>\
+      Regards<br><br>\
+      Prof. Busybody<br>\
+      Head of the Faculty of "Science"\
+      ';
+      var subject = 'Re: Research target';
+      eAPI.sendEmail(subject, email, [], 'Prof. Busybody');
     } else {
-      eAPI.displayNotification('Maybe some of your staff need to attend more courses?');
+      var email = 'Prof. Strawb<br><br>\
+      Your groups recent performance has been below expectations. As a result,\
+      the board of the Faculty of \'Science\' will be reconsidering the groups\
+      funding.<br><br>\
+      Regards<br><br>\
+      Prof. Busybody<br>\
+      Head of the Faculty of "Science"\
+      ';
+      var subject = 'Re: Research target';
+      eAPI.sendEmail(subject, email, [], 'Prof. Busybody');
     }
   }
 };
