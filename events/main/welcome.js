@@ -18,6 +18,8 @@ var start = {
                 We hope you have a super productive time working here :)<br><br>\
                 Dave From HR';
     eAPI.sendEmail('HR welcome', email, [], 'HR');
+    //Set Event Variables that are required at startup here.
+    eAPI.setEventVariable(this.name, 'starMediaStarted', false);
   },
   finish: function(eAPI) {
   }

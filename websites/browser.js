@@ -139,3 +139,4 @@ content : ''
 loadQueue.loadFile("websites/google/google.js");
 loadQueue.loadFile("websites/university/staffportal.js");
 loadQueue.loadFile("websites/university/email.js");
+loadQueue.loadFile("websites/starmedia/uploadcv.js");
