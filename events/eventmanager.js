@@ -36,6 +36,8 @@ var EventManager = {
       this.eventAPI.getRandomCharacterName = CharacterManager.getRandomCharacterName.bind(CharacterManager);
       this.eventAPI.findNearbyLocation = this.findNearbyLocation.bind(this);
       this.eventAPI.addQueue = this.addQueue.bind(this);
+      this.eventAPI.getEventVariable = this.getEventVariable.bind(this);
+      this.eventAPI.setEventVariable = this.setEventVariable.bind(this);
 
       // Create the random event queue (We should add all events before initializing)
       this.last = Time.getDay();
@@ -326,5 +328,23 @@ var EventManager = {
     changeSprite: function(character, sprite) {
       character.oldSprite = character.sprite;
       character.sprite = sprite;
+    },
+    checkEventExists: function (_eventName) {
+      return (this.eventsMain.some(ev => ev.name === _eventName) || this.eventsRandom.some(ev => ev.name === _eventName));
+    },
+    getEventVariable: function (_eventName, _eventVariable) {
+      if (this.checkEventExists(_eventName)) {
+        return GameState.getEventVariable(_eventName, _eventVariable);
+      } else {
+        return null;
+      }
+    },
+    setEventVariable: function (_eventName, _eventVariable, _value) {
+      if (this.checkEventExists(_eventName)) {
+        GameState.setEventVariable(_eventName, _eventVariable, _value);
+        return true;
+      } else {
+        return false;
+      }
     }
 };

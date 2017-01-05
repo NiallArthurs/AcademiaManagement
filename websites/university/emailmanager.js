@@ -86,8 +86,9 @@ var EmailManager = {
     document.getElementById('emailMain').innerHTML = '<section id="emailPadding"></section>';
     Browser.textRender(email.subject, document.getElementById('emailHeader'));
     Browser.textRender(email.content, document.getElementById('emailPadding'));
-    if (email.timeout != undefined) {
-      if (Time.getDayFromCurrent(email.time) + email.timeout >= Time.getDay()) {
+    if (email.timeout !== undefined) {
+      alert(Time.getDayFromCurrent(email.time) + email.timeout - Time.getDay());
+      if (Time.getDayFromCurrent(email.time) + email.timeout <= Time.getDay()) {
         email.responses = [];
         email.timeout = undefined;
       }
