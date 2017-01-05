@@ -16,7 +16,7 @@ var Character = (function () {
     this.speed = uiStyle.character.walkspeed; // Movement speed - pixels/second
     this.state = ['work', 'sleep', 'rest'];
     // Randomly assign state for now
-    this.activeState = getRandomInt(0,2);
+    this.activeState = 0;
     this.sprite = new Sprite(_sprite, 32, 42,32*3,42*4,  animations, 'walkdown', this.inputMouseDown.bind(this));
     var ranPos = TileMap.getRandomPosition();
     this.sprite.x = ranPos[0];  // Current x tile

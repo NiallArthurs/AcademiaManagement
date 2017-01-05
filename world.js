@@ -113,6 +113,13 @@ var World = (function () {
         else if (this.key === 77) {
           Browser.toggle(true);
         }
+        else if (this.key === 69) {
+          var eventName = prompt("Enter event name");
+          if (eventName !== null && eventName !== '') {
+            EventManager.randomEventTrigger(eventName);
+          }
+          this.keyDown = false;
+        }
       }
       else {
         if (this.key === 13) {

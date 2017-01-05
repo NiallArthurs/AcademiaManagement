@@ -10,6 +10,7 @@ var perform = {
   charName : '',
   ntt: 0,
   spread: false,
+  therapy: false,
   t0: 0,
   prequisites: function (eAPI) {
     var chars = eAPI.getCharacters();
@@ -37,13 +38,17 @@ var perform = {
       this.spread = true;
     })};
 
+    var option2Callback = () => {eAPI.displayNotification('It looks like he should return to normal shortly.');
+      this.therapy = true;
+    };
+
     var responses = [{short:'Wait and see.',long:'Let\'s see how effective it is before we take action.', run: option1Callback.bind(this)},
-    {short:'Send to counselling.',long:'Send the member of staff to counselling.', run: () => {eAPI.displayNotification('It looks like he should return to normal shortly.');}}];
+    {short:'Send to counselling.',long:'Send the member of staff to counselling.', run: option2Callback.bind(this)}];
 
     eAPI.sendEmail('Performance enhancing drugs', email, responses, 'Barbara');
   },
   update: function(eAPI) {
-    if (this.spread === true || (eAPI.getDay() - this.t0) >= 5) {
+    if (this.spread === true || (((eAPI.getDay() - this.t0) >= 5) && !this.therapy)) {
       eAPI.setCharacterProperty(this.charName, 'multiplier', 0.0, 1.0);
 
       if (!this.spread) {
