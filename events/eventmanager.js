@@ -2,7 +2,6 @@
 var EventManager = {
     effects : [],
     last : 0,
-    events : eventsMain,
     multipliers : {},
     queue : [],
     entities : undefined,
@@ -11,10 +10,12 @@ var EventManager = {
     eventsRandom : [],
     eventOrder : [],
     eventPos : 0,
-    eventRandNext : getRandomInt(2,5),
+    eventRandNext : 0,
     initialize: function(entities) {
-      // Set map and entities
+
+      // Set entities and event time
       this.entities = entities;
+      this.eventRandNext = getRandomInt(uiStyle.eventOptions.mintime, uiStyle.eventOptions.maxtime);
 
       // Populate the event API object exposing required functions.
       this.eventAPI.getCharacters = this.getCharacters.bind(this);
@@ -40,7 +41,6 @@ var EventManager = {
 
       // Create the random event queue (We should add all events before initializing)
       this.last = Time.getDay();
-      alert("Next Random Event:" + this.eventRandNext);
     },
     addQueue: function(_duration, _callback) {
       this.queue.push({t0: Time.getTime(), duration: _duration, callback: _callback});
@@ -71,94 +71,59 @@ var EventManager = {
 
       if (time - this.last > this.eventRandNext) {
 
+        // We shuffle the order events occur in
         if (this.eventPos === this.eventOrder.length || this.eventOrder.length !== this.eventsRandom.length) {
           this.eventOrder = [...Array(this.eventsRandom.length||0)].map((v,i) => i);
           this.eventOrder = shuffleArray(this.eventOrder);
-          alert(this.eventOrder[0])
+          this.evetPos = 0;
         }
 
         // This could cause problems if we have no events without prequisites
-        while (!this.eventsRandom[this.eventOrder[this.eventPos]].prequisites(this.eventAPI)) {
-          this.eventPos++;
+        while (!this.eventsRandom[this.eventOrder[this.eventPos]].prequisites(this.eventAPI) ||
+               this.eventsRandom[this.eventOrder[this.eventPos]].active) {
+          this.eventPos = (this.eventPos + 1) % this.eventOrder.length;
         }
-
-        alert('Start event: '+ this.eventsRandom[this.eventOrder[this.eventPos]].name);
 
         this.eventsRandom[this.eventOrder[this.eventPos]].active = true;
         this.eventsRandom[this.eventOrder[this.eventPos]].start(this.eventAPI);
 
+        var self = this;
         this.addQueue(this.eventsRandom[this.eventOrder[this.eventPos]].duration, function(ev) {
           return function () {
-            this.eventsRandom[ev].finish(this.eventAPI);
-            this.eventsRandom[ev].active = false;
+            self.eventsRandom[ev].finish(self.eventAPI);
+            self.eventsRandom[ev].active = false;
           };
         }(this.eventOrder[this.eventPos]));
 
-        this.eventRandNext = getRandomInt(2,5);
-        alert("Next Random Event:" + this.eventRandNext);
+        this.eventRandNext = getRandomInt(uiStyle.eventOptions.mintime, uiStyle.eventOptions.maxtime);
         this.eventPos++;
         this.last = time;
       }
     },
-    eventUpdate: function () {
-      var time = Time.getDay();
-      for (var obj in this.events) {
-        if (this.events[obj].type === 'main') {
-          if (this.events[obj].complete === undefined && !this.events[obj].active) {
-            if (this.events[obj].prequisites(this.eventAPI)) {
+    randomEventTrigger: function (name) {
+      var ev = this.eventsRandom.find(ev => ev.name == name);
 
-              this.events[obj].active = true;
-              this.events[obj].start(this.eventAPI);
+      if (ev !== undefined) {
+        ev.active = true;
+        ev.start(this.eventAPI);
 
-              var self = this;
-              this.addQueue(this.events[obj].duration, function(ev) {
-                return function () {
-                  self.events[ev].finish(self.eventAPI);
-                  self.events[ev].active = false;
-                  self.events[ev].complete = true;
-                };
-              }(obj));
-            }
-          }
-        }
-        else if (this.events[obj].type === 'random') {
-          if (!this.events[obj].active && time - this.last > 0) {
-            if (Math.random() < this.events[obj].probability) {
-              if (this.events[obj].prequisites(this.eventAPI)) {
-
-                this.events[obj].active = true;
-                this.events[obj].start(this.eventAPI);
-
-                var self = this;
-                this.addQueue(this.events[obj].duration, function(ev) {
-                  return function () {
-                    self.events[ev].finish(self.eventAPI);
-                    self.events[ev].active = false;
-                  };
-                }(obj));
-                this.last = time;
-              }
-            }
-          }
-        }
+        this.addQueue(ev.duration, () => {
+            ev.finish(this.eventAPI);
+            ev.active = false;
+        });
       }
-
-      if (time - this.last > 0) this.last = time;
     },
     update: function() {
       // Delete ui elements which are no longer visible
       this.effects = this.effects.filter(effect => effect.visible);
 
       this.checkQueue();
-      //this.eventUpdate();
       this.updateMain();
       this.updateRandom();
 
-      for (var obj in this.events) {
-        if (this.events[obj].active && this.events[obj].update !== undefined) {
-          this.events[obj].update(this.eventAPI);
-        }
-      }
+      // Run the update function for each active event
+      this.eventsRandom.filter(ev => ev.active).forEach(ev => {ev.update(this.eventAPI);});
+      this.eventsMain.filter(ev => ev.active).forEach(ev => {ev.update(this.eventAPI);});
 
       for (var k = this.effects.length; k--;) {
         this.effects[k].update();
@@ -292,8 +257,6 @@ var EventManager = {
       return undefined;
     },
     addEvent: function(name, ev) {
-      this.events[name] = ev;
-
       if (ev.type === 'random') {
         ev.name = name;
         this.eventsRandom.push(ev);

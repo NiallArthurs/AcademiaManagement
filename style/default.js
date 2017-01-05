@@ -29,5 +29,10 @@ var defaultStyle = {
 		  fontsize: 20,
 		  font: 'arial',
 			fadespeed: 8
-		 }
+		},
+	eventOptions :
+		 {
+		 	mintime : 2,
+			maxtime : 5
+		}
 };

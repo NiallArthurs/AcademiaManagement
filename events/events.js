@@ -64,7 +64,8 @@
  *
  */
 
- // Load events using preloadjs
+ // Events are loaded using preloadjs.
+
  // Random events
  loadQueue.loadFile("events/random/performenhance.js");
  loadQueue.loadFile("events/random/expertise.js");
@@ -73,83 +74,3 @@
 
  // Main events
  loadQueue.loadFile("events/main/welcome.js");
-
-// Examples
-var eventsMain = {
-  'ExplodeFurniture' : {
-    duration : 1, // Duration of event
-    probability : 0.2, // enabled approximately every 5 minutes.
-    type: 'random',
-    prequisites: function (eAPI) {
-      // Return true/false depending on whether the prequisites are met
-      // Check we have atleast one chracter working
-      return true;
-    },
-    update: function(eAPI) {
-      // A function which is run each timestep.
-    },
-    start: function(eAPI) {
-      // Run when an event starts
-      var mapObj = eAPI.getMapObjects();
-
-      var furniture = mapObj[0].name;
-      eAPI.displayNotification('You need to contact the building manager.');
-
-      var email = ' Doc Brown, \
-                    There seems to have been a problem in the PhD office, \
-                    What do you want us to do? \
-                    Best, \
-                    Dave';
-      var responses = [{short:'They\'ll manage.',long:'The smoke could be good for them.', run: function(){eAPI.displayNotification('I smell smoke.',function() {eAPI.addEffect(furniture, 'explosion');});}},
-                       {short:'Deal with it.',long:'We should get someone to take a look.', run: function(){eAPI.displayNotification('Looks like there was a problem with the table, all fixed now.');}}];
-
-      eAPI.sendEmail('Problem in PhD office', email, responses, 'Dave');
-    },
-    finish: function(eAPI) {
-      // Run when the duration of the event is up.
-    }
-
-  },
-  'CharacterExample' : {
-    duration : 5, // Duration of event
-    type: 'random',
-    character: undefined,
-    probability : 0.2,
-    follow : '',
-    prequisites: function (eAPI) {
-      // Return true/false depending on whether the prequisites are met
-      // Check we have atleast one chracter working
-      var chars = eAPI.getCharacters();
-      return chars.some(char => char.state === 'work');
-    },
-    update: function(eAPI) {
-      // A function which is run each timestep.
-      if (this.character !== undefined) {
-	      // Make the temporary character follow a character
-        if (!this.character.path().length) {
-          var chars = eAPI.getCharacters();
-          var poi =  chars.find(char => char.name === this.follow);
-
-          var pos = eAPI.findNearbyLocation(poi.x, poi.y);
-          this.character.moveTo(pos[0], pos[1]);
-        }
-      }
-    },
-    start: function(eAPI) {
-      // Run when an event starts
-      var chars = eAPI.getCharacters();
-      this.follow = chars.find(char => char.state === 'work').name;
-
-      // Add temporary character at random position
-      var pos = eAPI.getRandomMapPosition();
-      this.character = eAPI.createTemporaryCharacter('Student', pos[0], pos[1]);
-
-      eAPI.displayNotification('Someone new seems to be wandering around the lab!?!!?');
-    },
-    finish: function(eAPI) {
-      // Run when the duration of the event is up.
-      // Removes the character
-      this.character.remove();
-    }
-  }
-};
