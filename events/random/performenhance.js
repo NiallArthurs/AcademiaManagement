@@ -80,12 +80,12 @@ var perform = {
 
     if (this.spread) {
       var email = ' Prof Strawb, <br> <br> \
-      I am writing to inform you a number of your group members have\
-      become addicted to a performance enhancing drug. As the source wasn\'t \
-      initially dealt with we will have to send all effected members to a \
-      rehabilitation center. The cost of their stay will be charged to your deparment.<br><br> \
-      Kind Regards, <br>\
-      Susan <br><br> Head of Student Services';
+                  I am writing to inform you a number of your group members have\
+                  become addicted to a performance enhancing drug. As the source wasn\'t \
+                  initially dealt with we will have to send all effected members to a \
+                  rehabilitation center. The cost of their stay will be charged to your deparment.<br><br> \
+                  Kind Regards, <br>\
+                  Susan <br><br> Head of Student Services';
 
       eAPI.sendEmail('Student Services Notification', email, [], 'Susan');
     }

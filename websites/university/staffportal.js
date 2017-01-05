@@ -3,7 +3,6 @@
  */
 
 Browser.websites['arpa.towerblock.ac/staffportal'] = {
-
 title : 'Towerblock Polytechnic Staff Portal',
 stylesheet : 'websites/university/university.css',
 content : '\
@@ -48,5 +47,4 @@ content : '\
   </section>\
 </section>\
 '
-
 }

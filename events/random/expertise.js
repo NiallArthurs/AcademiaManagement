@@ -18,8 +18,8 @@ var researchTarget = {
     this.researchType = getRandomInt(1,3);
     this.t0RP = eAPI.getResearchPoints();
     var email = 'Prof. Strawb<br><br>\
-    As part of an up coming budget review we are asking all research groups to meet certain targets.<br>\
-    We ask that your group meets a target of '
+                As part of an up coming budget review we are asking all research groups to meet certain targets.<br>\
+                We ask that your group meets a target of '
     + this.researchTarget + ' ';
     var subject = '';
     if (this.researchType == 1) {
@@ -36,10 +36,10 @@ var researchTarget = {
       eAPI.displayNotification('You have ' + this.duration + ' days to prove your group has theoretical expertise.');
     }
     email += ' research points in the next ' + this.duration + ' days.<br><br>\
-    Regards<br><br>\
-    Prof. Busybody<br>\
-    Head of the Faculty of "Science"\
-    ';
+             Regards<br><br>\
+             Prof. Busybody<br>\
+             Head of the Faculty of "Science"\
+             ';
     subject += ' Research Target'
     eAPI.sendEmail(subject, email, [], 'Prof. Busybody');
   },
@@ -47,23 +47,23 @@ var researchTarget = {
     var curRP = eAPI.getResearchPoints()
     if (curRP[this.researchType]-this.t0RP[this.researchType] > this.researchTarget) {
       var email = 'Prof. Strawb<br><br>\
-      Congratulations on sucessfully meeting the research target. I am confident that<br>\
-      your groups funding will not be cut.<br><br>\
-      Regards<br><br>\
-      Prof. Busybody<br>\
-      Head of the Faculty of "Science"\
-      ';
+                  Congratulations on sucessfully meeting the research target. I am confident that<br>\
+                  your groups funding will not be cut.<br><br>\
+                  Regards<br><br>\
+                  Prof. Busybody<br>\
+                  Head of the Faculty of "Science"\
+                  ';
       var subject = 'Re: Research target';
       eAPI.sendEmail(subject, email, [], 'Prof. Busybody');
     } else {
       var email = 'Prof. Strawb<br><br>\
-      Your groups recent performance has been below expectations. As a result,\
-      the board of the Faculty of \'Science\' will be reconsidering the groups\
-      funding.<br><br>\
-      Regards<br><br>\
-      Prof. Busybody<br>\
-      Head of the Faculty of "Science"\
-      ';
+                  Your groups recent performance has been below expectations. As a result,\
+                  the board of the Faculty of \'Science\' will be reconsidering the groups\
+                  funding.<br><br>\
+                  Regards<br><br>\
+                  Prof. Busybody<br>\
+                  Head of the Faculty of "Science"\
+                  ';
       var subject = 'Re: Research target';
       eAPI.sendEmail(subject, email, [], 'Prof. Busybody');
     }

@@ -9,6 +9,7 @@ var GameState = {
   grants: [],
   publications: [],
   staff: [],
+  eventVariables: {},
   // Calculate the total funding available
   determineTotalGrantFunding: function() {
     this.grantFundingTotal = 10;
@@ -29,6 +30,24 @@ var GameState = {
       if ((Time.getDay()-this.grants[i].start) > this.grants[i].duration)
         this.ui.splice(i, 1);
     }
+  },
+  checkEventExists: function (_eventName) {
+    if (this.eventVariables._eventName != undefined) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  // Return the value of requested Event Variable
+  getEventVariable: function (_eventName, _eventVariable) {
+    return this.eventVariables._eventName._eventVariable;
+  },
+  //Set a new value for a given Event Variable
+  setEventVariable: function (_eventName, _eventVariable, _value) {
+    if (!this.checkEventExists(_eventName)) {
+      this.eventVariables._eventName = {};
+    }
+    this.eventVariables._eventName._eventVariable = _value;
   },
   // Add a grant
   addGrant: function (_name, _amount, _start, _duration) {
