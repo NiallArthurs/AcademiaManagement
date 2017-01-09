@@ -2,6 +2,7 @@ var TileMap = {
   name : '',
   occupied : {},
   offscreenRender : document.createElement('canvas'),
+  collisionOverlay: false,
   initializeMap: function(_mapobj, entities) {
     this.layout = _mapobj.tiles; // Not final solution for map storage!
     this.name = _mapobj.name;
@@ -120,5 +121,31 @@ var TileMap = {
     var y = Math.floor(cameraScreenPosition[1]-TILE_SIZE*cameraMapPosition[1]);
     ctx.drawImage(this.offscreenRender, x, y, this.offscreenRender.width,
       this.offscreenRender.height);
+  },
+  drawCollisionOverlay: function(ctx) {
+
+    if (!this.collisionOverlay)
+      return;
+
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = 'black';
+    ctx.fillStyle = 'green';
+    for (var i = this.width; i--;) {
+      for (var j = this.height; j--;) {
+        // No need to render transparent tile
+        if (this.layout[i][j] === 1)
+          continue;
+
+        if (!this.collision(i,j)) {
+          ctx.fillRect(Math.floor(cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0])),
+            Math.floor(cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1])), TILE_SIZE, TILE_SIZE);
+
+          ctx.strokeRect(Math.floor(cameraScreenPosition[0] + TILE_SIZE*(i - cameraMapPosition[0])),
+            Math.floor(cameraScreenPosition[1] + TILE_SIZE*(j - cameraMapPosition[1])), TILE_SIZE, TILE_SIZE);
+        }
+      }
+    }
+
+    ctx.globalAlpha = 1.0;
   }
 };

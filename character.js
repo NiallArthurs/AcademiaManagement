@@ -129,6 +129,7 @@ var Character = (function () {
             this.direction = 1;
           }
         }
+        TileMap.setCharacterOccupied(this.name, Math.floor(this.sprite.x), Math.floor(this.sprite.y));
       } else {
         if (this.direction === 1) {
           this.sprite.setState('down');
@@ -236,7 +237,6 @@ var Character = (function () {
     },
     move: function(xDest, yDest) {
       this.path = TileMap.generatePath(this.sprite.x, this.sprite.y, xDest, yDest);
-      TileMap.setCharacterOccupied(name, xDest, yDest);
     },
     getPath: function() {
       return this.path;

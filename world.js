@@ -20,6 +20,10 @@ var World = (function () {
     this.dt = 0;
     this.cameraSpeed = uiStyle.world.cameraspeed;
 
+    // Collision overlay
+    this.entities.push({getTileY: () => {return TileMap.height;}, z: 100,
+      draw: TileMap.drawCollisionOverlay.bind(TileMap), update: () => {}});
+
     // Initialise the character manager
     CharacterManager.initialize(this.entities);
 
@@ -118,6 +122,10 @@ var World = (function () {
           if (eventName !== null && eventName !== '') {
             EventManager.randomEventTrigger(eventName);
           }
+          this.keyDown = false;
+        }
+        else if (this.key === 67) {
+          TileMap.collisionOverlay = !TileMap.collisionOverlay;
           this.keyDown = false;
         }
       }
