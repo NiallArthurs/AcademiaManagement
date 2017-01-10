@@ -19,6 +19,9 @@ var World = (function () {
     this.height = _canvas.height;
     this.dt = 0;
     this.cameraSpeed = uiStyle.world.cameraspeed;
+    this.mouseX = 0;
+    this.mouseY = 0;
+    this.move = '';
 
     // Collision overlay
     this.entities.push({getTileY: () => {return TileMap.height;}, z: 100,
@@ -37,13 +40,18 @@ var World = (function () {
 
     this.keyDownFn = this.inputKeyDown.bind(this);
     this.keyUpFn = this.inputKeyUp.bind(this);
+    this.mouseDownFn = this.inputMouseDown.bind(this);
+    this.mouseMoveFn = this.inputMouseMove.bind(this);
     this.createNotifyFn = this.createNotify.bind(this);
     this.createMenuFn = this.createMenu.bind(this);
+    this.moveEntityFn = this.moveEntity.bind(this);
+
 
     window.addEventListener('keydown', this.keyDownFn);
     window.addEventListener('keyup', this.keyUpFn);
     amplify.subscribe('popup-text', this.createNotifyFn);
     amplify.subscribe('popup-menu', this.createMenuFn);
+    amplify.subscribe('move-entity', this.moveEntityFn);
   };
 
   World.prototype = {
@@ -53,6 +61,40 @@ var World = (function () {
     },
     inputKeyUp: function(e) {
       this.keyDown = false;
+    },
+    inputMouseDown: function(data) {
+      this.mouseX = data.ev.pageX - data.offsetLeft;
+      this.mouseY = data.ev.pageY - data.offsetTop;
+      var ent = this.entities.find(ent => ent.name == this.move);
+      if (ent !== undefined) {
+
+        if (ent.type === 'character') {
+          ent.pause = false;
+        }
+        amplify.unsubscribe( "mousemove", this.mouseMoveFn);
+        amplify.unsubscribe( "mousedown", this.mouseDownFn);
+        this.move = '';
+        ent.clearPath();
+        TileMap.collisionOverlay = false;
+      }
+    },
+    inputMouseMove: function(data) {
+      this.mouseX = data.ev.pageX - data.offsetLeft;
+      this.mouseY = data.ev.pageY - data.offsetTop;
+    },
+    moveEntity: function(name) {
+      var ent = this.entities.find(ent => ent.name == name);
+
+      if (ent !== undefined) {
+        if (ent.type === 'character') {
+          ent.pause = true;
+        }
+
+        TileMap.collisionOverlay = true;
+        amplify.subscribe( "mousemove", this.mouseMoveFn);
+        amplify.subscribe( "mousedown", this.mouseDownFn);
+        this.move = name;
+      }
     },
     createNotify: function (x, y, text, fun) {
       this.ui.push(new Notify(x, y, text, fun));
@@ -85,10 +127,27 @@ var World = (function () {
         this.pauseGame(false);
 
       if (!this.pause) {
+        // Move characters and objects (soon)
+        if (this.move !== '') {
+          var ent = this.entities.find(ent => ent.name == this.move);
 
+          if (ent !== undefined && ent.type === 'character') {
+              var x = Math.floor((this.mouseX - cameraScreenPosition[0])/TILE_SIZE + cameraMapPosition[0]);
+              var y = Math.floor((this.mouseY - cameraScreenPosition[1])/TILE_SIZE + cameraMapPosition[1]);
+
+              if (!TileMap.collision(x,y)) {
+                ent.sprite.x = x;
+                ent.sprite.y = y;
+                TileMap.setCharacterOccupied(this.move, x, y);
+              }
+          }
+        }
+
+        // Run the uprate function for each entity
         this.entities.filter(ent => ent.type !== 'object').forEach(
           (ent) => {ent.update()});
 
+        // Run the event manager update function
         EventManager.update();
       }
     },

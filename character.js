@@ -23,6 +23,7 @@ var Character = (function () {
     this.sprite.y = ranPos[1]; // Current y tile
     this.z = 0;
     this.points = [0.0, 0.0, 0.0];
+    this.pause = false;
     // Parameters for notifications which float up from the character
     this.float = {
       position: 0,
@@ -45,6 +46,9 @@ var Character = (function () {
   };
 
   Character.prototype = {
+    clearPath: function() {
+      this.path = [];
+    },
     getTileX: function() {
       return this.sprite.x;
     },
@@ -73,8 +77,12 @@ var Character = (function () {
       this.dt = dt;
     },
     inputMouseDown: function (data) {
+      if (this.pause)
+        return;
+
       var menu = [['Text Notification', () => {amplify.publish('popup-text', this.sprite.getX(), this.sprite.getY(), 'My name is '+this.name);}],
       ['Move', () => {if (this.path.length === 0) this.randomMove();}],
+      ['Manual Move', () => {amplify.publish('move-entity', this.name);}],
       ['Work', () => {if (this.state[this.activeState] !== 'work') this.activeState = 0;}],
       ['Sleep', () => {if (this.state[this.activeState] !== 'sleep') this.activeState = 1;}]];
 
@@ -147,6 +155,9 @@ var Character = (function () {
     },
     update: function () {
 
+      if (this.pause)
+        return;
+
       // Have character follow the path if it exists
       this.followPath();
 
@@ -184,7 +195,7 @@ var Character = (function () {
       this.sprite.draw(ctx);
 
       // If dummy character we only draw the sprite
-      if (this.dummy)
+      if (this.dummy || this.pause)
         return;
 
       // Draw state based animations
