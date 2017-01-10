@@ -137,7 +137,7 @@ var Character = (function () {
             this.direction = 1;
           }
         }
-        TileMap.setCharacterOccupied(this.name, Math.floor(this.sprite.x), Math.floor(this.sprite.y));
+        TileMap.setCharacterOccupied(this.name, Math.floor(this.sprite.x + 0.5), Math.floor(this.sprite.y + 0.5));
       } else {
         if (this.direction === 1) {
           this.sprite.setState('down');

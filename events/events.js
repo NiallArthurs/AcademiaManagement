@@ -70,7 +70,8 @@
  loadQueue.loadFile("events/random/performenhance.js");
  loadQueue.loadFile("events/random/expertise.js");
  loadQueue.loadFile("events/random/negation.js");
- loadQueue.loadFile("events/random/visit.js")
+ loadQueue.loadFile("events/random/visit.js");
+ loadQueue.loadFile("events/random/starMediaDocumentary.js");
 
  // Main events
  loadQueue.loadFile("events/main/welcome.js");

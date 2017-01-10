@@ -81,7 +81,7 @@ var EventManager = {
         // This could cause problems if we have no events without prequisites
         while (!this.eventsRandom[this.eventOrder[this.eventPos]].prequisites(this.eventAPI) ||
                this.eventsRandom[this.eventOrder[this.eventPos]].active) {
-          this.eventPos = (this.eventPos + 1) % this.eventOrder.length;
+          this.eventPos = (this.eventPos + 1) % (this.eventOrder.length - 1);
         }
 
         this.eventsRandom[this.eventOrder[this.eventPos]].active = true;
