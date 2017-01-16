@@ -23,10 +23,6 @@ var World = (function () {
     this.mouseY = 0;
     this.move = '';
 
-    // Collision overlay
-    this.entities.push({getTileY: () => {return TileMap.height;}, z: 100,
-      draw: TileMap.drawCollisionOverlay.bind(TileMap), update: () => {}});
-
     // Initialise the character manager
     CharacterManager.initialize(this.entities);
 
@@ -45,7 +41,6 @@ var World = (function () {
     this.createNotifyFn = this.createNotify.bind(this);
     this.createMenuFn = this.createMenu.bind(this);
     this.moveEntityFn = this.moveEntity.bind(this);
-
 
     window.addEventListener('keydown', this.keyDownFn);
     window.addEventListener('keyup', this.keyUpFn);
@@ -71,8 +66,8 @@ var World = (function () {
         if (ent.type === 'character') {
           ent.pause = false;
         }
-        amplify.unsubscribe( "mousemove", this.mouseMoveFn);
-        amplify.unsubscribe( "mousedown", this.mouseDownFn);
+        amplify.unsubscribe('mousemove', this.mouseMoveFn);
+        amplify.unsubscribe('mousedown', this.mouseDownFn);
         this.move = '';
         ent.clearPath();
         TileMap.collisionOverlay = false;
@@ -91,8 +86,8 @@ var World = (function () {
         }
 
         TileMap.collisionOverlay = true;
-        amplify.subscribe( "mousemove", this.mouseMoveFn);
-        amplify.subscribe( "mousedown", this.mouseDownFn);
+        amplify.subscribe('mousemove', this.mouseMoveFn);
+        amplify.subscribe('mousedown', this.mouseDownFn);
         this.move = name;
       }
     },
@@ -143,7 +138,7 @@ var World = (function () {
           }
         }
 
-        // Run the uprate function for each entity
+        // Run the update function for each entity
         this.entities.filter(ent => ent.type !== 'object').forEach(
           (ent) => {ent.update()});
 

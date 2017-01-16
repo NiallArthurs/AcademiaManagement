@@ -11,7 +11,6 @@ var TileMap = {
     this.tileset = _mapobj.tileset;
     this.objects = _mapobj.objects;
     this.atlas = _mapobj.atlas;
-    this.objectSprites = [];
     this.startPosition = _mapobj.startPosition;
     this.gridOrig = new PF.Grid(this.width, this.height);
 
@@ -121,11 +120,12 @@ var TileMap = {
     var y = Math.floor(cameraScreenPosition[1]-TILE_SIZE*cameraMapPosition[1]);
     ctx.drawImage(this.offscreenRender, x, y, this.offscreenRender.width,
       this.offscreenRender.height);
+
+    // Draw collision overlay
+    if (this.collisionOverlay)
+      this.drawCollisionOverlay(ctx);
   },
   drawCollisionOverlay: function(ctx) {
-
-    if (!this.collisionOverlay)
-      return;
 
     ctx.globalAlpha = 0.4;
     ctx.strokeStyle = 'black';
