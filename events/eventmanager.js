@@ -39,6 +39,7 @@ var EventManager = {
       this.eventAPI.getEventVariable = this.getEventVariable.bind(this);
       this.eventAPI.setEventVariable = this.setEventVariable.bind(this);
       this.eventAPI.hideCharacter = this.hideCharacter.bind(this);
+      this.eventAPI.createSpeechBubble = this.createSpeechBubble.bind(this);
 
       // Create the random event queue (We should add all events before initializing)
       this.last = Time.getDay();
@@ -239,6 +240,9 @@ var EventManager = {
     calcAndAssign: function(character) {
       var calc = this.multipliers[character].reduce((a, b) => a*b, 1.0);
       amplify.publish('characterprop', character, 'multiplier', calc);
+    },
+    createSpeechBubble: function(name, text, duration) {
+      amplify.publish('speechbubble', name, text, duration);
     },
     setCharacterState: function(character, state) {
       var states = ['work', 'sleep', 'rest'];
