@@ -23,10 +23,6 @@ var World = (function () {
     this.mouseY = 0;
     this.move = '';
 
-    // Collision overlay
-    this.entities.push({getTileY: () => {return TileMap.height;}, z: 100,
-      draw: TileMap.drawCollisionOverlay.bind(TileMap), update: () => {}});
-
     // Initialise the character manager
     CharacterManager.initialize(this.entities);
 
@@ -35,7 +31,7 @@ var World = (function () {
 
     // Test Charaacters
     for (var i=0; i < 3; i++) {
-      CharacterManager.createCharacter(names[i]);
+      var char = CharacterManager.createCharacter(names[i]);
     }
 
     this.keyDownFn = this.inputKeyDown.bind(this);
@@ -45,11 +41,12 @@ var World = (function () {
     this.createNotifyFn = this.createNotify.bind(this);
     this.createMenuFn = this.createMenu.bind(this);
     this.moveEntityFn = this.moveEntity.bind(this);
-
+    this.speechBubbleFn = this.createSpeechBubble.bind(this);
 
     window.addEventListener('keydown', this.keyDownFn);
     window.addEventListener('keyup', this.keyUpFn);
     amplify.subscribe('popup-text', this.createNotifyFn);
+    amplify.subscribe('speechbubble', this.speechBubbleFn);
     amplify.subscribe('popup-menu', this.createMenuFn);
     amplify.subscribe('move-entity', this.moveEntityFn);
   };
@@ -71,8 +68,8 @@ var World = (function () {
         if (ent.type === 'character') {
           ent.pause = false;
         }
-        amplify.unsubscribe( "mousemove", this.mouseMoveFn);
-        amplify.unsubscribe( "mousedown", this.mouseDownFn);
+        amplify.unsubscribe('mousemove', this.mouseMoveFn);
+        amplify.unsubscribe('mousedown', this.mouseDownFn);
         this.move = '';
         ent.clearPath();
         TileMap.collisionOverlay = false;
@@ -91,9 +88,16 @@ var World = (function () {
         }
 
         TileMap.collisionOverlay = true;
-        amplify.subscribe( "mousemove", this.mouseMoveFn);
-        amplify.subscribe( "mousedown", this.mouseDownFn);
+        amplify.subscribe('mousemove', this.mouseMoveFn);
+        amplify.subscribe('mousedown', this.mouseDownFn);
         this.move = name;
+      }
+    },
+    createSpeechBubble: function(name, text, duration) {
+      var ent = this.entities.find(ent => ent.name == name && ent.type == 'character');
+
+      if (ent !== undefined) {
+        this.entities.push(new SpeechBubble(function() {return ent.sprite.getX();}, function() {return ent.sprite.getY();}, text, duration));
       }
     },
     createNotify: function (x, y, text, fun) {
@@ -143,7 +147,7 @@ var World = (function () {
           }
         }
 
-        // Run the uprate function for each entity
+        // Run the update function for each entity
         this.entities.filter(ent => ent.type !== 'object').forEach(
           (ent) => {ent.update()});
 

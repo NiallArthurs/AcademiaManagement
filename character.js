@@ -11,9 +11,12 @@ var Character = (function () {
     this.direction = 1; // 0 = up, 1 = down, 2 = left, 3 = right
     this.path = [];
     this.dt = 0;
+    this.alpha = 0.0;
+    this.hide = false;
     this.type = 'character';
     this.dummy = false;
     this.speed = uiStyle.character.walkspeed; // Movement speed - pixels/second
+    this.fadespeed = uiStyle.character.fadespeed;
     this.state = ['work', 'sleep', 'rest'];
     // Randomly assign state for now
     this.activeState = 0;
@@ -66,6 +69,14 @@ var Character = (function () {
         case 'state':
           this.activeState = value;
           break;
+        case 'hide':
+          this.hide = value;
+          if (value) {
+            this.pause = true;
+          }
+          else {
+            this.pause = false;
+          }
         case 'speed':
           this.speed = value;
           break;
@@ -81,8 +92,7 @@ var Character = (function () {
         return;
 
       var menu = [['Text Notification', () => {amplify.publish('popup-text', this.sprite.getX(), this.sprite.getY(), 'My name is '+this.name);}],
-      ['Move', () => {if (this.path.length === 0) this.randomMove();}],
-      ['Manual Move', () => {amplify.publish('move-entity', this.name);}],
+      ['Move', () => {amplify.publish('move-entity', this.name);}],
       ['Work', () => {if (this.state[this.activeState] !== 'work') this.activeState = 0;}],
       ['Sleep', () => {if (this.state[this.activeState] !== 'sleep') this.activeState = 1;}]];
 
@@ -155,6 +165,12 @@ var Character = (function () {
     },
     update: function () {
 
+      if (this.alpha < 1.0 && !this.hide)
+        this.alpha = Math.min(this.alpha + this.dt*this.fadespeed, 1.0);
+
+      if (this.alpha > 0.0 && this.hide)
+        this.alpha = Math.max(this.alpha - this.dt*this.fadespeed, 0.0);
+
       if (this.pause)
         return;
 
@@ -192,7 +208,14 @@ var Character = (function () {
       }
     },
     draw: function(ctx) {
+
+      if (this.alpha !== 1.0)
+        ctx.globalAlpha = this.alpha;
+
       this.sprite.draw(ctx);
+
+      if (this.alpha !== 1.0)
+        ctx.globalAlpha = 1.0;
 
       // If dummy character we only draw the sprite
       if (this.dummy || this.pause)

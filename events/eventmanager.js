@@ -38,6 +38,8 @@ var EventManager = {
       this.eventAPI.addQueue = this.addQueue.bind(this);
       this.eventAPI.getEventVariable = this.getEventVariable.bind(this);
       this.eventAPI.setEventVariable = this.setEventVariable.bind(this);
+      this.eventAPI.hideCharacter = this.hideCharacter.bind(this);
+      this.eventAPI.createSpeechBubble = this.createSpeechBubble.bind(this);
 
       // Create the random event queue (We should add all events before initializing)
       this.last = Time.getDay();
@@ -204,6 +206,14 @@ var EventManager = {
           return;
       }
     },
+    hideCharacter: function(character, duration) {
+      amplify.publish('characterprop', character, 'hide', true);
+
+      // Reset character walkspeed to default
+      this.addQueue(duration, function() {
+        amplify.publish('characterprop', character, 'hide', false);
+      });
+    },
     setCharacterSpeed: function(character, speed, duration) {
       amplify.publish('characterprop', character, 'speed', speed);
 
@@ -230,6 +240,9 @@ var EventManager = {
     calcAndAssign: function(character) {
       var calc = this.multipliers[character].reduce((a, b) => a*b, 1.0);
       amplify.publish('characterprop', character, 'multiplier', calc);
+    },
+    createSpeechBubble: function(name, text, duration) {
+      amplify.publish('speechbubble', name, text, duration);
     },
     setCharacterState: function(character, state) {
       var states = ['work', 'sleep', 'rest'];
@@ -312,7 +325,7 @@ var EventManager = {
       return GameState.publications;
     },
     getCharacters: function() {
-      var chars = this.entities.filter(ent => ent.type === 'character').map(
+      var chars = this.entities.filter(ent => ent.type === 'character' && !ent.dummy && !ent.hide).map(
         ent => {return {'x': Math.floor(ent.getTileX()), 'y': Math.floor(ent.getTileY()),
         'level': ent.level, 'state': ent.state[ent.activeState], 'multiplier': ent.multiplier,
         'walkspeed': ent.speed, 'name': ent.name}});
